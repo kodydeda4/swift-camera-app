@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4382CFCF617009CDDFA /* SwiftNavigation */; };
 		3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C43A2CFCF617009CDDFA /* SwiftUINavigation */; };
+		3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 			files = (
 				3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */,
 				3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */,
+				3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +123,7 @@
 			packageProductDependencies = (
 				3345C4382CFCF617009CDDFA /* SwiftNavigation */,
 				3345C43A2CFCF617009CDDFA /* SwiftUINavigation */,
+				3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */,
 			);
 			productName = Camera;
 			productReference = 33B64EC62CFCC15000D97812 /* Camera.app */;
@@ -206,6 +209,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */,
+				3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 33B64EC72CFCC15000D97812 /* Products */;
@@ -586,6 +590,14 @@
 				version = 2.2.2;
 			};
 		};
+		3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -598,6 +610,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */;
 			productName = SwiftUINavigation;
+		};
+		3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
