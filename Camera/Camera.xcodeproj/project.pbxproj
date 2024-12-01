@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4382CFCF617009CDDFA /* SwiftNavigation */; };
+		3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C43A2CFCF617009CDDFA /* SwiftUINavigation */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		33B64ED72CFCC15200D97812 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */,
+				3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = Camera;
 			packageProductDependencies = (
+				3345C4382CFCF617009CDDFA /* SwiftNavigation */,
+				3345C43A2CFCF617009CDDFA /* SwiftUINavigation */,
 			);
 			productName = Camera;
 			productReference = 33B64EC62CFCC15000D97812 /* Camera.app */;
@@ -195,6 +204,9 @@
 			);
 			mainGroup = 33B64EBD2CFCC15000D97812;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 33B64EC72CFCC15000D97812 /* Products */;
 			projectDirPath = "";
@@ -564,6 +576,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-navigation";
+			requirement = {
+				kind = exactVersion;
+				version = 2.2.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3345C4382CFCF617009CDDFA /* SwiftNavigation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */;
+			productName = SwiftNavigation;
+		};
+		3345C43A2CFCF617009CDDFA /* SwiftUINavigation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */;
+			productName = SwiftUINavigation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 33B64EBE2CFCC15000D97812 /* Project object */;
 }

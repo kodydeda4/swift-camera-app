@@ -4,10 +4,21 @@ import Photos
 
 @Observable
 @MainActor
-final class UserPermissionsModel {
+final class UserPermissionsModel: Identifiable {
+  let id = UUID()
   var camera = false
   var microphone = false
   var photos = false
+  var delegate: Delegate
+  
+  struct Delegate {
+    var continueButtonTapped: () -> Void = {}
+  }
+  
+  //@DEDA .bind() in pointfree apps?..
+  init(delegate: Delegate = .init()) {
+    self.delegate = delegate
+  }
   
   var isContinueButtonDisabled: Bool {
     !(camera && microphone && photos)
@@ -46,7 +57,7 @@ final class UserPermissionsModel {
   }
   
   func continueButtonTapped() {
-    //...
+    self.delegate.continueButtonTapped()
   }
 }
 
