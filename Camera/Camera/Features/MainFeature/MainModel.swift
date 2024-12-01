@@ -20,9 +20,43 @@ final class MainModel: Identifiable {
   internal let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   internal var recordingDelegate = MovieCaptureDelegate()
   internal var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
+  var destination: Destination?
+  
+  @CasePathable
+  enum Destination {
+    case userPermissions(UserPermissionsModel)
+    case arObjectPicker(ARObjectPickerModel)
+  }
+
+  var isDeleteButtonDisabled: Bool {
+    false
+  }
   
   func recordingButtonTapped() {
     !isRecording ? startRecording() : stopRecording()
+  }
+  
+  func settingsButtonTapped() {
+    self.destination = .userPermissions(
+      UserPermissionsModel(delegate: .init(
+        dismiss: { [weak self] in
+          self?.destination = .none
+        },
+        continueButtonTapped: {}
+      ))
+    )
+  }
+  
+  func newObjectButtonTapped() {
+    self.destination = .arObjectPicker(ARObjectPickerModel(
+      delegate: .init(dismiss: { [weak self] in
+        self?.destination = .none
+      })
+    ))
+  }
+  
+  func deleteButtonTapped() {
+    //...
   }
   
   func task() async {
@@ -48,13 +82,17 @@ struct MainView: View {
   var body: some View {
     NavigationStack {
       VStack {
-        AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: self.model.avVideoPreviewLayer)
+        AVCaptureVideoPreviewLayerView(
+          avVideoPreviewLayer: self.model.avVideoPreviewLayer
+        )
       }
       .task { await self.model.task() }
-      .overlay {
-        Button(!self.model.isRecording ? "Start Recording" : "Stop Recording") {
-          self.model.recordingButtonTapped()
-        }
+      .overlay(content: self.overlay)
+      .sheet(item: $model.destination.userPermissions) { model in
+        UserPermissionsSheet(model: model)
+      }
+      .sheet(item: $model.destination.arObjectPicker) { model in
+        ARObjectPickerSheet(model: model)
       }
     }
   }

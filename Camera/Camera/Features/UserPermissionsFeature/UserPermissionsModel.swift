@@ -12,6 +12,7 @@ final class UserPermissionsModel: Identifiable {
   var delegate: Delegate
   
   struct Delegate {
+    var dismiss: () -> Void = {}
     var continueButtonTapped: () -> Void = {}
   }
   
@@ -56,12 +57,30 @@ final class UserPermissionsModel: Identifiable {
     )
   }
   
+  func cancelButtonTapped() {
+    self.delegate.dismiss()
+  }
+
   func continueButtonTapped() {
     self.delegate.continueButtonTapped()
   }
 }
 
 // MARK: - SwiftUI
+
+struct UserPermissionsSheet: View {
+  @Bindable var model: UserPermissionsModel
+  
+  var body: some View {
+    NavigationStack {
+      UserPermissionsView(model: self.model).toolbar {
+        Button("Cancel") {
+          self.model.cancelButtonTapped()
+        }
+      }
+    }
+  }
+}
 
 struct UserPermissionsView: View {
   @Bindable var model: UserPermissionsModel
