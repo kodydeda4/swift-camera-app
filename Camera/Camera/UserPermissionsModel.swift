@@ -63,37 +63,15 @@ struct UserPermissionsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top)
       
-      VStack {
-        Button(action: self.model.requestCameraPermissionsButtonTapped) {
-          self.permissionsView(
-            title: "Camera",
-            subtitle: "Record AR Videos",
-            systemImage: "camera.fill",
-            style: self.model.camera ? .green : Color(.systemGray6)
-          )
-        }
-        Button(action: self.model.requestMicrophonePermissionsButtonTapped) {
-          self.permissionsView(
-            title: "Microphone",
-            subtitle: "Add sound to your AR videos",
-            systemImage: "microphone.fill",
-            style: self.model.microphone ? .green : Color(.systemGray6)
-          )
-        }
-        Button(action: self.model.requestPhotoLibraryPermissionsButtonTapped) {
-          self.permissionsView(
-            title: "Photo Library",
-            subtitle: "Save your AR videos",
-            systemImage: "photo.stack",
-            style: self.model.photos ? .green : Color(.systemGray6)
-          )
-        }
-      }
-      .buttonStyle(.plain)
+      self.permissionsContent
       
-      Button("Open Settings") {
+      Button {
         self.model.openSettingsButtonTapped()
+      } label: {
+        Text("Open Settings")
+          .frame(maxWidth: .infinity, alignment: .leading)
       }
+      .padding(.top, 32)
 
       Spacer()
       
@@ -112,6 +90,36 @@ struct UserPermissionsView: View {
     .navigationTitle("User Permissions")
     .navigationBarTitleDisplayMode(.inline)
     .task { await self.model.task() }
+  }
+  
+  private var permissionsContent: some View {
+    VStack {
+      Button(action: self.model.requestCameraPermissionsButtonTapped) {
+        self.permissionsView(
+          title: "Camera",
+          subtitle: "Record AR Videos",
+          systemImage: "camera.fill",
+          style: self.model.camera ? .green : Color(.systemGray6)
+        )
+      }
+      Button(action: self.model.requestMicrophonePermissionsButtonTapped) {
+        self.permissionsView(
+          title: "Microphone",
+          subtitle: "Add sound to your AR videos",
+          systemImage: "microphone.fill",
+          style: self.model.microphone ? .green : Color(.systemGray6)
+        )
+      }
+      Button(action: self.model.requestPhotoLibraryPermissionsButtonTapped) {
+        self.permissionsView(
+          title: "Photo Library",
+          subtitle: "Save your AR videos",
+          systemImage: "photo.stack",
+          style: self.model.photos ? .green : Color(.systemGray6)
+        )
+      }
+    }
+    .buttonStyle(.plain)
   }
   
   private func permissionsView(
