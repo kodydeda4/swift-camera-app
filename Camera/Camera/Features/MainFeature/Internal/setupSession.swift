@@ -1,13 +1,6 @@
 import AVFoundation
 
 extension MainModel {
-  internal func handle(request device: AVCaptureDevice?) {
-    let result = Result {
-      try self.setupSession(with: device)
-    }
-    print("\(Self.self).setupSession", result)
-  }
-  
   internal func setupSession(with device: AVCaptureDevice?) throws {
     guard let device
     else { throw AnyError("❌ avCaptureDevice is nil") }
@@ -28,8 +21,9 @@ extension MainModel {
     self.avCaptureSession.addInput(input)
     self.avCaptureSession.addOutput(output)
     
-    Task.detached {
-      await self.avCaptureSession.startRunning()
-    }
+    //@DEDA probably here man.
+    print("Starting session on thread: \(Thread.current)")
+    self.avCaptureSession.startRunning()
+    print("isRunning", self.avCaptureSession.isRunning)
   }
 }

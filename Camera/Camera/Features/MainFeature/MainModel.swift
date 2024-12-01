@@ -8,7 +8,6 @@ import AVFoundation
 import Photos
 
 @Observable
-@MainActor
 final class MainModel: Identifiable {
   internal var isRecording = false
   internal var recordingDurationSeconds = 0
@@ -32,10 +31,12 @@ final class MainModel: Identifiable {
     false
   }
   
+  @MainActor
   func recordingButtonTapped() {
     !isRecording ? startRecording() : stopRecording()
   }
   
+  @MainActor
   func settingsButtonTapped() {
     self.destination = .userPermissions(
       UserPermissionsModel(delegate: .init(
@@ -47,6 +48,7 @@ final class MainModel: Identifiable {
     )
   }
   
+  @MainActor
   func newObjectButtonTapped() {
     self.destination = .arObjectPicker(ARObjectPickerModel(
       delegate: .init(dismiss: { [weak self] in
@@ -60,14 +62,12 @@ final class MainModel: Identifiable {
   }
   
   func task() async {
+    try? self.setupSession(with: AVCaptureDevice.default(for: .video))
+    
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        await AVCaptureDevice.requestAccess(for: .video)
-        await self.handle(request: AVCaptureDevice.default(for: .video))
-      }
-      taskGroup.addTask {
-        for await event in await self.recordingDelegate.events {
-          await self.handle(event: event)
+        for await event in self.recordingDelegate.events {
+          self.handle(event: event)
         }
       }
     }
