@@ -59,7 +59,6 @@ struct MainView: View {
   }
 }
 
-
 // MARK: - SwiftUI Previews
 
 #Preview {
