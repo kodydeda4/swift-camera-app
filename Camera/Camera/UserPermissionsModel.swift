@@ -88,13 +88,13 @@ struct UserPermissionsView: View {
             style: self.model.photos ? .green : Color(.systemGray6)
           )
         }
-        
-        Button("Open Settings") {
-          self.model.openSettingsButtonTapped()
-        }
       }
       .buttonStyle(.plain)
       
+      Button("Open Settings") {
+        self.model.openSettingsButtonTapped()
+      }
+
       Spacer()
       
       Button {
@@ -111,6 +111,7 @@ struct UserPermissionsView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .navigationTitle("User Permissions")
     .navigationBarTitleDisplayMode(.inline)
+    .task { await self.model.task() }
   }
   
   private func permissionsView(
