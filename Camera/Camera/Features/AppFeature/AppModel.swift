@@ -37,10 +37,10 @@ struct AppView: View {
           self.model.continueButtonTapped()
         }
       }
-      .sheet(item: $model.destination.userPermissions) { model in
+      .navigationDestination(item: $model.destination.userPermissions) { model in
         UserPermissionsView(model: model)
       }
-      .fullScreenCover(item: $model.destination.main) { model in
+      .navigationDestination(item: $model.destination.main) { model in
         MainView(model: model)
       }
     }

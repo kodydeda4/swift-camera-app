@@ -28,6 +28,7 @@ final class MainModel: Identifiable {
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
+        await AVCaptureDevice.requestAccess(for: .video)
         await self.handle(request: AVCaptureDevice.default(for: .video))
       }
       taskGroup.addTask {
