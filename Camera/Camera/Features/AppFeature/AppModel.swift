@@ -5,7 +5,7 @@ import SwiftUINavigation
 @MainActor
 final class AppModel {
   var destination: Destination?
-
+  
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -15,11 +15,15 @@ final class AppModel {
   func continueButtonTapped() {
     // @DEDA
     // here is where you're supposed to check if you have permissions with some sort of shared state object or dependency.
-    self.destination = .userPermissions(UserPermissionsModel(
-      delegate: UserPermissionsModel.Delegate(continueButtonTapped: { [weak self] in
-        self?.destination = .main(MainModel())
-      })
-    ))
+    self.destination = .userPermissions(
+      UserPermissionsModel(
+        delegate: UserPermissionsModel.Delegate(
+          continueButtonTapped: { [weak self] in
+            self?.destination = .main(MainModel())
+          }
+        )
+      )
+    )
   }
 }
 
@@ -31,17 +35,39 @@ struct AppView: View {
   var body: some View {
     NavigationStack {
       VStack {
-        Text("AR Camera")
-        
-        Button("Continue") {
-          self.model.continueButtonTapped()
+        VStack {
+          Spacer()
+          
+          Image(systemName: "camera.fill")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 64, height: 64)
+            .foregroundColor(.orange)
+            .padding()
+            .background(Color.orange.opacity(0.6))
+            .clipShape(Circle())
+          
+          Text("AR Camera")
+            .font(.title)
+            .bold()
+          
+          Text("Record Videos with AR Objects.")
+            .foregroundColor(.secondary)
+            .padding(.bottom)
+          
+          Button("Continue") {
+            self.model.continueButtonTapped()
+          }
+          .buttonStyle(.borderedProminent)
         }
+        .padding(64)
       }
       .navigationDestination(item: $model.destination.userPermissions) { model in
         UserPermissionsView(model: model)
       }
       .navigationDestination(item: $model.destination.main) { model in
         MainView(model: model)
+          .navigationBarBackButtonHidden()
       }
     }
   }
