@@ -1,36 +1,48 @@
 import SwiftUI
 import AVFoundation
+import Photos
 
 @Observable
 @MainActor
 final class UserPermissionsModel {
-  var cameraPermission = AVCaptureDevice.authorizationStatus(for: .video)
-  var microphonePermission = AVAudioApplication.shared.recordPermission
+  var camera = false
+  var microphone = false
+  var photos = false
   
   var isContinueButtonDisabled: Bool {
-    self.cameraPermission != .authorized ||
-    self.microphonePermission != .granted
+    !(camera && microphone && photos)
+  }
+  
+  func task() async {
+    self.camera = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+    self.microphone = AVAudioApplication.shared.recordPermission == .granted
+    self.photos = PHPhotoLibrary.authorizationStatus(for: .addOnly) == .authorized
   }
   
   func requestCameraPermissionsButtonTapped() {
-    print("requestCameraPermissionsButtonTapped")
-    
     Task {
-      _ = await AVCaptureDevice.requestAccess(for: .video)
+      self.camera = await AVCaptureDevice.requestAccess(for: .video)
     }
   }
   
   func requestMicrophonePermissionsButtonTapped() {
-    print("requestMicrophonePermissionsButtonTapped")
-    
     Task {
-      _ = await AVAudioApplication.requestRecordPermission()
+      self.microphone = await AVAudioApplication.requestRecordPermission()
     }
   }
   
   func requestPhotoLibraryPermissionsButtonTapped() {
-    print("requestPhotoLibraryPermissionsButtonTapped")
-    //...
+    Task {
+      self.photos = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+    }
+  }
+  
+  func openSettingsButtonTapped() {
+    UIApplication.shared.open(
+      URL(string: UIApplication.openSettingsURLString).unsafelyUnwrapped,
+      options: [:],
+      completionHandler: nil
+    )
   }
   
   func continueButtonTapped() {
@@ -57,7 +69,7 @@ struct UserPermissionsView: View {
             title: "Camera",
             subtitle: "Record AR Videos",
             systemImage: "camera.fill",
-            style: self.model.cameraPermission == .authorized ? .green : Color(.systemGray6)
+            style: self.model.camera ? .green : Color(.systemGray6)
           )
         }
         Button(action: self.model.requestMicrophonePermissionsButtonTapped) {
@@ -65,7 +77,7 @@ struct UserPermissionsView: View {
             title: "Microphone",
             subtitle: "Add sound to your AR videos",
             systemImage: "microphone.fill",
-            style: self.model.microphonePermission == .granted ? .green : Color(.systemGray6)
+            style: self.model.microphone ? .green : Color(.systemGray6)
           )
         }
         Button(action: self.model.requestPhotoLibraryPermissionsButtonTapped) {
@@ -73,8 +85,12 @@ struct UserPermissionsView: View {
             title: "Photo Library",
             subtitle: "Save your AR videos",
             systemImage: "photo.stack",
-            style: Color(.systemGray6)
+            style: self.model.photos ? .green : Color(.systemGray6)
           )
+        }
+        
+        Button("Open Settings") {
+          self.model.openSettingsButtonTapped()
         }
       }
       .buttonStyle(.plain)
