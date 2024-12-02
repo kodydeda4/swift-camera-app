@@ -1,10 +1,11 @@
 import SwiftUI
 
-extension CaptureSessionView {
+extension MainView {
   internal func overlay() -> some View {
     VStack {
       self.top
       Spacer()
+      self.debugView
       self.bottom
     }
     .padding(64)
@@ -45,6 +46,27 @@ extension CaptureSessionView {
       }
     }
     .padding(.horizontal)
+  }
+  
+  
+  @MainActor private var debugView: some View {
+    GroupBox {
+      VStack(alignment: .leading) {
+        debugLine("isPermissionGranted", model.isVideoPermissionGranted.description)
+        debugLine("isCaptureSessionRunning", model.avCaptureSession.isRunning.description)
+        debugLine("isRecording", model.isRecording.description)
+      }
+    }
+    .padding()
+  }
+  
+  @MainActor private func debugLine(_ title: String, _ description: String) -> some View {
+    HStack {
+      Text("\(title):")
+        .bold()
+      Text(description)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 

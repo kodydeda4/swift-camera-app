@@ -1,6 +1,6 @@
 import AVFoundation
 
-extension CaptureSessionModel {
+extension MainModel {
   internal func stopRecording() {
     avCaptureMovieFileOutput.stopRecording()
     isRecording = false

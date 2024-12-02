@@ -67,7 +67,7 @@ struct AppView: View {
         UserPermissionsView(model: model)
       }
       .navigationDestination(item: $model.destination.main) { model in
-        CaptureSessionView(model: CaptureSessionModel())
+        MainView(model: MainModel())
         //@DEDA
 //        MainView(model: model)
           .navigationBarBackButtonHidden()

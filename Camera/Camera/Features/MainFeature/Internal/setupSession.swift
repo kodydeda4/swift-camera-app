@@ -1,29 +1,37 @@
-//import AVFoundation
-//
-//extension MainModel {
-//  internal func setupSession(with device: AVCaptureDevice?) throws {
-//    guard let device
-//    else { throw AnyError("❌ avCaptureDevice is nil") }
-//    
-//    let output = self.avCaptureMovieFileOutput
-//
-//    guard let input = try? AVCaptureDeviceInput(device: device)
-//    else { throw AnyError("❌ avCaptureDeviceInput is nil") }
-//    
-//    guard self.avCaptureSession.canAddInput(input)
-//    else { throw AnyError("❌ cannot add input") }
-//    
-//    guard self.avCaptureSession.canAddOutput(output)
-//    else { throw AnyError("❌ cannot add output") }
-//
-//    self.avCaptureDevice = device
-//    self.avCaptureDeviceInput = input
-//    self.avCaptureSession.addInput(input)
-//    self.avCaptureSession.addOutput(output)
-//    
-//    //@DEDA probably here man.
-//    print("Starting session on thread: \(Thread.current)")
-//    self.avCaptureSession.startRunning()
-//    print("isRunning", self.avCaptureSession.isRunning)
-//  }
-//}
+import AVFoundation
+
+extension MainModel {
+  func startCaptureSession(with device: AVCaptureDevice?) {
+    self.avCaptureDevice = device
+    
+    guard let device else {
+      print("❌ requestDefaultAVCaptureDeviceResponse is false")
+      return
+    }
+    
+    self.avCaptureDeviceInput = try? AVCaptureDeviceInput(device: device)
+    
+    guard let input = self.avCaptureDeviceInput else {
+      print("❌ avCaptureDeviceInput is nil")
+      return
+    }
+    
+    let output = self.avCaptureMovieFileOutput
+    
+    print("✅ input and output are non-nil")
+    
+    if self.avCaptureSession.canAddInput(input) {
+      self.avCaptureSession.addInput(input)
+      print("✅ added input")
+    }
+    if self.avCaptureSession.canAddOutput(output) {
+      self.avCaptureSession.addOutput(output)
+      print("✅ added output")
+    }
+    self.avVideoPreviewLayer.session = self.avCaptureSession
+    
+    Task.detached {
+      await self.avCaptureSession.startRunning()
+    }
+  }
+}

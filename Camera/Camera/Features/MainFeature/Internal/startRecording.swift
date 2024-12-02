@@ -1,6 +1,6 @@
 import AVFoundation
 
-extension CaptureSessionModel {
+extension MainModel {
   
   internal func startRecording() {
     let movieOutput = self.avCaptureMovieFileOutput
