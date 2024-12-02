@@ -10,7 +10,7 @@ extension MainView {
 //      .resizable()
 //      .scaledToFill()
 //#else
-    AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: model.avVideoPreviewLayer)
+    AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: self.model.avVideoPreviewLayer)
 //#endif
   }
 }

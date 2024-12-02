@@ -55,9 +55,9 @@ fileprivate extension MainView {
   @MainActor private var debug: some View {
     GroupBox {
       VStack(alignment: .leading) {
-        debugLine("isPermissionGranted", model.isVideoPermissionGranted.description)
-        debugLine("isCaptureSessionRunning", model.avCaptureSession.isRunning.description)
-        debugLine("isRecording", model.isRecording.description)
+        debugLine("isPermissionGranted", self.model.isVideoPermissionGranted.description)
+        debugLine("isCaptureSessionRunning", self.model.avCaptureSession.isRunning.description)
+        debugLine("isRecording", self.model.isRecording.description)
       }
     }
     .padding()
