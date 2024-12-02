@@ -10,6 +10,7 @@
 		3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4382CFCF617009CDDFA /* SwiftNavigation */; };
 		3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C43A2CFCF617009CDDFA /* SwiftUINavigation */; };
 		3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */; };
+		33E19B9C2CFDFB2800C28458 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 			files = (
 				3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */,
 				3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */,
+				33E19B9C2CFDFB2800C28458 /* ComposableArchitecture in Frameworks */,
 				3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,6 +126,7 @@
 				3345C4382CFCF617009CDDFA /* SwiftNavigation */,
 				3345C43A2CFCF617009CDDFA /* SwiftUINavigation */,
 				3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */,
+				33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */,
 			);
 			productName = Camera;
 			productReference = 33B64EC62CFCC15000D97812 /* Camera.app */;
@@ -210,6 +213,7 @@
 			packageReferences = (
 				3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */,
 				3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 33B64EC72CFCC15000D97812 /* Products */;
@@ -598,6 +602,14 @@
 				version = 1.0.2;
 			};
 		};
+		33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = exactVersion;
+				version = 1.16.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -615,6 +627,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
+		};
+		33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

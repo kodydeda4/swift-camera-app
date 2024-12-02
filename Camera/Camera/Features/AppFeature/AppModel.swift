@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftUINavigation
+import ComposableArchitecture
 
 @Observable
 @MainActor
@@ -66,7 +67,11 @@ struct AppView: View {
         UserPermissionsView(model: model)
       }
       .navigationDestination(item: $model.destination.main) { model in
-        MainView(model: model)
+        CaptureSessionView(store: Store(initialState: CaptureSession.State()) {
+          CaptureSession()
+        })
+        //@DEDA
+//        MainView(model: model)
           .navigationBarBackButtonHidden()
       }
     }
