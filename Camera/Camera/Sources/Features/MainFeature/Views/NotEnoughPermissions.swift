@@ -9,6 +9,7 @@ extension MainView {
         self.model.settingsButtonTapped()
       }
     }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
 
