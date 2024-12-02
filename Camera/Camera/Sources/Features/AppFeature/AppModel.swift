@@ -1,11 +1,17 @@
 import SwiftUI
 import SwiftUINavigation
 import ComposableArchitecture
+import AVFoundation
+import Photos
 
 @Observable
 @MainActor
 final class AppModel {
   var destination: Destination?
+  
+  @ObservationIgnored
+  @AppStorage(AppStorageKey.isOnboardingComplete.rawValue)
+  var isOnboardingComplete = false
   
   @CasePathable
   enum Destination {
@@ -13,13 +19,18 @@ final class AppModel {
     case main(MainModel)
   }
   
+  init() {
+    if self.isOnboardingComplete {
+      self.destination = .main(MainModel())
+    }
+  }
+  
   func continueButtonTapped() {
-    // @DEDA
-    // here is where you're supposed to check if you have permissions with some sort of shared state object or dependency.
     self.destination = .userPermissions(
       UserPermissionsModel(
-        delegate: UserPermissionsModel.Delegate(
+        delegate: .init(
           continueButtonTapped: { [weak self] in
+            self?.isOnboardingComplete = true
             self?.destination = .main(MainModel())
           }
         )

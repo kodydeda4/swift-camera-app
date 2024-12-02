@@ -105,19 +105,6 @@ final class UserPermissionsModel: Identifiable {
 
 // MARK: - SwiftUI
 
-struct UserPermissionsSheet: View {
-  @Bindable var model: UserPermissionsModel
-  
-  var body: some View {
-    NavigationStack {
-      UserPermissionsView(model: self.model).toolbar {
-        Button("Cancel") {
-          self.model.cancelButtonTapped()
-        }
-      }
-    }
-  }
-}
 
 struct UserPermissionsView: View {
   @Bindable var model: UserPermissionsModel
@@ -134,9 +121,7 @@ struct UserPermissionsView: View {
 
       Spacer()
       
-      Button {
-        self.model.continueButtonTapped()
-      } label: {
+      Button(action: self.model.continueButtonTapped) {
         Text("Continue")
           .frame(maxWidth: .infinity)
       }
@@ -203,6 +188,20 @@ struct UserPermissionsView: View {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
+  }
+}
+
+struct UserPermissionsSheet: View {
+  @Bindable var model: UserPermissionsModel
+  
+  var body: some View {
+    NavigationStack {
+      UserPermissionsView(model: self.model).toolbar {
+        Button("Cancel") {
+          self.model.cancelButtonTapped()
+        }
+      }
+    }
   }
 }
 

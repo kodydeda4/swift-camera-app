@@ -21,19 +21,11 @@
 			remoteGlobalIDString = 33B64EC52CFCC15000D97812;
 			remoteInfo = Camera;
 		};
-		33B64EE12CFCC15200D97812 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33B64EBE2CFCC15000D97812 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 33B64EC52CFCC15000D97812;
-			remoteInfo = Camera;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		33B64EC62CFCC15000D97812 /* Camera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Camera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33B64ED62CFCC15200D97812 /* CameraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		33B64EE02CFCC15200D97812 /* CameraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -45,11 +37,6 @@
 		33B64ED92CFCC15200D97812 /* CameraTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CameraTests;
-			sourceTree = "<group>";
-		};
-		33B64EE32CFCC15200D97812 /* CameraUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CameraUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -73,13 +60,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		33B64EDD2CFCC15200D97812 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -88,7 +68,6 @@
 			children = (
 				33B64EC82CFCC15000D97812 /* Camera */,
 				33B64ED92CFCC15200D97812 /* CameraTests */,
-				33B64EE32CFCC15200D97812 /* CameraUITests */,
 				33B64EC72CFCC15000D97812 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,7 +77,6 @@
 			children = (
 				33B64EC62CFCC15000D97812 /* Camera.app */,
 				33B64ED62CFCC15200D97812 /* CameraTests.xctest */,
-				33B64EE02CFCC15200D97812 /* CameraUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -155,29 +133,6 @@
 			productReference = 33B64ED62CFCC15200D97812 /* CameraTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		33B64EDF2CFCC15200D97812 /* CameraUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 33B64EF02CFCC15200D97812 /* Build configuration list for PBXNativeTarget "CameraUITests" */;
-			buildPhases = (
-				33B64EDC2CFCC15200D97812 /* Sources */,
-				33B64EDD2CFCC15200D97812 /* Frameworks */,
-				33B64EDE2CFCC15200D97812 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				33B64EE22CFCC15200D97812 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				33B64EE32CFCC15200D97812 /* CameraUITests */,
-			);
-			name = CameraUITests;
-			packageProductDependencies = (
-			);
-			productName = CameraUITests;
-			productReference = 33B64EE02CFCC15200D97812 /* CameraUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -192,10 +147,6 @@
 						CreatedOnToolsVersion = 16.1;
 					};
 					33B64ED52CFCC15200D97812 = {
-						CreatedOnToolsVersion = 16.1;
-						TestTargetID = 33B64EC52CFCC15000D97812;
-					};
-					33B64EDF2CFCC15200D97812 = {
 						CreatedOnToolsVersion = 16.1;
 						TestTargetID = 33B64EC52CFCC15000D97812;
 					};
@@ -222,7 +173,6 @@
 			targets = (
 				33B64EC52CFCC15000D97812 /* Camera */,
 				33B64ED52CFCC15200D97812 /* CameraTests */,
-				33B64EDF2CFCC15200D97812 /* CameraUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -236,13 +186,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		33B64ED42CFCC15200D97812 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		33B64EDE2CFCC15200D97812 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,13 +209,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		33B64EDC2CFCC15200D97812 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -280,11 +216,6 @@
 			isa = PBXTargetDependency;
 			target = 33B64EC52CFCC15000D97812 /* Camera */;
 			targetProxy = 33B64ED72CFCC15200D97812 /* PBXContainerItemProxy */;
-		};
-		33B64EE22CFCC15200D97812 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 33B64EC52CFCC15000D97812 /* Camera */;
-			targetProxy = 33B64EE12CFCC15200D97812 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -510,40 +441,6 @@
 			};
 			name = Release;
 		};
-		33B64EF12CFCC15200D97812 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ME637H7ZM9;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.deda.CameraUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Camera;
-			};
-			name = Debug;
-		};
-		33B64EF22CFCC15200D97812 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ME637H7ZM9;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.deda.CameraUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Camera;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -570,15 +467,6 @@
 			buildConfigurations = (
 				33B64EEE2CFCC15200D97812 /* Debug */,
 				33B64EEF2CFCC15200D97812 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		33B64EF02CFCC15200D97812 /* Build configuration list for PBXNativeTarget "CameraUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				33B64EF12CFCC15200D97812 /* Debug */,
-				33B64EF22CFCC15200D97812 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
