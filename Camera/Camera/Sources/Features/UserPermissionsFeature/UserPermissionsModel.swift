@@ -1,3 +1,4 @@
+
 import SwiftUI
 import AVFoundation
 import Photos
@@ -6,51 +7,45 @@ import Photos
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
-  var camera = false
-  var microphone = false
-  var photos = false
+  var camera: Bool
+  var microphone: Bool
+  var photos: Bool
+  var application: any ApplicationServiceProtocol
+  var userPermissions: any UserPermissionsServiceProtocol
   var delegate: Delegate
-  
+
   struct Delegate {
     var dismiss: () -> Void = {}
     var continueButtonTapped: () -> Void = {}
   }
   
-  static var cameraStatus: AVAuthorizationStatus {
-    AVCaptureDevice.authorizationStatus(for: .video)
-  }
-  static var microphoneStatus: AVAudioApplication.recordPermission {
-    AVAudioApplication.shared.recordPermission
-  }
-  static var photosStatus: PHAuthorizationStatus {
-    PHPhotoLibrary.authorizationStatus(for: .addOnly)
-  }
-  
-  //@DEDA .bind() in pointfree apps?..
-  init(delegate: Delegate = Delegate()) {
+  init(
+    delegate: Delegate = Delegate(),
+    application: any ApplicationServiceProtocol = ApplicationService(),
+    userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
+  ) {
     self.delegate = delegate
+    self.application = application
+    self.userPermissions = userPermissions
+    self.camera = userPermissions.camera == .authorized
+    self.microphone = userPermissions.microphone == .granted
+    self.photos = userPermissions.photos == .authorized
   }
   
   var isContinueButtonDisabled: Bool {
     !(camera && microphone && photos)
   }
   
-  func task() async {
-    self.camera = Self.cameraStatus == .authorized
-    self.microphone = Self.microphoneStatus == .granted
-    self.photos = Self.photosStatus == .authorized
-  }
-
   func cameraPermissionsButtonTapped() {
     guard !camera else {
       return
     }
-    guard Self.cameraStatus == .notDetermined else {
-      try? self.openSettings()
+    guard self.userPermissions.camera == .notDetermined else {
+      try? self.application.openSettings()
       return
     }
     Task {
-      self.camera = await AVCaptureDevice.requestAccess(for: .video)
+      self.camera = await self.userPermissions.cameraRequest()
     }
   }
   
@@ -58,12 +53,12 @@ final class UserPermissionsModel: Identifiable {
     guard !microphone else {
       return
     }
-    guard Self.microphoneStatus == .undetermined else {
-      try? self.openSettings()
+    guard self.userPermissions.microphone == .undetermined else {
+      try? self.application.openSettings()
       return
     }
     Task {
-      self.microphone = await AVAudioApplication.requestRecordPermission()
+      self.microphone = await self.userPermissions.microphoneRequest()
     }
   }
   
@@ -71,40 +66,25 @@ final class UserPermissionsModel: Identifiable {
     guard !photos else {
       return
     }
-    guard Self.photosStatus == .notDetermined else {
-      try? self.openSettings()
+    guard self.userPermissions.photos == .notDetermined else {
+      try? self.application.openSettings()
       return
     }
     Task {
-      self.photos = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+      self.photos = await self.userPermissions.photosRequest()
     }
-  }
-  
-  private func openSettings() throws {
-    guard let url = URL(string: UIApplication.openSettingsURLString) else {
-      throw AnyError("GG")
-    }
-    guard UIApplication.shared.canOpenURL(url) else {
-      throw AnyError("GG")
-    }
-    UIApplication.shared.open(
-      url,
-      options: [:],
-      completionHandler: nil
-    )
   }
   
   func cancelButtonTapped() {
     self.delegate.dismiss()
   }
-
+  
   func continueButtonTapped() {
     self.delegate.continueButtonTapped()
   }
 }
 
 // MARK: - SwiftUI
-
 
 struct UserPermissionsView: View {
   @Bindable var model: UserPermissionsModel
@@ -118,7 +98,7 @@ struct UserPermissionsView: View {
         .padding(.top)
       
       self.permissionsContent
-
+      
       Spacer()
       
       Button(action: self.model.continueButtonTapped) {
@@ -133,7 +113,6 @@ struct UserPermissionsView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .navigationTitle("User Permissions")
     .navigationBarTitleDisplayMode(.inline)
-    .task { await self.model.task() }
   }
   
   private var permissionsContent: some View {
