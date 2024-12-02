@@ -1,7 +1,10 @@
-
 import SwiftUI
 import AVFoundation
 import Photos
+
+// @DEDA
+// Eh. maybe your state lives in UserPermissions.
+// hamburger
 
 @Observable
 @MainActor
@@ -13,20 +16,29 @@ final class UserPermissionsModel: Identifiable {
   var application: any ApplicationServiceProtocol
   var userPermissions: any UserPermissionsServiceProtocol
   var delegate: Delegate
+  var options = Options()
 
   struct Delegate {
     var dismiss: () -> Void = {}
     var continueButtonTapped: () -> Void = {}
   }
   
+  struct Options {
+    var isContinueButtonHidden = false
+  }
+  
   init(
     delegate: Delegate = Delegate(),
+    options: Options = Options(),
     application: any ApplicationServiceProtocol = ApplicationService(),
     userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
   ) {
     self.delegate = delegate
+    self.options = options
     self.application = application
     self.userPermissions = userPermissions
+    
+    // Refresh
     self.camera = userPermissions.camera == .authorized
     self.microphone = userPermissions.microphone == .granted
     self.photos = userPermissions.photos == .authorized
@@ -101,13 +113,15 @@ struct UserPermissionsView: View {
       
       Spacer()
       
-      Button(action: self.model.continueButtonTapped) {
-        Text("Continue")
-          .frame(maxWidth: .infinity)
+      if !self.model.options.isContinueButtonHidden {
+        Button(action: self.model.continueButtonTapped) {
+          Text("Continue")
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(self.model.isContinueButtonDisabled)
+        .padding()
       }
-      .buttonStyle(.borderedProminent)
-      .disabled(self.model.isContinueButtonDisabled)
-      .padding()
     }
     .padding(.horizontal, 32)
     .frame(maxWidth: .infinity, alignment: .leading)
