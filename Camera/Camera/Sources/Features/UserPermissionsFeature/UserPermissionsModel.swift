@@ -16,8 +16,18 @@ final class UserPermissionsModel: Identifiable {
     var continueButtonTapped: () -> Void = {}
   }
   
+  static var cameraStatus: AVAuthorizationStatus {
+    AVCaptureDevice.authorizationStatus(for: .video)
+  }
+  static var microphoneStatus: AVAudioApplication.recordPermission {
+    AVAudioApplication.shared.recordPermission
+  }
+  static var photosStatus: PHAuthorizationStatus {
+    PHPhotoLibrary.authorizationStatus(for: .addOnly)
+  }
+  
   //@DEDA .bind() in pointfree apps?..
-  init(delegate: Delegate = .init()) {
+  init(delegate: Delegate = Delegate()) {
     self.delegate = delegate
   }
   
@@ -26,32 +36,59 @@ final class UserPermissionsModel: Identifiable {
   }
   
   func task() async {
-    self.camera = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
-    self.microphone = AVAudioApplication.shared.recordPermission == .granted
-    self.photos = PHPhotoLibrary.authorizationStatus(for: .addOnly) == .authorized
+    self.camera = Self.cameraStatus == .authorized
+    self.microphone = Self.microphoneStatus == .granted
+    self.photos = Self.photosStatus == .authorized
   }
-  
-  func requestCameraPermissionsButtonTapped() {
+
+  func cameraPermissionsButtonTapped() {
+    guard !camera else {
+      return
+    }
+    guard Self.cameraStatus == .notDetermined else {
+      try? self.openSettings()
+      return
+    }
     Task {
       self.camera = await AVCaptureDevice.requestAccess(for: .video)
     }
   }
   
-  func requestMicrophonePermissionsButtonTapped() {
+  func microphonePermissionsButtonTapped() {
+    guard !microphone else {
+      return
+    }
+    guard Self.microphoneStatus == .undetermined else {
+      try? self.openSettings()
+      return
+    }
     Task {
       self.microphone = await AVAudioApplication.requestRecordPermission()
     }
   }
   
-  func requestPhotoLibraryPermissionsButtonTapped() {
+  func photoLibraryPermissionsButtonTapped() {
+    guard !photos else {
+      return
+    }
+    guard Self.photosStatus == .notDetermined else {
+      try? self.openSettings()
+      return
+    }
     Task {
       self.photos = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
     }
   }
   
-  func openSettingsButtonTapped() {
+  private func openSettings() throws {
+    guard let url = URL(string: UIApplication.openSettingsURLString) else {
+      throw AnyError("GG")
+    }
+    guard UIApplication.shared.canOpenURL(url) else {
+      throw AnyError("GG")
+    }
     UIApplication.shared.open(
-      URL(string: UIApplication.openSettingsURLString).unsafelyUnwrapped,
+      url,
       options: [:],
       completionHandler: nil
     )
@@ -94,14 +131,6 @@ struct UserPermissionsView: View {
         .padding(.top)
       
       self.permissionsContent
-      
-      Button {
-        self.model.openSettingsButtonTapped()
-      } label: {
-        Text("Open Settings")
-          .frame(maxWidth: .infinity, alignment: .leading)
-      }
-      .padding(.top, 32)
 
       Spacer()
       
@@ -124,7 +153,7 @@ struct UserPermissionsView: View {
   
   private var permissionsContent: some View {
     VStack {
-      Button(action: self.model.requestCameraPermissionsButtonTapped) {
+      Button(action: self.model.cameraPermissionsButtonTapped) {
         self.permissionsView(
           title: "Camera",
           subtitle: "Record AR Videos",
@@ -132,7 +161,7 @@ struct UserPermissionsView: View {
           style: self.model.camera ? .green : Color(.systemGray6)
         )
       }
-      Button(action: self.model.requestMicrophonePermissionsButtonTapped) {
+      Button(action: self.model.microphonePermissionsButtonTapped) {
         self.permissionsView(
           title: "Microphone",
           subtitle: "Add sound to your AR videos",
@@ -140,7 +169,7 @@ struct UserPermissionsView: View {
           style: self.model.microphone ? .green : Color(.systemGray6)
         )
       }
-      Button(action: self.model.requestPhotoLibraryPermissionsButtonTapped) {
+      Button(action: self.model.photoLibraryPermissionsButtonTapped) {
         self.permissionsView(
           title: "Photo Library",
           subtitle: "Save your AR videos",

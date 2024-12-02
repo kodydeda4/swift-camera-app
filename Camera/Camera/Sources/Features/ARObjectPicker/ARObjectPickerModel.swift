@@ -16,7 +16,7 @@ final class ARObjectPickerModel: Identifiable {
     var dismiss: () -> Void = {}
   }
   
-  init(delegate: Delegate = .init()) {
+  init(delegate: Delegate = Delegate()) {
     self.delegate = delegate
   }
 
