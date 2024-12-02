@@ -24,7 +24,41 @@ final class CaptureSessionModel {
     case userPermissions(UserPermissionsModel)
     case arObjectPicker(ARObjectPickerModel)
   }
+
+  var isDeleteButtonDisabled: Bool {
+    false
+  }
   
+  @MainActor
+  func recordingButtonTapped() {
+    !isRecording ? startRecording() : stopRecording()
+  }
+  
+  @MainActor
+  func settingsButtonTapped() {
+    self.destination = .userPermissions(
+      UserPermissionsModel(delegate: .init(
+        dismiss: { [weak self] in
+          self?.destination = .none
+        },
+        continueButtonTapped: {}
+      ))
+    )
+  }
+  
+  @MainActor
+  func newObjectButtonTapped() {
+    self.destination = .arObjectPicker(ARObjectPickerModel(
+      delegate: .init(dismiss: { [weak self] in
+        self?.destination = .none
+      })
+    ))
+  }
+  
+  func deleteButtonTapped() {
+    //...
+  }
+
   func task() async {
     Task.detached {
       await withTaskGroup(of: Void.self) { taskGroup in
@@ -114,20 +148,27 @@ final class CaptureSessionModel {
 // MARK: - SwiftUI
 
 struct CaptureSessionView: View {
-  @Bindable public var store: CaptureSessionModel
+  @Bindable public var model: CaptureSessionModel
   
   var body: some View {
     NavigationStack {
-      AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: store.avVideoPreviewLayer)
+      AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: model.avVideoPreviewLayer)
     }
     .tabViewStyle(.page(indexDisplayMode: .never))
     .overlay(content: self.overlay)
-    .task { await self.store.task() }
+//    .overlay(content: self.overlayA)
+    .task { await self.model.task() }
+    .sheet(item: $model.destination.userPermissions) { model in
+      UserPermissionsSheet(model: model)
+    }
+    .sheet(item: $model.destination.arObjectPicker) { model in
+      ARObjectPickerSheet(model: model)
+    }
   }
 }
 
 extension CaptureSessionView {
-  @MainActor internal func overlay() -> some View {
+  @MainActor internal func overlayA() -> some View {
     VStack {
       Spacer()
       self.debugView
@@ -137,7 +178,7 @@ extension CaptureSessionView {
   
   @MainActor private var footer: some View {
     HStack {
-      Button(store.isRecording ? "Start Recording" : "Stop Recording") {
+      Button(model.isRecording ? "Start Recording" : "Stop Recording") {
         //        send(.recordingButtonTapped)
       }
       Button("End Session") {
@@ -150,9 +191,9 @@ extension CaptureSessionView {
   @MainActor private var debugView: some View {
     GroupBox {
       VStack(alignment: .leading) {
-        debugLine("isPermissionGranted", store.isVideoPermissionGranted.description)
-        debugLine("isCaptureSessionRunning", store.avCaptureSession.isRunning.description)
-        debugLine("isRecording", store.isRecording.description)
+        debugLine("isPermissionGranted", model.isVideoPermissionGranted.description)
+        debugLine("isCaptureSessionRunning", model.avCaptureSession.isRunning.description)
+        debugLine("isRecording", model.isRecording.description)
       }
     }
     .padding()
@@ -171,7 +212,7 @@ extension CaptureSessionView {
 // MARK: - SwiftUI Previews
 
 //#Preview {
-//  CaptureSessionView(store: Store(initialState: CaptureSession.State()) {
+//  CaptureSessionView(model: Store(initialState: CaptureSession.State()) {
 //    CaptureSession()
 //  })
 //}

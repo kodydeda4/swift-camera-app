@@ -33,7 +33,7 @@ final class MainModel: Identifiable {
   
   @MainActor
   func recordingButtonTapped() {
-    !isRecording ? startRecording() : stopRecording()
+//    !isRecording ? startRecording() : stopRecording()
   }
   
   @MainActor
@@ -61,17 +61,7 @@ final class MainModel: Identifiable {
     //...
   }
   
-  func task() async {
-    try? self.setupSession(with: AVCaptureDevice.default(for: .video))
-    
-    await withTaskGroup(of: Void.self) { taskGroup in
-      taskGroup.addTask {
-        for await event in self.recordingDelegate.events {
-          self.handle(event: event)
-        }
-      }
-    }
-  }
+  func task() async {}
 }
 
 // MARK: - SwiftUI
@@ -87,7 +77,7 @@ struct MainView: View {
         )
       }
       .task { await self.model.task() }
-      .overlay(content: self.overlay)
+//      .overlay(content: self.overlay)
       .sheet(item: $model.destination.userPermissions) { model in
         UserPermissionsSheet(model: model)
       }

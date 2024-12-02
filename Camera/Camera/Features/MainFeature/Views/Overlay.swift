@@ -1,6 +1,6 @@
 import SwiftUI
 
-extension MainView {
+extension CaptureSessionView {
   internal func overlay() -> some View {
     VStack {
       self.top
