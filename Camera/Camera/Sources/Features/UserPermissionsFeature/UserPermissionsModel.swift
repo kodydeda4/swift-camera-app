@@ -8,8 +8,8 @@ final class UserPermissionsModel: Identifiable {
   let id: UUID
   let options: Options
   private let delegate: Delegate
-  private let application: any ApplicationServiceProtocol
-  private let userPermissions: UserPermissionsService
+  private let application: ApplicationClient
+  private let userPermissions: UserPermissionsClient
 
   struct Delegate {
     var dismiss: () -> Void = {}
@@ -24,8 +24,8 @@ final class UserPermissionsModel: Identifiable {
     id: UUID = UUID(),
     delegate: Delegate = Delegate(),
     options: Options = Options(),
-    application: any ApplicationServiceProtocol = ApplicationService(),
-    userPermissions: UserPermissionsService = UserPermissionsService()
+    application: ApplicationClient = .liveValue,
+    userPermissions: UserPermissionsClient = .liveValue
   ) {
     self.id = id
     self.delegate = delegate
@@ -38,20 +38,23 @@ final class UserPermissionsModel: Identifiable {
     !(isAuthorized(.camera) && isAuthorized(.microphone) && isAuthorized(.photoLibrary))
   }
   
-  func isAuthorized(_ privacyFeature: UserPermissionsService.PrivacyFeature) -> Bool {
-    self.userPermissions.isAuthorized(privacyFeature)
+  func isAuthorized(_ privacyFeature: UserPermissionsClient.PrivacyFeature) -> Bool {
+    self.userPermissions.status(privacyFeature) == .authorized
   }
 
-  func privacyFeatureButtonTapped(_ privacyFeature: UserPermissionsService.PrivacyFeature) {
-    guard !userPermissions.isAuthorized(privacyFeature) else {
-      return
-    }
-    guard userPermissions.isStatusDetermined(privacyFeature) else {
-      try? self.application.openSettings()
-      return
-    }
+  func privacyFeatureButtonTapped(_ privacyFeature: UserPermissionsClient.PrivacyFeature) {
     Task {
-      await self.userPermissions.request(privacyFeature)
+      switch userPermissions.status(privacyFeature) {
+        
+      case .undetermined:
+        await userPermissions.request(privacyFeature)
+        
+      case .denied:
+        try? application.openSettings()
+        
+      case .authorized:
+        break
+      }
     }
   }
   
