@@ -7,26 +7,30 @@ import SwiftUI
 @MainActor
 @Observable
 final class CaptureSessionModel {
-  internal var isRecording = false
-  internal var recordingDurationSeconds = 0
-  internal let avCaptureSession = AVCaptureSession()
-  internal var avCaptureDevice: AVCaptureDevice?
-  internal var avCaptureDeviceInput: AVCaptureDeviceInput?
-  internal var avCaptureMovieFileOutput = AVCaptureMovieFileOutput()
-  internal let avVideoAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-  internal let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  internal var recordingDelegate = MovieCaptureDelegate()
-  internal var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
+  var isRecording = false
+  var recordingDurationSeconds = 0
+  let avCaptureSession = AVCaptureSession()
+  var avCaptureDevice: AVCaptureDevice?
+  var avCaptureDeviceInput: AVCaptureDeviceInput?
+  var avCaptureMovieFileOutput = AVCaptureMovieFileOutput()
+  let avVideoAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+  let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
+  var recordingDelegate = MovieCaptureDelegate()
+  var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
+  var destination: Destination?
+  
+  @CasePathable
+  enum Destination {
+    case userPermissions(UserPermissionsModel)
+    case arObjectPicker(ARObjectPickerModel)
+  }
   
   func task() async {
     Task.detached {
       await withTaskGroup(of: Void.self) { taskGroup in
         taskGroup.addTask {
-          await self.startCaptureSession(
-            AVCaptureDevice.default(for: .video)
-          )
+          await self.startCaptureSession(with: .default(for: .video))
         }
-        // recording-delegate
         taskGroup.addTask {
           for await event in await self.recordingDelegate.events {
             await self.handleRecordingDelegateEvent(event)
@@ -47,7 +51,7 @@ final class CaptureSessionModel {
     ):
       print(output, outputFileURL, connections, error as Any)
       
-      Task.detached {
+      Task {
         let isPhotoLibraryReadWriteAccessGranted: Bool = await {
           let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
           var isAuthorized = status == .authorized
@@ -72,16 +76,15 @@ final class CaptureSessionModel {
     }
   }
   
-  func startCaptureSession(_ value: AVCaptureDevice?) {
-    self.avCaptureDevice = value
+  func startCaptureSession(with device: AVCaptureDevice?) {
+    self.avCaptureDevice = device
     
-    guard let value else {
+    guard let device else {
       print("❌ requestDefaultAVCaptureDeviceResponse is false")
       return
-      //      return .none
     }
     
-    self.avCaptureDeviceInput = try? AVCaptureDeviceInput(device: value)
+    self.avCaptureDeviceInput = try? AVCaptureDeviceInput(device: device)
     
     guard let input = self.avCaptureDeviceInput else {
       print("❌ avCaptureDeviceInput is nil")
@@ -102,12 +105,9 @@ final class CaptureSessionModel {
     }
     self.avVideoPreviewLayer.session = self.avCaptureSession
     
-    avCaptureSession.startRunning()
-    
-    //      return .run { [avCaptureSession = state.avCaptureSession] _ in
-    //        avCaptureSession.startRunning()
-    //        print("✅ captureSession.startRunning()")
-    //      }
+    Task.detached {
+      await self.avCaptureSession.startRunning()
+    }
   }
 }
 
