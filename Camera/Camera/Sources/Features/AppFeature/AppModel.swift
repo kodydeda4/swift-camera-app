@@ -68,9 +68,6 @@ struct AppView: View {
       }
       .navigationDestination(item: $model.destination.main) { model in
         MainView(model: MainModel())
-        //@DEDA
-//        MainView(model: model)
-          .navigationBarBackButtonHidden()
       }
     }
   }

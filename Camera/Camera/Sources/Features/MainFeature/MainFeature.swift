@@ -57,11 +57,10 @@ final class MainModel {
   }
 
   func task() async {
+    self.startCaptureSession(with: .default(for: .video))
+    
     Task.detached {
       await withTaskGroup(of: Void.self) { taskGroup in
-        taskGroup.addTask {
-          await self.startCaptureSession(with: .default(for: .video))
-        }
         taskGroup.addTask {
           for await event in await self.recordingDelegate.events {
             await self.handleRecordingDelegateEvent(event)
@@ -79,8 +78,9 @@ struct MainView: View {
   
   var body: some View {
     NavigationStack {
-      AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: model.avVideoPreviewLayer)
+      self.camera
     }
+    .navigationBarBackButtonHidden()
     .tabViewStyle(.page(indexDisplayMode: .never))
     .overlay(content: self.overlay)
     .task { await self.model.task() }

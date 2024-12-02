@@ -5,11 +5,14 @@ extension MainView {
     VStack {
       self.top
       Spacer()
-      self.debugView
+      self.debug
       self.bottom
     }
-    .padding(64)
+    .padding(32)
   }
+}
+
+fileprivate extension MainView {
   
   private var top: some View {
     Button("Settings") {
@@ -49,7 +52,7 @@ extension MainView {
   }
   
   
-  @MainActor private var debugView: some View {
+  @MainActor private var debug: some View {
     GroupBox {
       VStack(alignment: .leading) {
         debugLine("isPermissionGranted", model.isVideoPermissionGranted.description)
