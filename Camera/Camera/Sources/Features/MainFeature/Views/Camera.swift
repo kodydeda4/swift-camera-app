@@ -4,14 +4,25 @@ import AVFoundation
 
 extension MainView {
   @MainActor var camera: some View {
-    //@DEDA fix this plz
-//#if DEBUG
-//    Image(.cameraPreview)
-//      .resizable()
-//      .scaledToFill()
-//#else
-    AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: self.model.avVideoPreviewLayer)
-//#endif
+    Group {
+      if self.model.isSwiftUIPreview {
+        self.debug
+      } else {
+        self.release
+      }
+    }
+  }
+  
+  @MainActor private var debug: some View {
+    Image(.cameraPreview)
+      .resizable()
+      .scaledToFill()
+  }
+  
+  @MainActor private var release: some View {
+    AVCaptureVideoPreviewLayerView(
+      avVideoPreviewLayer: self.model.avVideoPreviewLayer
+    )
   }
 }
 
@@ -39,5 +50,5 @@ fileprivate struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: MainModel())
+  MainView(model: .previewValue)
 }

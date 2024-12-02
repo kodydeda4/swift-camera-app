@@ -76,5 +76,5 @@ fileprivate extension MainView {
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: MainModel())
+  MainView(model: .previewValue)
 }

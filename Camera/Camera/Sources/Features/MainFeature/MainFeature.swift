@@ -19,6 +19,13 @@ final class MainModel {
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   var destination: Destination?
   
+  
+  static var previewValue = MainModel.init(isSwiftUIPreview: true)
+  var isSwiftUIPreview: Bool//@DEDA plz
+  init(isSwiftUIPreview: Bool = false) {
+    self.isSwiftUIPreview = isSwiftUIPreview
+  }
+  
   @CasePathable
   enum Destination {
     case arObjectPicker(ARObjectPickerModel)
@@ -96,5 +103,5 @@ struct MainView: View {
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: MainModel())
+  MainView(model: .previewValue)
 }
