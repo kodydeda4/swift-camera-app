@@ -2,21 +2,14 @@ import SwiftUI
 import AVFoundation
 import Photos
 
-// @DEDA
-// Eh. maybe your state lives in UserPermissions.
-// hamburger
-
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
-  let id = UUID()
-  var camera: Bool
-  var microphone: Bool
-  var photos: Bool
-  var application: any ApplicationServiceProtocol
-  var userPermissions: any UserPermissionsServiceProtocol
-  var delegate: Delegate
-  var options = Options()
+  let id: UUID
+  let options: Options
+  private let delegate: Delegate
+  private let application: any ApplicationServiceProtocol
+  private let userPermissions: UserPermissionsService
 
   struct Delegate {
     var dismiss: () -> Void = {}
@@ -28,62 +21,37 @@ final class UserPermissionsModel: Identifiable {
   }
   
   init(
+    id: UUID = UUID(),
     delegate: Delegate = Delegate(),
     options: Options = Options(),
     application: any ApplicationServiceProtocol = ApplicationService(),
-    userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
+    userPermissions: UserPermissionsService = UserPermissionsService()
   ) {
+    self.id = id
     self.delegate = delegate
     self.options = options
     self.application = application
     self.userPermissions = userPermissions
-    
-    // Refresh
-    self.camera = userPermissions.camera == .authorized
-    self.microphone = userPermissions.microphone == .granted
-    self.photos = userPermissions.photos == .authorized
   }
   
   var isContinueButtonDisabled: Bool {
-    !(camera && microphone && photos)
+    !(isAuthorized(.camera) && isAuthorized(.microphone) && isAuthorized(.photoLibrary))
   }
   
-  func cameraPermissionsButtonTapped() {
-    guard !camera else {
+  func isAuthorized(_ privacyFeature: UserPermissionsService.PrivacyFeature) -> Bool {
+    self.userPermissions.isAuthorized(privacyFeature)
+  }
+
+  func privacyFeatureButtonTapped(_ privacyFeature: UserPermissionsService.PrivacyFeature) {
+    guard !userPermissions.isAuthorized(privacyFeature) else {
       return
     }
-    guard self.userPermissions.camera == .notDetermined else {
+    guard userPermissions.isStatusDetermined(privacyFeature) else {
       try? self.application.openSettings()
       return
     }
     Task {
-      self.camera = await self.userPermissions.cameraRequest()
-    }
-  }
-  
-  func microphonePermissionsButtonTapped() {
-    guard !microphone else {
-      return
-    }
-    guard self.userPermissions.microphone == .undetermined else {
-      try? self.application.openSettings()
-      return
-    }
-    Task {
-      self.microphone = await self.userPermissions.microphoneRequest()
-    }
-  }
-  
-  func photoLibraryPermissionsButtonTapped() {
-    guard !photos else {
-      return
-    }
-    guard self.userPermissions.photos == .notDetermined else {
-      try? self.application.openSettings()
-      return
-    }
-    Task {
-      self.photos = await self.userPermissions.photosRequest()
+      await self.userPermissions.request(privacyFeature)
     }
   }
   
@@ -131,28 +99,34 @@ struct UserPermissionsView: View {
   
   private var permissionsContent: some View {
     VStack {
-      Button(action: self.model.cameraPermissionsButtonTapped) {
+      Button {
+        self.model.privacyFeatureButtonTapped(.camera)
+      } label: {
         self.permissionsView(
           title: "Camera",
           subtitle: "Record AR Videos",
           systemImage: "camera.fill",
-          style: self.model.camera ? .green : Color(.systemGray6)
+          isAuthorized: self.model.isAuthorized(.camera)
         )
       }
-      Button(action: self.model.microphonePermissionsButtonTapped) {
+      Button {
+        self.model.privacyFeatureButtonTapped(.microphone)
+      } label: {
         self.permissionsView(
           title: "Microphone",
           subtitle: "Add sound to your AR videos",
           systemImage: "microphone.fill",
-          style: self.model.microphone ? .green : Color(.systemGray6)
+          isAuthorized: self.model.isAuthorized(.microphone)
         )
       }
-      Button(action: self.model.photoLibraryPermissionsButtonTapped) {
+      Button {
+        self.model.privacyFeatureButtonTapped(.photoLibrary)
+      } label: {
         self.permissionsView(
           title: "Photo Library",
           subtitle: "Save your AR videos",
           systemImage: "photo.stack",
-          style: self.model.photos ? .green : Color(.systemGray6)
+          isAuthorized: self.model.isAuthorized(.photoLibrary)
         )
       }
     }
@@ -163,7 +137,7 @@ struct UserPermissionsView: View {
     title: String,
     subtitle: String,
     systemImage: String,
-    style: Color
+    isAuthorized: Bool
   ) -> some View {
     HStack(spacing: 16) {
       Image(systemName: systemImage)
@@ -171,7 +145,7 @@ struct UserPermissionsView: View {
         .scaledToFit()
         .frame(width: 24, height: 24)
         .padding()
-        .background(style)
+        .background(isAuthorized ? .green : Color(.systemGray6))
         .clipShape(Circle())
       
       VStack(alignment: .leading) {

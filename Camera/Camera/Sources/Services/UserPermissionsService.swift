@@ -3,50 +3,77 @@ import AVFoundation
 import Photos
 import AVFoundation
 
-protocol UserPermissionsServiceProtocol {
-  var camera: AVAuthorizationStatus { get }
-  var microphone: AVAudioApplication.recordPermission { get }
-  var photos: PHAuthorizationStatus { get }
-  
-  func cameraRequest() async -> Bool
-  func microphoneRequest() async -> Bool
-  func photosRequest() async -> Bool
-}
-
-// MARK: - Live
-
 @Observable
-final class UserPermissionsService: UserPermissionsServiceProtocol {
-  var camera: AVAuthorizationStatus {
-    AVCaptureDevice.authorizationStatus(for: .video)
+class UserPermissionsService {
+  
+  private var camera = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+  private var microphone = AVAudioApplication.shared.recordPermission == .granted
+  private var photoLibrary = PHPhotoLibrary.authorizationStatus(for: .addOnly) == .authorized
+  
+  enum PrivacyFeature: CaseIterable {
+    case camera
+    case microphone
+    case photoLibrary
+    
+    enum Status {
+      case undetermined
+      case authorized
+      case denied
+    }
   }
-  var microphone: AVAudioApplication.recordPermission {
-    AVAudioApplication.shared.recordPermission
+
+  init() {}
+  
+  // MARK: isAuthorized
+  
+  func isAuthorized(_ privacyFeatures: [PrivacyFeature]) -> Bool {
+    privacyFeatures.allSatisfy(isAuthorized)
   }
-  var photos: PHAuthorizationStatus {
-    PHPhotoLibrary.authorizationStatus(for: .addOnly)
+
+  func isAuthorized(_ privacyFeature: PrivacyFeature) -> Bool {
+    switch privacyFeature {
+      
+    case .camera:
+      self.camera
+      
+    case .microphone:
+      self.microphone
+      
+    case .photoLibrary:
+      self.photoLibrary
+    }
   }
   
-  func cameraRequest() async -> Bool {
-    await AVCaptureDevice.requestAccess(for: .video)
+  // MARK: request
+  
+  func request(_ privacyFeature: PrivacyFeature) async {
+    switch privacyFeature {
+      
+    case .camera:
+      self.camera = await AVCaptureDevice.requestAccess(for: .video)
+      
+    case .microphone:
+      self.microphone = await AVAudioApplication.requestRecordPermission()
+      
+    case .photoLibrary:
+      self.photoLibrary = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+    }
   }
-  func microphoneRequest() async -> Bool {
-    await AVAudioApplication.requestRecordPermission()
-  }
-  func photosRequest() async -> Bool {
-    await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+  
+  // MARK: status
+
+  func isStatusDetermined(_ privacyFeature: PrivacyFeature) -> Bool {
+    switch privacyFeature {
+      
+    case .camera:
+      AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined
+      
+    case .microphone:
+      AVAudioApplication.shared.recordPermission == .undetermined
+      
+    case .photoLibrary:
+      PHPhotoLibrary.authorizationStatus(for: .addOnly) == .notDetermined
+    }
   }
 }
 
-// MARK: - Preview
-
-@Observable
-final class UserPermissionsServicePreview: UserPermissionsServiceProtocol {
-  var camera: AVAuthorizationStatus { .authorized }
-  var microphone: AVAudioApplication.recordPermission { .granted }
-  var photos: PHAuthorizationStatus { .authorized }
-  
-  func cameraRequest() async -> Bool { true }
-  func microphoneRequest() async -> Bool { true }
-  func photosRequest() async -> Bool { true }
-}
