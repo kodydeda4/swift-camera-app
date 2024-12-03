@@ -4,22 +4,6 @@ import ComposableArchitecture
 import AVFoundation
 import Photos
 
-
-// @DEDA
-// Todo
-// - [ ] You need to refactor UserPermissionsClient because we're not seeing updates.
-// - [ ] Make sure AppicationClient works.
-// - [ ] Load up some AR objects
-// - [ ] Cleanup the UI.
-//
-// Stretch goals:
-// - [ ] Onboarding -> NavigationStack (Each page of user permissions).
-// - [ ] Settings -> UserPermissions will just be a link.
-// - [ ] Build as SPM package.
-// - [ ] Compiler directive for the Camera previews.
-// - [ ] Swift unit tests.
-// - [ ] Destinations.Bind() && unimplemented.
-
 @Observable
 @MainActor
 final class AppModel {
