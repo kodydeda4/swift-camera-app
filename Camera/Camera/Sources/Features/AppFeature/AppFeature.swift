@@ -14,10 +14,12 @@ import Photos
 // - [ ] SwiftUI Preview Compiler Directive
 // - [ ] ARKit integration
 // - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
+// - [ ] Build version
 // - [ ] Finished recording toast / progress
 // - [ ] Swift Dependencies
 // - [ ] DesignSystem
 // - [ ] Logs
+// - [ ] Git Flow release version
 //
 // Modern SwiftUI - PointFree
 // https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
