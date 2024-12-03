@@ -10,9 +10,9 @@ import Photos
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
-  var camera: Bool
-  var microphone: Bool
-  var photos: Bool
+  var camera: Bool { userPermissions.camera }
+  var microphone: Bool { userPermissions.microphone }
+  var photos: Bool { userPermissions.photos }
   var application: any ApplicationServiceProtocol
   var userPermissions: any UserPermissionsServiceProtocol
   var delegate: Delegate
@@ -37,11 +37,6 @@ final class UserPermissionsModel: Identifiable {
     self.options = options
     self.application = application
     self.userPermissions = userPermissions
-    
-    // Refresh
-    self.camera = userPermissions.camera == .authorized
-    self.microphone = userPermissions.microphone == .granted
-    self.photos = userPermissions.photos == .authorized
   }
   
   var isContinueButtonDisabled: Bool {
@@ -52,12 +47,12 @@ final class UserPermissionsModel: Identifiable {
     guard !camera else {
       return
     }
-    guard self.userPermissions.camera == .notDetermined else {
+    guard self.userPermissions.statusCamera == .notDetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      self.camera = await self.userPermissions.cameraRequest()
+      await self.userPermissions.requestCamera()
     }
   }
   
@@ -65,12 +60,12 @@ final class UserPermissionsModel: Identifiable {
     guard !microphone else {
       return
     }
-    guard self.userPermissions.microphone == .undetermined else {
+    guard self.userPermissions.statusMicrophone == .undetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      self.microphone = await self.userPermissions.microphoneRequest()
+      await self.userPermissions.requestMicrophone()
     }
   }
   
@@ -78,12 +73,12 @@ final class UserPermissionsModel: Identifiable {
     guard !photos else {
       return
     }
-    guard self.userPermissions.photos == .notDetermined else {
+    guard self.userPermissions.statusPhotos == .notDetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      self.photos = await self.userPermissions.photosRequest()
+      await self.userPermissions.requestPhotos()
     }
   }
   
