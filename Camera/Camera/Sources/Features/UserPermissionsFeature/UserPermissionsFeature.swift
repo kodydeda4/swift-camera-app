@@ -1,68 +1,71 @@
 import SwiftUI
 import AVFoundation
 import Photos
-//import IssueReporting
+import Sharing
+import Dependencies
+import IssueReporting
 
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
-  var camera: Bool { userPermissions.camera }
-  var microphone: Bool { userPermissions.microphone }
-  var photos: Bool { userPermissions.photos }
   var application: any ApplicationServiceProtocol
-  var userPermissions: any UserPermissionsServiceProtocol
-  var dismiss: () -> Void = {}//unimplemented("UserPermissionsModel.dismiss")
-  var onContinueButtonTapped: () -> Void = {}//unimplemented("UserPermissionsModel.onContinueButtonTapped")
-
-  init(
-    application: any ApplicationServiceProtocol = ApplicationService(),
-    userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
-  ) {
-    self.application = application
-    self.userPermissions = userPermissions
-  }
+  var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
+  var onContinueButtonTapped: () -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
+  @ObservationIgnored
+  @Shared(.userPermissions) var userPermissionsValues
+  
+  @ObservationIgnored
+  @Dependency(\.userPermissions) var userPermissions
+  
+  init(application: any ApplicationServiceProtocol = ApplicationService()) {
+    self.application = application
+  }
+
   var isContinueButtonDisabled: Bool {
-    !(camera && microphone && photos)
+    !(userPermissionsValues.camera && userPermissionsValues.microphone && userPermissionsValues.photos)
   }
   
   func cameraPermissionsButtonTapped() {
-    guard !camera else {
+    guard !userPermissionsValues.camera else {
       return
     }
-    guard self.userPermissions.statusCamera == .notDetermined else {
+    guard self.userPermissions.status(.camera) == .undetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      await self.userPermissions.requestCamera()
+      let newValue = await self.userPermissions.request(.camera)
+      self.$userPermissionsValues.camera.withLock { $0 = newValue }
     }
   }
   
   func microphonePermissionsButtonTapped() {
-    guard !microphone else {
+    guard !userPermissionsValues.microphone else {
       return
     }
-    guard self.userPermissions.statusMicrophone == .undetermined else {
+    guard self.userPermissions.status(.microphone) == .undetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      await self.userPermissions.requestMicrophone()
+      let newValue = await self.userPermissions.request(.microphone)
+      self.$userPermissionsValues.microphone.withLock { $0 = newValue }
     }
   }
   
   func photoLibraryPermissionsButtonTapped() {
-    guard !photos else {
+    guard !userPermissionsValues.photos else {
       return
     }
-    guard self.userPermissions.statusPhotos == .notDetermined else {
+    guard self.userPermissions.status(.photos) == .undetermined else {
       try? self.application.openSettings()
       return
     }
     Task {
-      await self.userPermissions.requestPhotos()
+      let newValue = await self.userPermissions.request(.photos)
+      self.$userPermissionsValues.photos.withLock { $0 = newValue }
     }
   }
   
@@ -113,7 +116,7 @@ struct UserPermissionsView: View {
           title: "Camera",
           subtitle: "Record AR Videos",
           systemImage: "camera.fill",
-          style: self.model.camera ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues.camera ? .green : Color(.systemGray6)
         )
       }
       Button(action: self.model.microphonePermissionsButtonTapped) {
@@ -121,7 +124,7 @@ struct UserPermissionsView: View {
           title: "Microphone",
           subtitle: "Add sound to your AR videos",
           systemImage: "microphone.fill",
-          style: self.model.microphone ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues.microphone ? .green : Color(.systemGray6)
         )
       }
       Button(action: self.model.photoLibraryPermissionsButtonTapped) {
@@ -129,7 +132,7 @@ struct UserPermissionsView: View {
           title: "Photo Library",
           subtitle: "Save your AR videos",
           systemImage: "photo.stack",
-          style: self.model.photos ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues.photos ? .green : Color(.systemGray6)
         )
       }
     }

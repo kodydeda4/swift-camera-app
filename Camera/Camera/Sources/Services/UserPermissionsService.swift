@@ -2,58 +2,98 @@ import SwiftUI
 import AVFoundation
 import Photos
 import AVFoundation
+import Dependencies
+import DependenciesMacros
 
-protocol UserPermissionsServiceProtocol {
-  // Properties
-  var camera: Bool { get }
-  var microphone: Bool { get }
-  var photos: Bool { get }
+@DependencyClient
+struct UserPermissionsClient: Sendable {
+  //@DEDA can u fix
+  var status: @Sendable (PrivacyFeature) -> Status = { _ in .undetermined }
+  var request: @Sendable (PrivacyFeature) async -> Bool = { _ in false }
   
-  // Status
-  var statusCamera: AVAuthorizationStatus { get }
-  var statusMicrophone: AVAudioApplication.recordPermission { get }
-  var statusPhotos: PHAuthorizationStatus { get }
+  enum PrivacyFeature {
+    case camera
+    case microphone
+    case photos
+  }
   
-  // Request
-  func requestCamera() async
-  func requestMicrophone() async
-  func requestPhotos() async
+  enum Status {
+    case undetermined
+    case authorized
+    case denied
+  }
 }
 
-// MARK: - Live
+extension UserPermissionsClient: DependencyKey {
+  static var liveValue: UserPermissionsClient {
+    return Self(
+      status: { privacyFeature in
+        switch privacyFeature {
+          
+        case .camera:
+          switch AVCaptureDevice.authorizationStatus(for: .video) {
+            
+          case .notDetermined:
+            return .undetermined
+            
+          case .authorized:
+            return .authorized
+            
+          default:
+            return .denied
+          }
+          
+        case .microphone:
+          switch AVAudioApplication.shared.recordPermission {
+            
+          case .undetermined:
+            return .undetermined
+            
+          case .granted:
+            return .authorized
+            
+          default:
+            return .denied
+          }
+          
+        case .photos:
+          switch PHPhotoLibrary.authorizationStatus(for: .addOnly) {
+            
+          case .notDetermined:
+            return .undetermined
+            
+          case .authorized:
+            return .authorized
+            
+          default:
+            return .denied
+          }
+        }
+      },
+      request: { privacyFeature in
+        switch privacyFeature {
+          
+        case .camera:
+          await AVCaptureDevice.requestAccess(for: .video)
+          
+        case .microphone:
+          await AVAudioApplication.requestRecordPermission()
+          
+        case .photos:
+          await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+        }
+      }
+    )
+  }
+}
 
-@Observable
-final class UserPermissionsService: UserPermissionsServiceProtocol {
-  var camera = false
-  var microphone = false
-  var photos = false
+extension UserPermissionsClient: TestDependencyKey {
+  static var testValue = UserPermissionsClient()
+}
 
-  init() {
-    self.refresh()
-  }
-  
-  private func refresh() {
-    self.camera = statusCamera == .authorized
-    self.microphone = statusMicrophone == .granted
-    self.photos = statusPhotos == .authorized
-  }
-  
-  var statusCamera: AVAuthorizationStatus {
-    AVCaptureDevice.authorizationStatus(for: .video)
-  }
-  var statusMicrophone: AVAudioApplication.recordPermission {
-    AVAudioApplication.shared.recordPermission
-  }
-  var statusPhotos: PHAuthorizationStatus {
-    PHPhotoLibrary.authorizationStatus(for: .addOnly)
-  }
-  func requestCamera() async {
-    self.camera = await AVCaptureDevice.requestAccess(for: .video)
-  }
-  func requestMicrophone() async {
-    self.microphone = await AVAudioApplication.requestRecordPermission()
-  }
-  func requestPhotos() async {
-    self.photos = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+extension DependencyValues {
+  var userPermissions: UserPermissionsClient {
+    get { self[UserPermissionsClient.self] }
+    set { self[UserPermissionsClient.self] = newValue }
   }
 }

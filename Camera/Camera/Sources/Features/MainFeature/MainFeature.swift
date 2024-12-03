@@ -4,6 +4,8 @@ import PhotosUI
 import SwiftUI
 import Photos
 import SwiftUINavigation
+import Sharing
+import Dependencies
 
 @MainActor
 @Observable
@@ -19,22 +21,23 @@ final class MainModel {
   var recordingDelegate = MovieCaptureDelegate()
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   var destination: Destination? { didSet { self.bind() } }
-  var userPermissions: any UserPermissionsServiceProtocol
   
+  @ObservationIgnored
+  @Shared(.userPermissions) var userPermissionsValues
+  
+  @ObservationIgnored
+  @Dependency(\.userPermissions) var userPermissions
+  
+  init() {}
+
   @CasePathable
   enum Destination {
     case arObjectPicker(ARObjectPickerModel)
     case userPermissions(UserPermissionsModel)
   }
   
-  init(userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()) {
-    self.userPermissions = userPermissions
-  }
-  
   var hasUserPermissions: Bool {
-    self.userPermissions.camera &&
-    self.userPermissions.microphone &&
-    self.userPermissions.photos
+    (userPermissionsValues.camera && userPermissionsValues.microphone && userPermissionsValues.photos)
   }
 
   var isDeleteButtonDisabled: Bool {

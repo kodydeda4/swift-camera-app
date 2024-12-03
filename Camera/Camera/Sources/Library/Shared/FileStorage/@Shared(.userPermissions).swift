@@ -7,8 +7,8 @@ struct UserPermissionsState: Codable {
   var photos = false
 }
 
-extension SharedReaderKey where Self == InMemoryKey<UserPermissionsState>.Default {
+extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Default {
   static var userPermissions: Self {
-    Self[.inMemory("userPermissions"), default: UserPermissionsState()]
+    Self[.fileStorage(.shared("userPermissions")), default: UserPermissionsState()]
   }
 }
