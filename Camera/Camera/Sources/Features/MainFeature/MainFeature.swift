@@ -27,8 +27,6 @@ final class MainModel {
   
   @ObservationIgnored
   @Dependency(\.userPermissions) var userPermissions
-  
-  init() {}
 
   @CasePathable
   enum Destination {

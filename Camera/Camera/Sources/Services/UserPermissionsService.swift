@@ -7,9 +7,11 @@ import DependenciesMacros
 
 @DependencyClient
 struct UserPermissionsClient: Sendable {
-  //@DEDA can u fix
-  var status: @Sendable (PrivacyFeature) -> Status = { _ in .undetermined }
-  var request: @Sendable (PrivacyFeature) async -> Bool = { _ in false }
+  var status: @Sendable (PrivacyFeature) -> Status
+  = { _ in reportIssue("\(Self.self).status"); return .undetermined }
+  
+  var request: @Sendable (PrivacyFeature) async -> Bool
+  = { _ in reportIssue("\(Self.self).request"); return false }
   
   enum PrivacyFeature {
     case camera
@@ -85,10 +87,6 @@ extension UserPermissionsClient: DependencyKey {
       }
     )
   }
-}
-
-extension UserPermissionsClient: TestDependencyKey {
-  static var testValue = UserPermissionsClient()
 }
 
 extension DependencyValues {

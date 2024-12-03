@@ -12,3 +12,4 @@ extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Def
     Self[.fileStorage(.shared("userPermissions")), default: UserPermissionsState()]
   }
 }
+

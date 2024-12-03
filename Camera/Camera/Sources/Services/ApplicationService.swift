@@ -12,19 +12,15 @@ extension ApplicationClient: DependencyKey {
     return Self(
       openSettings: {
         guard let url = URL(string: UIApplication.openSettingsURLString) else {
-          throw AnyError("GG")
+          throw AnyError("UIApplication.openSettingsURLString")
         }
         guard UIApplication.shared.canOpenURL(url) else {
-          throw AnyError("GG")
+          throw AnyError("UIApplication.shared.canOpenURL")
         }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
       }
     )
   }
-}
-
-extension ApplicationClient: TestDependencyKey {
-  static var testValue = ApplicationClient()
 }
 
 extension DependencyValues {
