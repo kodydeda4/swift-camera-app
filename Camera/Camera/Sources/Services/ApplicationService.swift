@@ -1,11 +1,15 @@
 import SwiftUI
+import AVFoundation
+import Photos
 
-struct ApplicationClient {
-  var openSettings: () throws -> Void
+protocol ApplicationServiceProtocol {
+  func openSettings() throws
 }
 
-extension ApplicationClient {
-  static var liveValue = Self {
+// MARK: - Live
+
+final class ApplicationService: ApplicationServiceProtocol {
+  func openSettings() throws {
     guard let url = URL(string: UIApplication.openSettingsURLString) else {
       throw AnyError("UIApplication.openSettingsURLString is nil.")
     }

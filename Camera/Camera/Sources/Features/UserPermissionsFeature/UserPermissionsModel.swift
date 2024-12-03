@@ -8,8 +8,8 @@ final class UserPermissionsModel: Identifiable {
   let id: UUID
   let options: Options
   private let delegate: Delegate
-  private let application: ApplicationClient
-  private let userPermissions: UserPermissionsClient
+  private let application: any ApplicationServiceProtocol
+  private let userPermissions: UserPermissionsService
 
   struct Delegate {
     var dismiss: () -> Void = {}
@@ -24,8 +24,8 @@ final class UserPermissionsModel: Identifiable {
     id: UUID = UUID(),
     delegate: Delegate = Delegate(),
     options: Options = Options(),
-    application: ApplicationClient = .liveValue,
-    userPermissions: UserPermissionsClient = .liveValue
+    application: any ApplicationServiceProtocol = ApplicationService(),
+    userPermissions: UserPermissionsService = UserPermissionsService()
   ) {
     self.id = id
     self.delegate = delegate
@@ -38,23 +38,20 @@ final class UserPermissionsModel: Identifiable {
     !(isAuthorized(.camera) && isAuthorized(.microphone) && isAuthorized(.photoLibrary))
   }
   
-  func isAuthorized(_ privacyFeature: UserPermissionsClient.PrivacyFeature) -> Bool {
-    self.userPermissions.status(privacyFeature) == .authorized
+  func isAuthorized(_ privacyFeature: UserPermissionsService.PrivacyFeature) -> Bool {
+    self.userPermissions.isAuthorized(privacyFeature)
   }
 
-  func privacyFeatureButtonTapped(_ privacyFeature: UserPermissionsClient.PrivacyFeature) {
+  func privacyFeatureButtonTapped(_ privacyFeature: UserPermissionsService.PrivacyFeature) {
+    guard !userPermissions.isAuthorized(privacyFeature) else {
+      return
+    }
+    guard userPermissions.isStatusDetermined(privacyFeature) else {
+      try? self.application.openSettings()
+      return
+    }
     Task {
-      switch userPermissions.status(privacyFeature) {
-        
-      case .undetermined:
-        await userPermissions.request(privacyFeature)
-        
-      case .denied:
-        try? application.openSettings()
-        
-      case .authorized:
-        break
-      }
+      await self.userPermissions.request(privacyFeature)
     }
   }
   

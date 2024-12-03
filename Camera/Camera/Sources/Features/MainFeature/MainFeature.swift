@@ -19,20 +19,19 @@ final class MainModel {
   var recordingDelegate = MovieCaptureDelegate()
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   var destination: Destination?
-  var userPermissions: UserPermissionsClient
+  var userPermissions: UserPermissionsService
   var isSwiftUIPreview: Bool//@DEDA plz
   
   init(
     isSwiftUIPreview: Bool = false,
-    userPermissions: UserPermissionsClient = .liveValue
+    userPermissions: UserPermissionsService = UserPermissionsService()
   ) {
     self.isSwiftUIPreview = isSwiftUIPreview
     self.userPermissions = userPermissions
   }
   
   var hasUserPermissions: Bool {
-    self.userPermissions.hasUserPermissions()
-    
+    self.userPermissions.isAuthorized([.camera, .microphone, .photoLibrary])
   }
   
   @CasePathable
@@ -51,17 +50,12 @@ final class MainModel {
   
   func settingsButtonTapped() {
     self.destination = .userPermissions(
-      UserPermissionsModel(
-        delegate: .init(
-          dismiss: { [weak self] in
-            self?.destination = .none
-          },
-          continueButtonTapped: {}
-        ),
-        options: .init(
-          isContinueButtonHidden: true
-        )
-      )
+      UserPermissionsModel(delegate: .init(
+        dismiss: { [weak self] in
+          self?.destination = .none
+        },
+        continueButtonTapped: {}
+      ))
     )
   }
   
