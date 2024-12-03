@@ -13,7 +13,12 @@ import ARKit
 // @DEDA
 // Once you get this working at a decent speed,
 // you can create an interface.
-// Doesn't work if you try to record twice :-(
+
+// Problems:
+// 1. Laggy AF
+// 2. After exporting the first video, other videos won't export.
+// 3. Coffee cup gets rendered multiple times (i think after you record it generates a new one or smthn)
+// 4. Video quality?
 
 struct ARVideoRecorderClient {
   var startRecording: () -> Void
