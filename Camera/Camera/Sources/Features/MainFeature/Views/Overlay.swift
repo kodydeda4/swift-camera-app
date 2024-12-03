@@ -5,11 +5,11 @@ extension MainView {
     VStack {
       self.top
       Spacer()
-//      self.debug
       self.bottom
     }
     .frame(maxWidth: .infinity)
     .padding()
+    .buttonStyle(.plain)
   }
 }
 
@@ -21,6 +21,7 @@ fileprivate extension MainView {
       Text("AR Camera")
         .font(.title)
         .fontWeight(.bold)
+        .foregroundColor(.white)
       
       Spacer()
       
@@ -29,6 +30,10 @@ fileprivate extension MainView {
           .resizable()
           .scaledToFit()
           .frame(width: Self.buttonSize, height: Self.buttonSize)
+          .padding(8)
+          .background(.regularMaterial)
+          .foregroundColor(.accentColor)
+          .clipShape(Circle())
       }
     }
   }
@@ -40,6 +45,10 @@ fileprivate extension MainView {
           .resizable()
           .scaledToFit()
           .frame(width: Self.buttonSize, height: Self.buttonSize)
+          .foregroundColor(.red)
+          .padding(8)
+          .background(.regularMaterial)
+          .clipShape(Circle())
       }
       .disabled(self.model.isDeleteButtonDisabled)
       
@@ -50,6 +59,10 @@ fileprivate extension MainView {
           .resizable()
           .scaledToFit()
           .frame(width: Self.buttonSize, height: Self.buttonSize)
+          .padding(8)
+          .background(Color.blue)
+          .foregroundColor(.white)
+          .clipShape(Circle())
       }
       
       Spacer()
@@ -59,30 +72,13 @@ fileprivate extension MainView {
           .resizable()
           .scaledToFit()
           .frame(width: Self.buttonSize, height: Self.buttonSize)
+          .padding(8)
+          .background(.regularMaterial)
+          .foregroundColor(self.model.isRecording ? .red : .gray)
+          .clipShape(Circle())
       }
     }
     .padding(.horizontal)
-  }
-  
-  
-  @MainActor private var debug: some View {
-    GroupBox {
-      VStack(alignment: .leading) {
-        debugLine("isPermissionGranted", self.model.isVideoPermissionGranted.description)
-        debugLine("isCaptureSessionRunning", self.model.avCaptureSession.isRunning.description)
-        debugLine("isRecording", self.model.isRecording.description)
-      }
-    }
-    .padding()
-  }
-  
-  @MainActor private func debugLine(_ title: String, _ description: String) -> some View {
-    HStack {
-      Text("\(title):")
-        .bold()
-      Text(description)
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 
