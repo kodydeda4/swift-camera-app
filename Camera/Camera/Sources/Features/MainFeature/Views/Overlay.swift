@@ -5,7 +5,7 @@ extension MainView {
     VStack {
       self.top
       Spacer()
-      self.debug
+//      self.debug
       self.bottom
     }
     .frame(maxWidth: .infinity)
@@ -14,16 +14,21 @@ extension MainView {
 }
 
 fileprivate extension MainView {
+  private static let buttonSize: CGFloat = 24
   
   private var top: some View {
     HStack {
       Text("AR Camera")
+        .font(.title)
         .fontWeight(.bold)
       
       Spacer()
       
       Button(action: self.model.settingsButtonTapped) {
         Image(systemName: "gear")
+          .resizable()
+          .scaledToFit()
+          .frame(width: Self.buttonSize, height: Self.buttonSize)
       }
     }
   }
@@ -34,7 +39,7 @@ fileprivate extension MainView {
         Image(systemName: "trash")
           .resizable()
           .scaledToFit()
-          .frame(width: 32, height: 32)
+          .frame(width: Self.buttonSize, height: Self.buttonSize)
       }
       .disabled(self.model.isDeleteButtonDisabled)
       
@@ -44,7 +49,7 @@ fileprivate extension MainView {
         Image(systemName: "plus")
           .resizable()
           .scaledToFit()
-          .frame(width: 32, height: 32)
+          .frame(width: Self.buttonSize, height: Self.buttonSize)
       }
       
       Spacer()
@@ -53,7 +58,7 @@ fileprivate extension MainView {
         Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
           .resizable()
           .scaledToFit()
-          .frame(width: 32, height: 32)
+          .frame(width: Self.buttonSize, height: Self.buttonSize)
       }
     }
     .padding(.horizontal)

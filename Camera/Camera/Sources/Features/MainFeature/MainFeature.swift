@@ -97,12 +97,7 @@ struct MainView: View {
         if self.model.hasUserPermissions {
           self.camera
         } else {
-          self.notEnoughPermissions
-        }
-      }
-      .toolbar {
-        Button(action: self.model.settingsButtonTapped) {
-          Image(systemName: "gear")
+          self.permissionsRequired
         }
       }
     }
