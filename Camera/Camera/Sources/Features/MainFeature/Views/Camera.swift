@@ -5,11 +5,11 @@ import AVFoundation
 extension MainView {
   @MainActor var camera: some View {
     Group {
-      if self.model.isSwiftUIPreview {
-        self.debug
-      } else {
-        self.release
-      }
+      //      if preview {
+      self.debug
+      //      } else {
+      //        self.release
+      //      }
     }
   }
   
@@ -50,5 +50,5 @@ fileprivate struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: .previewValue)
+  MainView(model: MainModel())
 }

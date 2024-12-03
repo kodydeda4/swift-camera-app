@@ -16,5 +16,5 @@ extension MainView {
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: .previewValue)
+  MainView(model: MainModel())
 }

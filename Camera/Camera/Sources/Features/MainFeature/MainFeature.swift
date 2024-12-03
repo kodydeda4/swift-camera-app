@@ -20,14 +20,14 @@ final class MainModel {
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   var destination: Destination?
   var userPermissions: any UserPermissionsServiceProtocol
-
-  static var previewValue = MainModel.init(isSwiftUIPreview: true)
-  var isSwiftUIPreview: Bool//@DEDA plz
-  init(
-    isSwiftUIPreview: Bool = false,
-    userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
-  ) {
-    self.isSwiftUIPreview = isSwiftUIPreview
+  
+  @CasePathable
+  enum Destination {
+    case arObjectPicker(ARObjectPickerModel)
+    case userPermissions(UserPermissionsModel)
+  }
+  
+  init(userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()) {
     self.userPermissions = userPermissions
   }
   
@@ -35,12 +35,6 @@ final class MainModel {
     self.userPermissions.camera &&
     self.userPermissions.microphone &&
     self.userPermissions.photos
-  }
-  
-  @CasePathable
-  enum Destination {
-    case arObjectPicker(ARObjectPickerModel)
-    case userPermissions(UserPermissionsModel)
   }
 
   var isDeleteButtonDisabled: Bool {
@@ -81,14 +75,10 @@ final class MainModel {
     switch destination {
       
     case let .userPermissions(model):
-      model.dismiss = { [weak self] in
-        self?.destination = .none
-      }
+      model.dismiss = { [weak self] in self?.destination = .none }
       
     case let .arObjectPicker(model):
-      model.dismiss = { [weak self] in
-        self?.destination = .none
-      }
+      model.dismiss = { [weak self] in self?.destination = .none }
       
     case .none:
       break
@@ -125,5 +115,5 @@ struct MainView: View {
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: .previewValue)
+  MainView(model: MainModel())
 }
