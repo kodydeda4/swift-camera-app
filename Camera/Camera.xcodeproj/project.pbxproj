@@ -12,6 +12,8 @@
 		335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02862CFF7F24009FBDAD /* Dependencies */; };
 		335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02882CFF7F24009FBDAD /* DependenciesMacros */; };
 		335D028C2CFF7F5C009FBDAD /* Sharing in Frameworks */ = {isa = PBXBuildFile; productRef = 335D028B2CFF7F5C009FBDAD /* Sharing */; };
+		335D02942CFFA270009FBDAD /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 335D02932CFFA270009FBDAD /* ARKit.framework */; };
+		335D02962CFFA27B009FBDAD /* SceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 335D02952CFFA27B009FBDAD /* SceneKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,13 +27,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		335D02932CFFA270009FBDAD /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
+		335D02952CFFA27B009FBDAD /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
 		33B64EC62CFCC15000D97812 /* Camera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Camera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33B64ED62CFCC15200D97812 /* CameraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		335D02912CFFA0B3009FBDAD /* Exceptions for "Camera" folder in "Camera" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 33B64EC52CFCC15000D97812 /* Camera */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		33B64EC82CFCC15000D97812 /* Camera */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				335D02912CFFA0B3009FBDAD /* Exceptions for "Camera" folder in "Camera" target */,
+			);
 			path = Camera;
 			sourceTree = "<group>";
 		};
@@ -47,6 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				335D02962CFFA27B009FBDAD /* SceneKit.framework in Frameworks */,
+				335D02942CFFA270009FBDAD /* ARKit.framework in Frameworks */,
 				335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */,
 				335D02842CFF7ED4009FBDAD /* SwiftUINavigation in Frameworks */,
 				335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */,
@@ -65,11 +84,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		335D02922CFFA270009FBDAD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				335D02952CFFA27B009FBDAD /* SceneKit.framework */,
+				335D02932CFFA270009FBDAD /* ARKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		33B64EBD2CFCC15000D97812 = {
 			isa = PBXGroup;
 			children = (
 				33B64EC82CFCC15000D97812 /* Camera */,
 				33B64ED92CFCC15200D97812 /* CameraTests */,
+				335D02922CFFA270009FBDAD /* Frameworks */,
 				33B64EC72CFCC15000D97812 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -354,12 +383,14 @@
 				DEVELOPMENT_TEAM = ME637H7ZM9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Camera/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record AR videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Save your AR videos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -386,12 +417,14 @@
 				DEVELOPMENT_TEAM = ME637H7ZM9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Camera/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record AR videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Save your AR videos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

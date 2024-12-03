@@ -5,10 +5,16 @@ import AVFoundation
 extension MainView {
   @MainActor var camera: some View {
     Group {
+      Button("display") {
+        self.arsheet = true
+      }
+      .fullScreenCover(isPresented: $arsheet) {
+        ARSheetView()
+      }
 //      if preview {
 //        self.debug
 //      } else {
-        self.release
+//        self.release
 //      }
     }
   }

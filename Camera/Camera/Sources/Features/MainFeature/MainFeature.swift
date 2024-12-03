@@ -91,6 +91,7 @@ final class MainModel {
 
 struct MainView: View {
   @Bindable public var model: MainModel
+  @State var arsheet = false
   
   var body: some View {
     NavigationStack {
