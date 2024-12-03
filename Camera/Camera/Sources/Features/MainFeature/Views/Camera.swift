@@ -4,32 +4,26 @@ import AVFoundation
 
 extension MainView {
   @MainActor var camera: some View {
-    Group {
-      Button("display") {
-        self.arsheet = true
-      }
-      .fullScreenCover(isPresented: $arsheet) {
-        ARSheetView()
-      }
-//      if preview {
-//        self.debug
-//      } else {
-//        self.release
-//      }
-    }
+    ARSheetView()
+    //      if preview {
+    //        self.debug
+    //      } else {
+    //        self.release
+    //      }
   }
-  
-  @MainActor private var debug: some View {
-    Image(.cameraPreview)
-      .resizable()
-      .scaledToFill()
-  }
-  
-  @MainActor private var release: some View {
-    AVCaptureVideoPreviewLayerView(
-      avVideoPreviewLayer: self.model.avVideoPreviewLayer
-    )
-  }
+}
+
+@MainActor private var debug: some View {
+  Image(.cameraPreview)
+    .resizable()
+    .scaledToFill()
+}
+
+@MainActor private var release: some View {
+  AVCaptureVideoPreviewLayerView(
+    avVideoPreviewLayer: self.model.avVideoPreviewLayer
+  )
+}
 }
 
 fileprivate struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
