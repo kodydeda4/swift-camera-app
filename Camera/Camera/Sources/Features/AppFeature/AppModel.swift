@@ -15,6 +15,8 @@ import Photos
 // - [ ] ARKit integration
 // - [ ] Animations && UI Improvements
 // - [ ] Finished recording toast / progress
+// - [ ] Swift Dependencies
+// - [ ] DesignSystem
 //
 // Modern SwiftUI - PointFree
 // https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
