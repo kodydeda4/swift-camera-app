@@ -1,25 +1,35 @@
 import SwiftUI
-import AVFoundation
-import Photos
+import Dependencies
+import DependenciesMacros
 
-protocol ApplicationServiceProtocol {
-  func openSettings() throws
+@DependencyClient
+struct ApplicationClient: Sendable {
+  var openSettings: @Sendable () throws -> Void
 }
 
-// MARK: - Live
-
-final class ApplicationService: ApplicationServiceProtocol {
-  func openSettings() throws {
-    guard let url = URL(string: UIApplication.openSettingsURLString) else {
-      throw AnyError("GG")
-    }
-    guard UIApplication.shared.canOpenURL(url) else {
-      throw AnyError("GG")
-    }
-    UIApplication.shared.open(
-      url,
-      options: [:],
-      completionHandler: nil
+extension ApplicationClient: DependencyKey {
+  static var liveValue: ApplicationClient {
+    return Self(
+      openSettings: {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+          throw AnyError("GG")
+        }
+        guard UIApplication.shared.canOpenURL(url) else {
+          throw AnyError("GG")
+        }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+      }
     )
+  }
+}
+
+extension ApplicationClient: TestDependencyKey {
+  static var testValue = ApplicationClient()
+}
+
+extension DependencyValues {
+  var application: ApplicationClient {
+    get { self[ApplicationClient.self] }
+    set { self[ApplicationClient.self] = newValue }
   }
 }

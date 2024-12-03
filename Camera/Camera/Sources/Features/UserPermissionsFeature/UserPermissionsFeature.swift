@@ -9,7 +9,6 @@ import IssueReporting
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
-  var application: any ApplicationServiceProtocol
   var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
   var onContinueButtonTapped: () -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
@@ -19,12 +18,19 @@ final class UserPermissionsModel: Identifiable {
   @ObservationIgnored
   @Dependency(\.userPermissions) var userPermissions
   
-  init(application: any ApplicationServiceProtocol = ApplicationService()) {
-    self.application = application
-  }
+  @ObservationIgnored
+  @Dependency(\.application) var application
 
   var isContinueButtonDisabled: Bool {
     !(userPermissionsValues.camera && userPermissionsValues.microphone && userPermissionsValues.photos)
+  }
+  
+  func cancelButtonTapped() {
+    self.dismiss()
+  }
+  
+  func continueButtonTapped() {
+    self.onContinueButtonTapped()
   }
   
   func cameraPermissionsButtonTapped() {
@@ -68,14 +74,7 @@ final class UserPermissionsModel: Identifiable {
       self.$userPermissionsValues.photos.withLock { $0 = newValue }
     }
   }
-  
-  func cancelButtonTapped() {
-    self.dismiss()
-  }
-  
-  func continueButtonTapped() {
-    self.onContinueButtonTapped()
-  }
+
 }
 
 // MARK: - SwiftUI
