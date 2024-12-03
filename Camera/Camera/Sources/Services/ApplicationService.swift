@@ -11,8 +11,15 @@ protocol ApplicationServiceProtocol {
 final class ApplicationService: ApplicationServiceProtocol {
   func openSettings() throws {
     guard let url = URL(string: UIApplication.openSettingsURLString) else {
-      throw AnyError("UIApplication.openSettingsURLString is nil.")
+      throw AnyError("GG")
     }
-    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    guard UIApplication.shared.canOpenURL(url) else {
+      throw AnyError("GG")
+    }
+    UIApplication.shared.open(
+      url,
+      options: [:],
+      completionHandler: nil
+    )
   }
 }

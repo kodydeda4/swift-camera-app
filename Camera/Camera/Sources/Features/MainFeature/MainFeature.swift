@@ -19,19 +19,17 @@ final class MainModel {
   var recordingDelegate = MovieCaptureDelegate()
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   var destination: Destination?
-  var userPermissions: UserPermissionsService
-  var isSwiftUIPreview: Bool//@DEDA plz
   
-  init(
-    isSwiftUIPreview: Bool = false,
-    userPermissions: UserPermissionsService = UserPermissionsService()
-  ) {
+  static var previewValue = MainModel.init(isSwiftUIPreview: true)
+  var isSwiftUIPreview: Bool//@DEDA plz
+  init(isSwiftUIPreview: Bool = false) {
     self.isSwiftUIPreview = isSwiftUIPreview
-    self.userPermissions = userPermissions
   }
   
-  var hasUserPermissions: Bool {
-    self.userPermissions.isAuthorized([.camera, .microphone, .photoLibrary])
+  var userPermissions: Bool {
+    AVCaptureDevice.authorizationStatus(for: .video) == .authorized &&
+    AVAudioApplication.shared.recordPermission == .granted &&
+    PHPhotoLibrary.authorizationStatus(for: .addOnly) == .authorized
   }
   
   @CasePathable
@@ -93,7 +91,7 @@ struct MainView: View {
   
   var body: some View {
     NavigationStack {
-      if self.model.hasUserPermissions {
+      if self.model.userPermissions {
         self.camera
       } else {
         self.notEnoughPermissions
@@ -113,10 +111,6 @@ struct MainView: View {
 }
 
 // MARK: - SwiftUI Previews
-
-extension MainModel {
-  static var previewValue = MainModel.init(isSwiftUIPreview: true)
-}
 
 #Preview {
   MainView(model: .previewValue)
