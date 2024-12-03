@@ -4,14 +4,17 @@ import Photos
 import AVFoundation
 
 protocol UserPermissionsServiceProtocol {
+  // Properties
   var camera: Bool { get }
   var microphone: Bool { get }
   var photos: Bool { get }
   
+  // Status
   var statusCamera: AVAuthorizationStatus { get }
   var statusMicrophone: AVAudioApplication.recordPermission { get }
   var statusPhotos: PHAuthorizationStatus { get }
   
+  // Request
   func requestCamera() async
   func requestMicrophone() async
   func requestPhotos() async
@@ -54,16 +57,3 @@ final class UserPermissionsService: UserPermissionsServiceProtocol {
     self.photos = await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
   }
 }
-
-//// MARK: - Preview
-//
-//@Observable
-//final class UserPermissionsServicePreview: UserPermissionsServiceProtocol {
-//  var camera: AVAuthorizationStatus { .authorized }
-//  var microphone: AVAudioApplication.recordPermission { .granted }
-//  var photos: PHAuthorizationStatus { .authorized }
-//  
-//  func requestCamera() async -> Bool { true }
-//  func requestMicrophone() async -> Bool { true }
-//  func requestPhotos() async -> Bool { true }
-//}
