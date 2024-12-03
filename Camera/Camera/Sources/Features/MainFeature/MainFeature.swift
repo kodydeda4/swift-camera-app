@@ -56,6 +56,10 @@ final class MainModel {
     //...
   }
   
+  func setupARVideoRecorder(for arView: ARView) {
+    self.recorder = ARVideoRecorder(arView: arView)
+  }
+
   func task() async {
     //    self.startCaptureSession(with: .default(for: .video))
     
@@ -181,10 +185,6 @@ class ARVideoRecorder {
     
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
-    // @DEDA you can probaly grab ur device res here.
-    // Define video settings for high quality
-    // Initialize the AVAssetWriter with the desired output URL and file type
-    
     // Define video settings with dynamic resolution
     let settings: [String: Any] = [
       AVVideoCodecKey: AVVideoCodecType.h264,
@@ -256,7 +256,11 @@ extension CGImage {
 }
 
 struct ARViewContainer: UIViewRepresentable {
-  @Bindable var model: MainModel
+  let callback: (ARView) -> Void
+
+  init(callback: @escaping (ARView) -> Void) {
+    self.callback = callback
+  }
   
   func makeUIView(context: Context) -> ARView {
     let arView = ARView(frame: .zero)
@@ -264,7 +268,7 @@ struct ARViewContainer: UIViewRepresentable {
     config.planeDetection = [.horizontal, .vertical]
     config.environmentTexturing = .automatic
     arView.session.run(config)
-    self.model.recorder = ARVideoRecorder(arView: arView)
+    self.callback(arView)
     return arView
   }
   
@@ -288,8 +292,11 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasUserPermissions {
-          ARViewContainer(model: self.model)
-            .edgesIgnoringSafeArea(.all)
+          ARViewContainer { arView in
+            self.model.setupARVideoRecorder(for: arView)
+          }
+          .edgesIgnoringSafeArea(.all)
+          
         } else {
           self.permissionsRequired
         }
