@@ -15,27 +15,17 @@ final class AppModel {
   
   @CasePathable
   enum Destination {
-    case userPermissions(UserPermissionsModel)
     case main(MainModel)
+    case onboarding(OnboardingModel)
   }
   
   init() {
-    if self.isOnboardingComplete {
-      self.destination = .main(MainModel())
-    }
-  }
-  
-  func continueButtonTapped() {
-    self.destination = .userPermissions(
-      UserPermissionsModel(
-        delegate: .init(
-          continueButtonTapped: { [weak self] in
-            self?.isOnboardingComplete = true
-            self?.destination = .main(MainModel())
-          }
-        )
-      )
-    )
+    self.destination = self.isOnboardingComplete
+    ? .main(MainModel())
+    : .onboarding(OnboardingModel(onCompletion: { [weak self] in
+      self?.isOnboardingComplete = true
+      self?.destination = .main(MainModel())
+    }))
   }
 }
 
@@ -45,40 +35,17 @@ struct AppView: View {
   @Bindable var model: AppModel
   
   var body: some View {
-    NavigationStack {
-      VStack {
-        VStack {
-          Spacer()
-          
-          Image(systemName: "camera.fill")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 64, height: 64)
-            .foregroundColor(.orange)
-            .padding()
-            .background(Color.orange.opacity(0.6))
-            .clipShape(Circle())
-          
-          Text("AR Camera")
-            .font(.title)
-            .bold()
-          
-          Text("Record Videos with AR Objects.")
-            .foregroundColor(.secondary)
-            .padding(.bottom)
-          
-          Button("Continue") {
-            self.model.continueButtonTapped()
-          }
-          .buttonStyle(.borderedProminent)
-        }
-        .padding(64)
-      }
-      .navigationDestination(item: $model.destination.userPermissions) { model in
-        UserPermissionsView(model: model)
-      }
-      .navigationDestination(item: $model.destination.main) { model in
-        MainView(model: MainModel())
+    Group {
+      switch self.model.destination {
+        
+      case let .main(model):
+        MainView(model: model)
+        
+      case let .onboarding(model):
+        OnboardingView(model: model)
+        
+      case .none:
+        ProgressView()
       }
     }
   }

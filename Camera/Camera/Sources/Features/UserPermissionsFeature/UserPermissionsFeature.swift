@@ -2,10 +2,6 @@ import SwiftUI
 import AVFoundation
 import Photos
 
-// @DEDA
-// Eh. maybe your state lives in UserPermissions.
-// hamburger
-
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
