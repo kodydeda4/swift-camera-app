@@ -129,19 +129,43 @@ class ARVideoRecorder {
   }
   
   private func setupAssetWriter(outputURL: URL) {
+    // Get the device screen dimensions
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    let scale = UIScreen.main.scale // To account for retina scaling
+    let videoWidth = Int(screenWidth * scale)
+    let videoHeight = Int(screenHeight * scale)
+    
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
     // @DEDA you can probaly grab ur device res here.
-    let settings = [
-      AVVideoCodecKey: AVVideoCodecType.h264,
-      AVVideoWidthKey: NSNumber(value: 1920),
-      AVVideoHeightKey: NSNumber(value: 1080)
-    ] as [String: Any]
+    // Define video settings for high quality
+    // Initialize the AVAssetWriter with the desired output URL and file type
     
+    // Define video settings with dynamic resolution
+    let settings: [String: Any] = [
+      AVVideoCodecKey: AVVideoCodecType.h264,
+      AVVideoWidthKey: NSNumber(value: videoWidth),
+      AVVideoHeightKey: NSNumber(value: videoHeight),
+      AVVideoCompressionPropertiesKey: [
+        AVVideoAverageBitRateKey: NSNumber(value: 10_000_000), // Higher bitrate for better quality
+        AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+        AVVideoMaxKeyFrameIntervalKey: NSNumber(value: 30) // Keyframe every 30 frames
+      ]
+    ]
+    
+    // Create an AVAssetWriterInput with the settings
     assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
+    assetWriterInput?.expectsMediaDataInRealTime = true
+    
+    // Configure the pixel buffer adaptor with dynamic dimensions
     pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
       assetWriterInput: assetWriterInput!,
-      sourcePixelBufferAttributes: nil
+      sourcePixelBufferAttributes: [
+        kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32ARGB,
+        kCVPixelBufferWidthKey as String: NSNumber(value: videoWidth),
+        kCVPixelBufferHeightKey as String: NSNumber(value: videoHeight)
+      ]
     )
     
     if let assetWriter = assetWriter, let assetWriterInput = assetWriterInput {
