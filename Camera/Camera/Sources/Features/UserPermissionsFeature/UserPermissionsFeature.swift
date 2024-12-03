@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import Photos
+import XCTestDynamicOverlay
 
 @Observable
 @MainActor
@@ -11,26 +12,13 @@ final class UserPermissionsModel: Identifiable {
   var photos: Bool { userPermissions.photos }
   var application: any ApplicationServiceProtocol
   var userPermissions: any UserPermissionsServiceProtocol
-  var delegate: Delegate
-  var options = Options()
+  var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
+  var onContinueButtonTapped: () -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
 
-  struct Delegate {
-    var dismiss: () -> Void = {}
-    var continueButtonTapped: () -> Void = {}
-  }
-  
-  struct Options {
-    var isContinueButtonHidden = false
-  }
-  
   init(
-    delegate: Delegate = Delegate(),
-    options: Options = Options(),
     application: any ApplicationServiceProtocol = ApplicationService(),
     userPermissions: any UserPermissionsServiceProtocol = UserPermissionsService()
   ) {
-    self.delegate = delegate
-    self.options = options
     self.application = application
     self.userPermissions = userPermissions
   }
@@ -79,11 +67,11 @@ final class UserPermissionsModel: Identifiable {
   }
   
   func cancelButtonTapped() {
-    self.delegate.dismiss()
+    self.dismiss()
   }
   
   func continueButtonTapped() {
-    self.delegate.continueButtonTapped()
+    self.onContinueButtonTapped()
   }
 }
 
@@ -104,15 +92,13 @@ struct UserPermissionsView: View {
       
       Spacer()
       
-      if !self.model.options.isContinueButtonHidden {
-        Button(action: self.model.continueButtonTapped) {
-          Text("Continue")
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(self.model.isContinueButtonDisabled)
-        .padding()
+      Button(action: self.model.continueButtonTapped) {
+        Text("Continue")
+          .frame(maxWidth: .infinity)
       }
+      .buttonStyle(.borderedProminent)
+      .disabled(self.model.isContinueButtonDisabled)
+      .padding()
     }
     .padding(.horizontal, 32)
     .frame(maxWidth: .infinity, alignment: .leading)

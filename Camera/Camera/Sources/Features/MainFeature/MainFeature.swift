@@ -52,22 +52,11 @@ final class MainModel {
   }
   
   func settingsButtonTapped() {
-    self.destination = .userPermissions(
-      UserPermissionsModel(delegate: .init(
-        dismiss: { [weak self] in
-          self?.destination = .none
-        },
-        continueButtonTapped: {}
-      ))
-    )
+    self.destination = .userPermissions(UserPermissionsModel())
   }
   
   func newObjectButtonTapped() {
-    self.destination = .arObjectPicker(ARObjectPickerModel(
-      delegate: .init(dismiss: { [weak self] in
-        self?.destination = .none
-      })
-    ))
+    self.destination = .arObjectPicker(ARObjectPickerModel())
   }
   
   func deleteButtonTapped() {
@@ -85,6 +74,24 @@ final class MainModel {
           }
         }
       }
+    }
+  }
+  
+  private func bind() {
+    switch destination {
+      
+    case let .userPermissions(model):
+      model.dismiss = { [weak self] in
+        self?.destination = .none
+      }
+      
+    case let .arObjectPicker(model):
+      model.dismiss = { [weak self] in
+        self?.destination = .none
+      }
+      
+    case .none:
+      break
     }
   }
 }

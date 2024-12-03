@@ -7,28 +7,29 @@ import Photos
 @Observable
 @MainActor
 final class OnboardingModel {
-  var destination: Destination?
-  var onCompletion: () -> Void
-  
+  var destination: Destination? { didSet { self.bind() } }
+  var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
+
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
   }
   
-  init(onCompletion: @escaping () -> Void = {}) {
-    self.onCompletion = onCompletion
-  }
-  
   func continueButtonTapped() {
-    self.destination = .userPermissions(
-      UserPermissionsModel(
-        delegate: .init(
-          continueButtonTapped: { [weak self] in
-            self?.onCompletion()
-          }
-        )
-      )
-    )
+    self.destination = .userPermissions(UserPermissionsModel())
+  }
+
+  private func bind() {
+    switch destination {
+      
+    case let .userPermissions(model):
+      model.onContinueButtonTapped = { [weak self] in
+        self?.onCompletion()
+      }
+      
+    case .none:
+     break
+    }
   }
 }
 

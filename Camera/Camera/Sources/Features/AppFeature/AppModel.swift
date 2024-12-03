@@ -4,11 +4,26 @@ import ComposableArchitecture
 import AVFoundation
 import Photos
 
+// @DEDA
+// - [x] Camera
+// - [x] Video Recording
+// - [x] UserPermissions
+// - [x] Bind && Unimplemented
+// - [x] Destination
+// - [ ] SPM
+// - [ ] SwiftUI Preview Compiler Directive
+// - [ ] ARKit integration
+// - [ ] Animations && UI Improvements
+// - [ ] Finished recording toast / progress
+//
+// Modern SwiftUI - PointFree
+// https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
+
 @Observable
 @MainActor
 final class AppModel {
-  var destination: Destination?
-  
+  var destination: Destination? { didSet { self.bind() } }
+
   @ObservationIgnored
   @AppStorage(AppStorageKey.isOnboardingComplete.rawValue)
   var isOnboardingComplete = false
@@ -22,10 +37,24 @@ final class AppModel {
   init() {
     self.destination = self.isOnboardingComplete
     ? .main(MainModel())
-    : .onboarding(OnboardingModel(onCompletion: { [weak self] in
-      self?.isOnboardingComplete = true
-      self?.destination = .main(MainModel())
-    }))
+    : .onboarding(OnboardingModel())
+  }
+
+  private func bind() {
+    switch destination {
+      
+    case .main:
+      break
+      
+    case let .onboarding(model):
+      model.onCompletion = { [weak self] in
+        self?.isOnboardingComplete = true
+        self?.destination = .main(MainModel())
+      }
+      
+    case .none:
+      break
+    }
   }
 }
 

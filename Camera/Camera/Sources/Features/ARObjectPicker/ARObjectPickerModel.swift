@@ -6,26 +6,19 @@ import AVFoundation
 import AsyncAlgorithms
 import AVFoundation
 import Photos
+import XCTestDynamicOverlay
 
 @Observable
 @MainActor
 final class ARObjectPickerModel: Identifiable {
-  var delegate: Delegate
-  
-  struct Delegate {
-    var dismiss: () -> Void = {}
-  }
-  
-  init(delegate: Delegate = Delegate()) {
-    self.delegate = delegate
-  }
+  var dismiss: () -> Void = unimplemented("ARObjectPickerModel.dismiss")
 
   func cancelButtonTapped() {
-    self.delegate.dismiss()
+    self.dismiss()
   }
   
   func saveButtonTapped() {
-    self.delegate.dismiss()
+    self.dismiss()
   }
 }
 
