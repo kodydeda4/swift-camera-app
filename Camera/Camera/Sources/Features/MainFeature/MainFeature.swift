@@ -157,16 +157,13 @@ class ARVideoRecorder {
     let currentTime = CACurrentMediaTime()
     let elapsedTime = currentTime - (recordingStartTime ?? currentTime)
     
-    DispatchQueue.global(qos: .userInitiated).async {
-      self.arView.snapshot(saveToHDR: false) { image in
+    Task.detached {
+      await self.arView.snapshot(saveToHDR: false) { image in
         guard let pixelBuffer = image?.cgImage?.toPixelBuffer() else { return }
-        
-        DispatchQueue.main.async {
-          pixelBufferAdaptor.append(
-            pixelBuffer,
-            withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600)
-          )
-        }
+        pixelBufferAdaptor.append(
+          pixelBuffer,
+          withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600)
+        )
       }
     }
   }
@@ -176,8 +173,8 @@ class ARVideoRecorder {
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     let scale = UIScreen.main.scale // To account for retina scaling
-    let videoWidth = Int(screenWidth * scale * 0.5)
-    let videoHeight = Int(screenHeight * scale * 0.5)
+    let videoWidth = Int(screenWidth * scale * 0.25)
+    let videoHeight = Int(screenHeight * scale * 0.25)
     
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
