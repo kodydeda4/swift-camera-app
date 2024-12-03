@@ -178,10 +178,6 @@ class ARVideoRecorder {
     
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
-    // @DEDA you can probaly grab ur device res here.
-    // Define video settings for high quality
-    // Initialize the AVAssetWriter with the desired output URL and file type
-    
     // Define video settings with dynamic resolution
     let settings: [String: Any] = [
       AVVideoCodecKey: AVVideoCodecType.h264,
