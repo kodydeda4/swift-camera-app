@@ -5,11 +5,11 @@ import AVFoundation
 extension MainView {
   @MainActor var camera: some View {
     Group {
-      //      if preview {
-      self.debug
-      //      } else {
-      //        self.release
-      //      }
+//      if preview {
+//        self.debug
+//      } else {
+        self.release
+//      }
     }
   }
   
