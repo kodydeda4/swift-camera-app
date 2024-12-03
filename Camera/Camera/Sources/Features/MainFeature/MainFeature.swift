@@ -103,6 +103,15 @@ final class MainModel {
 
 // MARK: Internal
 
+// @DEDA
+// Once you get this working at a decent speed,
+// you can create an interface.
+
+struct ARVideoRecorderClient {
+  var startRecording: () -> Void
+  var stopRecording: () -> Void//VideoURL
+}
+
 class ARVideoRecorder {
   private let arView: ARView
   private var assetWriter: AVAssetWriter?
@@ -148,12 +157,16 @@ class ARVideoRecorder {
     let currentTime = CACurrentMediaTime()
     let elapsedTime = currentTime - (recordingStartTime ?? currentTime)
     
-    //    let pixelBuffer = arView.snapshot().cgImage?.toPixelBuffer()
-    arView.snapshot(saveToHDR: false) { image in
-      let pixelBuffer = image?.cgImage?.toPixelBuffer()
-      
-      if let pixelBuffer  {
-        pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600))
+    DispatchQueue.global(qos: .userInitiated).async {
+      self.arView.snapshot(saveToHDR: false) { image in
+        guard let pixelBuffer = image?.cgImage?.toPixelBuffer() else { return }
+        
+        DispatchQueue.main.async {
+          pixelBufferAdaptor.append(
+            pixelBuffer,
+            withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600)
+          )
+        }
       }
     }
   }
@@ -163,8 +176,8 @@ class ARVideoRecorder {
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     let scale = UIScreen.main.scale // To account for retina scaling
-    let videoWidth = Int(screenWidth * scale)
-    let videoHeight = Int(screenHeight * scale)
+    let videoWidth = Int(screenWidth * scale * 0.5)
+    let videoHeight = Int(screenHeight * scale * 0.5)
     
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
@@ -178,9 +191,9 @@ class ARVideoRecorder {
       AVVideoWidthKey: NSNumber(value: videoWidth),
       AVVideoHeightKey: NSNumber(value: videoHeight),
       AVVideoCompressionPropertiesKey: [
-        AVVideoAverageBitRateKey: NSNumber(value: 10_000_000), // Higher bitrate for better quality
-        AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-        AVVideoMaxKeyFrameIntervalKey: NSNumber(value: 30) // Keyframe every 30 frames
+        AVVideoAverageBitRateKey: NSNumber(value: 5_000_000), // Reduce bitrate for faster encoding
+        AVVideoProfileLevelKey: AVVideoProfileLevelH264BaselineAutoLevel, // Use a simpler profile
+        AVVideoMaxKeyFrameIntervalKey: NSNumber(value: 15) // More frequent keyframes
       ]
     ]
     
