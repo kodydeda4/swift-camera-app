@@ -255,42 +255,6 @@ extension CGImage {
   }
 }
 
-
-// MARK: - SwiftUI
-
-struct MainView: View {
-  @Bindable public var model: MainModel
-  @State var arsheet = false
-  
-  var body: some View {
-    NavigationStack {
-      Group {
-        if self.model.hasUserPermissions {
-          self.camera
-        } else {
-          self.permissionsRequired
-        }
-      }
-    }
-    .navigationBarBackButtonHidden()
-    .overlay(content: self.overlay)
-    .task { await self.model.task() }
-    .sheet(item: $model.destination.userPermissions) { model in
-      UserPermissionsSheet(model: model)
-    }
-    .sheet(item: $model.destination.arObjectPicker) { model in
-      ARObjectPickerSheet(model: model)
-    }
-  }
-}
-
-extension MainView {
-  @MainActor var camera: some View {
-    ARViewContainer(model: self.model)
-      .edgesIgnoringSafeArea(.all)
-  }
-}
-
 struct ARViewContainer: UIViewRepresentable {
   @Bindable var model: MainModel
   
@@ -311,6 +275,35 @@ struct ARViewContainer: UIViewRepresentable {
     else { return }
     anchorEntity.addChild(modelEntity)
     uiView.scene.addAnchor(anchorEntity)
+  }
+}
+
+// MARK: - SwiftUI
+
+struct MainView: View {
+  @Bindable public var model: MainModel
+  @State var arsheet = false
+  
+  var body: some View {
+    NavigationStack {
+      Group {
+        if self.model.hasUserPermissions {
+          ARViewContainer(model: self.model)
+            .edgesIgnoringSafeArea(.all)
+        } else {
+          self.permissionsRequired
+        }
+      }
+    }
+    .navigationBarBackButtonHidden()
+    .overlay(content: self.overlay)
+    .task { await self.model.task() }
+    .sheet(item: $model.destination.userPermissions) { model in
+      UserPermissionsSheet(model: model)
+    }
+    .sheet(item: $model.destination.arObjectPicker) { model in
+      ARObjectPickerSheet(model: model)
+    }
   }
 }
 
