@@ -13,13 +13,13 @@ import Sharing
  - [x] UserPermissions
  - [x] Bind && Unimplemented
  - [x] Destination
+ - [x] Swift Dependencies
  - [ ] SPM
  - [ ] SwiftUI Preview Compiler Directive
  - [ ] ARKit integration
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Build version
  - [ ] Finished recording toast / progress
- - [ ] Swift Dependencies
  - [ ] DesignSystem
  - [ ] Logs
  - [ ] Git Flow release version
