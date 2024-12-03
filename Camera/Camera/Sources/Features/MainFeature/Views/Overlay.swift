@@ -8,15 +8,23 @@ extension MainView {
       self.debug
       self.bottom
     }
-    .padding(32)
+    .frame(maxWidth: .infinity)
+    .padding()
   }
 }
 
 fileprivate extension MainView {
   
   private var top: some View {
-    Button("Settings") {
-      self.model.settingsButtonTapped()
+    HStack {
+      Text("AR Camera")
+        .fontWeight(.bold)
+      
+      Spacer()
+      
+      Button(action: self.model.settingsButtonTapped) {
+        Image(systemName: "gear")
+      }
     }
   }
 

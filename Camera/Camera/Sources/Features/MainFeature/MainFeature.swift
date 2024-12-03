@@ -18,7 +18,7 @@ final class MainModel {
   let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   var recordingDelegate = MovieCaptureDelegate()
   var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
-  var destination: Destination?
+  var destination: Destination? { didSet { self.bind() } }
   var userPermissions: any UserPermissionsServiceProtocol
   
   @CasePathable
@@ -93,14 +93,20 @@ struct MainView: View {
   
   var body: some View {
     NavigationStack {
-      if self.model.hasUserPermissions {
-        self.camera
-      } else {
-        self.notEnoughPermissions
+      Group {
+        if self.model.hasUserPermissions {
+          self.camera
+        } else {
+          self.notEnoughPermissions
+        }
+      }
+      .toolbar {
+        Button(action: self.model.settingsButtonTapped) {
+          Image(systemName: "gear")
+        }
       }
     }
     .navigationBarBackButtonHidden()
-    .tabViewStyle(.page(indexDisplayMode: .never))
     .overlay(content: self.overlay)
     .task { await self.model.task() }
     .sheet(item: $model.destination.userPermissions) { model in

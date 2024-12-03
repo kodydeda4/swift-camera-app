@@ -161,20 +161,6 @@ struct UserPermissionsView: View {
   }
 }
 
-struct UserPermissionsSheet: View {
-  @Bindable var model: UserPermissionsModel
-  
-  var body: some View {
-    NavigationStack {
-      UserPermissionsView(model: self.model).toolbar {
-        Button("Cancel") {
-          self.model.cancelButtonTapped()
-        }
-      }
-    }
-  }
-}
-
 // MARK: - SwiftUI Previews
 
 #Preview {
