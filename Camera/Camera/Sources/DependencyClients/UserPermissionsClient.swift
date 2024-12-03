@@ -89,6 +89,13 @@ extension UserPermissionsClient: DependencyKey {
   }
 }
 
+extension UserPermissionsClient {
+  static var previewValue = UserPermissionsClient(
+    status: { _ in .undetermined },
+    request: { _ in true }
+  )
+}
+
 extension DependencyValues {
   var userPermissions: UserPermissionsClient {
     get { self[UserPermissionsClient.self] }

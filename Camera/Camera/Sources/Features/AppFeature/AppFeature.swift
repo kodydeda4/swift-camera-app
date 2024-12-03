@@ -22,10 +22,10 @@ import Sharing
  - [ ] Finished recording toast / progress
  - [ ] DesignSystem
  - [ ] Logs
- - [ ] Git Flow release version
  - [ ] Swift Format
  - [ ] Unit Tests
  - [ ] swift 6
+ - [ ] Git Flow release version
 
  Modern SwiftUI - PointFree
  https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
