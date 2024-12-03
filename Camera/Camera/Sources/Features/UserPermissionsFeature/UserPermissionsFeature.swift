@@ -1,7 +1,7 @@
 import SwiftUI
 import AVFoundation
 import Photos
-import XCTestDynamicOverlay
+//import IssueReporting
 
 @Observable
 @MainActor
@@ -12,8 +12,8 @@ final class UserPermissionsModel: Identifiable {
   var photos: Bool { userPermissions.photos }
   var application: any ApplicationServiceProtocol
   var userPermissions: any UserPermissionsServiceProtocol
-  var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
-  var onContinueButtonTapped: () -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
+  var dismiss: () -> Void = {}//unimplemented("UserPermissionsModel.dismiss")
+  var onContinueButtonTapped: () -> Void = {}//unimplemented("UserPermissionsModel.onContinueButtonTapped")
 
   init(
     application: any ApplicationServiceProtocol = ApplicationService(),

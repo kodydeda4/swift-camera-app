@@ -6,12 +6,12 @@ import AVFoundation
 import AsyncAlgorithms
 import AVFoundation
 import Photos
-import XCTestDynamicOverlay
+//import IssueReporting
 
 @Observable
 @MainActor
 final class ARObjectPickerModel: Identifiable {
-  var dismiss: () -> Void = unimplemented("ARObjectPickerModel.dismiss")
+  var dismiss: () -> Void = {}//unimplemented("ARObjectPickerModel.dismiss")
 
   func cancelButtonTapped() {
     self.dismiss()

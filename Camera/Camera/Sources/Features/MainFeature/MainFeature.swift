@@ -1,9 +1,9 @@
 import AsyncAlgorithms
 import AVFoundation
-import ComposableArchitecture
 import PhotosUI
 import SwiftUI
 import Photos
+import SwiftUINavigation
 
 @MainActor
 @Observable

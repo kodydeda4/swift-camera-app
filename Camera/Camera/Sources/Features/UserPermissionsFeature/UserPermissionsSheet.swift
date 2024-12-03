@@ -1,7 +1,7 @@
 import SwiftUI
 import AVFoundation
 import Photos
-import XCTestDynamicOverlay
+//import IssueReporting
 
 struct UserPermissionsSheet: View {
   @Bindable var model: UserPermissionsModel

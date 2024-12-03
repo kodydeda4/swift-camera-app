@@ -1,14 +1,14 @@
 import SwiftUI
 import SwiftUINavigation
-import ComposableArchitecture
 import AVFoundation
 import Photos
+//import IssueReporting
 
 @Observable
 @MainActor
 final class OnboardingModel {
   var destination: Destination? { didSet { self.bind() } }
-  var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
+  var onCompletion: () -> Void = {}//unimplemented("OnboardingModel.onCompletion")
 
   @CasePathable
   enum Destination {

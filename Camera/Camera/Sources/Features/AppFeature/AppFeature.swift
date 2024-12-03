@@ -1,8 +1,8 @@
 import SwiftUI
 import SwiftUINavigation
-import ComposableArchitecture
 import AVFoundation
 import Photos
+import Sharing
 
 /* --------------------------------------------------------------------------------------------
  
@@ -23,7 +23,10 @@ import Photos
  - [ ] DesignSystem
  - [ ] Logs
  - [ ] Git Flow release version
- 
+ - [ ] Swift Format
+ - [ ] Unit Tests
+ - [ ] swift 6
+
  Modern SwiftUI - PointFree
  https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
  
@@ -35,8 +38,7 @@ final class AppModel {
   var destination: Destination? { didSet { self.bind() } }
 
   @ObservationIgnored
-  @AppStorage(AppStorageKey.isOnboardingComplete.rawValue)
-  var isOnboardingComplete = false
+  @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   
   @CasePathable
   enum Destination {
@@ -58,7 +60,7 @@ final class AppModel {
       
     case let .onboarding(model):
       model.onCompletion = { [weak self] in
-        self?.isOnboardingComplete = true
+        self?.$isOnboardingComplete.withLock { $0 = true }
         self?.destination = .main(MainModel())
       }
       

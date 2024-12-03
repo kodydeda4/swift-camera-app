@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4382CFCF617009CDDFA /* SwiftNavigation */; };
-		3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C43A2CFCF617009CDDFA /* SwiftUINavigation */; };
-		3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */; };
-		33E19B9C2CFDFB2800C28458 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */; };
+		335D02812CFF7EC1009FBDAD /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02802CFF7EC1009FBDAD /* AsyncAlgorithms */; };
+		335D02842CFF7ED4009FBDAD /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02832CFF7ED4009FBDAD /* SwiftUINavigation */; };
+		335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02862CFF7F24009FBDAD /* Dependencies */; };
+		335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02882CFF7F24009FBDAD /* DependenciesMacros */; };
+		335D028C2CFF7F5C009FBDAD /* Sharing in Frameworks */ = {isa = PBXBuildFile; productRef = 335D028B2CFF7F5C009FBDAD /* Sharing */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,10 +47,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3345C43B2CFCF617009CDDFA /* SwiftUINavigation in Frameworks */,
-				3345C4392CFCF617009CDDFA /* SwiftNavigation in Frameworks */,
-				33E19B9C2CFDFB2800C28458 /* ComposableArchitecture in Frameworks */,
-				3345C4472CFCF8A0009CDDFA /* AsyncAlgorithms in Frameworks */,
+				335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */,
+				335D02842CFF7ED4009FBDAD /* SwiftUINavigation in Frameworks */,
+				335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */,
+				335D028C2CFF7F5C009FBDAD /* Sharing in Frameworks */,
+				335D02812CFF7EC1009FBDAD /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,10 +103,11 @@
 			);
 			name = Camera;
 			packageProductDependencies = (
-				3345C4382CFCF617009CDDFA /* SwiftNavigation */,
-				3345C43A2CFCF617009CDDFA /* SwiftUINavigation */,
-				3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */,
-				33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */,
+				335D02802CFF7EC1009FBDAD /* AsyncAlgorithms */,
+				335D02832CFF7ED4009FBDAD /* SwiftUINavigation */,
+				335D02862CFF7F24009FBDAD /* Dependencies */,
+				335D02882CFF7F24009FBDAD /* DependenciesMacros */,
+				335D028B2CFF7F5C009FBDAD /* Sharing */,
 			);
 			productName = Camera;
 			productReference = 33B64EC62CFCC15000D97812 /* Camera.app */;
@@ -162,9 +165,10 @@
 			mainGroup = 33B64EBD2CFCC15000D97812;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */,
-				3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
-				33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				335D027F2CFF7EC1009FBDAD /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				335D02822CFF7ED4009FBDAD /* XCRemoteSwiftPackageReference "swift-navigation" */,
+				335D02852CFF7F24009FBDAD /* XCRemoteSwiftPackageReference "swift-dependencies" */,
+				335D028A2CFF7F5C009FBDAD /* XCRemoteSwiftPackageReference "swift-sharing" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 33B64EC72CFCC15000D97812 /* Products */;
@@ -474,15 +478,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-navigation";
-			requirement = {
-				kind = exactVersion;
-				version = 2.2.2;
-			};
-		};
-		3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+		335D027F2CFF7EC1009FBDAD /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
 			requirement = {
@@ -490,36 +486,57 @@
 				version = 1.0.2;
 			};
 		};
-		33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+		335D02822CFF7ED4009FBDAD /* XCRemoteSwiftPackageReference "swift-navigation" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			repositoryURL = "https://github.com/pointfreeco/swift-navigation";
 			requirement = {
 				kind = exactVersion;
-				version = 1.16.1;
+				version = 2.2.2;
+			};
+		};
+		335D02852CFF7F24009FBDAD /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies";
+			requirement = {
+				kind = exactVersion;
+				version = 1.6.2;
+			};
+		};
+		335D028A2CFF7F5C009FBDAD /* XCRemoteSwiftPackageReference "swift-sharing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-sharing";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3345C4382CFCF617009CDDFA /* SwiftNavigation */ = {
+		335D02802CFF7EC1009FBDAD /* AsyncAlgorithms */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */;
-			productName = SwiftNavigation;
-		};
-		3345C43A2CFCF617009CDDFA /* SwiftUINavigation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3345C4372CFCF617009CDDFA /* XCRemoteSwiftPackageReference "swift-navigation" */;
-			productName = SwiftUINavigation;
-		};
-		3345C4462CFCF8A0009CDDFA /* AsyncAlgorithms */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3345C4452CFCF8A0009CDDFA /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			package = 335D027F2CFF7EC1009FBDAD /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
 		};
-		33E19B9B2CFDFB2800C28458 /* ComposableArchitecture */ = {
+		335D02832CFF7ED4009FBDAD /* SwiftUINavigation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 33E19B9A2CFDFB2800C28458 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
-			productName = ComposableArchitecture;
+			package = 335D02822CFF7ED4009FBDAD /* XCRemoteSwiftPackageReference "swift-navigation" */;
+			productName = SwiftUINavigation;
+		};
+		335D02862CFF7F24009FBDAD /* Dependencies */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 335D02852CFF7F24009FBDAD /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = Dependencies;
+		};
+		335D02882CFF7F24009FBDAD /* DependenciesMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 335D02852CFF7F24009FBDAD /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = DependenciesMacros;
+		};
+		335D028B2CFF7F5C009FBDAD /* Sharing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 335D028A2CFF7F5C009FBDAD /* XCRemoteSwiftPackageReference "swift-sharing" */;
+			productName = Sharing;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
