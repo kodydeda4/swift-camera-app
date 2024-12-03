@@ -1,53 +1,205 @@
 import SwiftUI
 import UIKit
 import AVFoundation
+import RealityKit
+import ARKit
+import Photos
 
 extension MainView {
   @MainActor var camera: some View {
-    ARSheetView()
-    //      if preview {
-    //        self.debug
-    //      } else {
-    //        self.release
-    //      }
-  }
-  
-  @MainActor private var debug: some View {
-    Image(.cameraPreview)
-      .resizable()
-      .scaledToFill()
-  }
-  
-  @MainActor private var release: some View {
-    AVCaptureVideoPreviewLayerView(
-      avVideoPreviewLayer: self.model.avVideoPreviewLayer
-    )
+    ContentView()
   }
 }
 
-fileprivate struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
-  let avVideoPreviewLayer: AVCaptureVideoPreviewLayer
-  typealias UIViewControllerType = UIViewController
+// @DEDA 👨🏼‍🍳🤖🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤🤤
+
+struct ContentView: View {
+  @State private var isRecording = false
+  @State private var recorder: ARVideoRecorder?
   
-  func makeUIViewController(context: Context) -> UIViewController {
-    let viewController = UIViewController()
-    viewController.view.backgroundColor = .black
-    viewController.view.layer.addSublayer(avVideoPreviewLayer)
-    avVideoPreviewLayer.frame = CGRect(
-      x: 0,
-      y: 0,
-      width: UIScreen.main.bounds.size.width,
-      height: UIScreen.main.bounds.size.height
-    )
-    avVideoPreviewLayer.videoGravity = .resizeAspectFill
-    return viewController
+  var body: some View {
+    ZStack {
+      ARViewContainer(isRecording: $isRecording, recorder: $recorder)
+        .edgesIgnoringSafeArea(.all)
+      
+      VStack {
+        Spacer()
+        Button(action: {
+          if isRecording {
+            recorder?.stopRecording { url in
+              saveVideoToPhotos(url: url)
+            }
+          } else {
+            recorder?.startRecording()
+          }
+          isRecording.toggle()
+        }) {
+          Text(isRecording ? "Stop Recording" : "Start Recording")
+            .padding()
+            .background(Color.red)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+        .padding()
+      }
+    }
   }
-  
-  func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-// MARK: - SwiftUI Previews
+struct ARViewContainer: UIViewRepresentable {
+  @Binding var isRecording: Bool
+  @Binding var recorder: ARVideoRecorder?
+  
+  func makeUIView(context: Context) -> ARView {
+    let arView = ARView(frame: .zero)
+    recorder = ARVideoRecorder(arView: arView)
+    let config = ARWorldTrackingConfiguration()
+    config.planeDetection = [.horizontal, .vertical]
+    config.environmentTexturing = .automatic
+    arView.session.run(config)
+    return arView
+  }
+  
+  func updateUIView(_ uiView: ARView, context: Context) {
+    // Load the coffee model and anchor it in the real world.
+    let anchorEntity = AnchorEntity(plane: .any)
+    
+    guard let modelEntity = try? Entity.loadModel(named: "coffee")
+    else { return }
+    
+    anchorEntity.addChild(modelEntity)
+    
+    uiView.scene.addAnchor(anchorEntity)
+  }
+}
 
-#Preview {
-  MainView(model: MainModel())
+class ARVideoRecorder {
+  private let arView: ARView
+  private var assetWriter: AVAssetWriter?
+  private var assetWriterInput: AVAssetWriterInput?
+  private var pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
+  private var displayLink: CADisplayLink?
+  private var recordingStartTime: CFTimeInterval?
+  
+  init(arView: ARView) {
+    self.arView = arView
+  }
+  
+  func startRecording() {
+    let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mp4")
+    setupAssetWriter(outputURL: outputURL)
+    
+    recordingStartTime = CACurrentMediaTime()
+    displayLink = CADisplayLink(target: self, selector: #selector(recordFrame))
+    displayLink?.add(to: .main, forMode: .default)
+  }
+  
+  func stopRecording(completion: @escaping (URL) -> Void) {
+    displayLink?.invalidate()
+    assetWriterInput?.markAsFinished()
+    assetWriter?.finishWriting {
+      if let url = self.assetWriter?.outputURL {
+        DispatchQueue.main.async {
+          completion(url)
+        }
+      }
+    }
+  }
+  
+  @objc private func recordFrame() {
+    guard
+      let assetWriter = assetWriter,
+      let assetWriterInput = assetWriterInput,
+      assetWriter.status == .writing,
+      let pixelBufferAdaptor = pixelBufferAdaptor,
+      assetWriterInput.isReadyForMoreMediaData
+    else { return }
+    
+    let currentTime = CACurrentMediaTime()
+    let elapsedTime = currentTime - (recordingStartTime ?? currentTime)
+    
+    //    let pixelBuffer = arView.snapshot().cgImage?.toPixelBuffer()
+    arView.snapshot(saveToHDR: false) { image in
+      let pixelBuffer = image?.cgImage?.toPixelBuffer()
+      
+      if let pixelBuffer  {
+        pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600))
+      }
+    }
+  }
+  
+  private func setupAssetWriter(outputURL: URL) {
+    assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
+    
+    // @DEDA you can probaly grab ur device res here.
+    let settings = [
+      AVVideoCodecKey: AVVideoCodecType.h264,
+      AVVideoWidthKey: NSNumber(value: 1920),
+      AVVideoHeightKey: NSNumber(value: 1080)
+    ] as [String: Any]
+    
+    assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
+    pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
+      assetWriterInput: assetWriterInput!,
+      sourcePixelBufferAttributes: nil
+    )
+    
+    if let assetWriter = assetWriter, let assetWriterInput = assetWriterInput {
+      assetWriter.add(assetWriterInput)
+      assetWriter.startWriting()
+      assetWriter.startSession(atSourceTime: .zero)
+    }
+  }
+}
+
+extension CGImage {
+  func toPixelBuffer() -> CVPixelBuffer? {
+    let width = self.width
+    let height = self.height
+    var pixelBuffer: CVPixelBuffer?
+    
+    let attrs = [
+      kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue!,
+      kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue!
+    ] as CFDictionary
+    
+    CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32ARGB, attrs, &pixelBuffer)
+    guard let buffer = pixelBuffer else { return nil }
+    
+    CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
+    let pixelData = CVPixelBufferGetBaseAddress(buffer)
+    
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    
+    let context = CGContext(
+      data: pixelData,
+      width: width,
+      height: height,
+      bitsPerComponent: 8,
+      bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+      space: colorSpace,
+      bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+    )
+    
+    context?.draw(self, in: CGRect(x: 0, y: 0, width: width, height: height))
+    CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
+    
+    return buffer
+  }
+}
+
+func saveVideoToPhotos(url: URL) {
+  PHPhotoLibrary.requestAuthorization { status in
+    if status == .authorized {
+      PHPhotoLibrary.shared().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+      }) { success, error in
+        if success {
+          print("Video saved to Photos!")
+        } else {
+          print("Failed to save video: \(error?.localizedDescription ?? "Unknown error")")
+        }
+      }
+    }
+  }
 }
