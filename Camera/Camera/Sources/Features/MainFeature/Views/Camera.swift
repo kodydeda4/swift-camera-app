@@ -11,19 +11,18 @@ extension MainView {
     //        self.release
     //      }
   }
-}
-
-@MainActor private var debug: some View {
-  Image(.cameraPreview)
-    .resizable()
-    .scaledToFill()
-}
-
-@MainActor private var release: some View {
-  AVCaptureVideoPreviewLayerView(
-    avVideoPreviewLayer: self.model.avVideoPreviewLayer
-  )
-}
+  
+  @MainActor private var debug: some View {
+    Image(.cameraPreview)
+      .resizable()
+      .scaledToFill()
+  }
+  
+  @MainActor private var release: some View {
+    AVCaptureVideoPreviewLayerView(
+      avVideoPreviewLayer: self.model.avVideoPreviewLayer
+    )
+  }
 }
 
 fileprivate struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
