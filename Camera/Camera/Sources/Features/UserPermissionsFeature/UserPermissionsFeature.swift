@@ -20,9 +20,14 @@ final class UserPermissionsModel: Identifiable {
   
   @ObservationIgnored
   @Dependency(\.application) var application
-
+  
   var isContinueButtonDisabled: Bool {
-    !(userPermissionsValues.camera && userPermissionsValues.microphone && userPermissionsValues.photos)
+    let hasFullPermissions =
+    self.userPermissionsValues[.camera] == .authorized &&
+    self.userPermissionsValues[.microphone] == .authorized &&
+    self.userPermissionsValues[.photos] == .authorized
+    
+    return !hasFullPermissions
   }
   
   func cancelButtonTapped() {
@@ -33,48 +38,24 @@ final class UserPermissionsModel: Identifiable {
     self.onContinueButtonTapped()
   }
   
-  func cameraPermissionsButtonTapped() {
-    guard !userPermissionsValues.camera else {
-      return
-    }
-    guard self.userPermissions.status(.camera) == .undetermined else {
+  func request(_ feature: UserPermissionsClient.Feature) {
+    switch userPermissionsValues[feature] {
+      
+    case .authorized:
+      break
+      
+    case .denied:
       try? self.application.openSettings()
-      return
-    }
-    Task {
-      let newValue = await self.userPermissions.request(.camera)
-      self.$userPermissionsValues.camera.withLock { $0 = newValue }
+      
+    case .undetermined, .none:
+      Task {
+        let newValue = await self.userPermissions.request(feature)
+        self.$userPermissionsValues.withLock {
+          $0[feature] = newValue ? .authorized : .denied
+        }
+      }
     }
   }
-  
-  func microphonePermissionsButtonTapped() {
-    guard !userPermissionsValues.microphone else {
-      return
-    }
-    guard self.userPermissions.status(.microphone) == .undetermined else {
-      try? self.application.openSettings()
-      return
-    }
-    Task {
-      let newValue = await self.userPermissions.request(.microphone)
-      self.$userPermissionsValues.microphone.withLock { $0 = newValue }
-    }
-  }
-  
-  func photoLibraryPermissionsButtonTapped() {
-    guard !userPermissionsValues.photos else {
-      return
-    }
-    guard self.userPermissions.status(.photos) == .undetermined else {
-      try? self.application.openSettings()
-      return
-    }
-    Task {
-      let newValue = await self.userPermissions.request(.photos)
-      self.$userPermissionsValues.photos.withLock { $0 = newValue }
-    }
-  }
-
 }
 
 // MARK: - SwiftUI
@@ -110,28 +91,28 @@ struct UserPermissionsView: View {
   
   private var permissionsContent: some View {
     VStack {
-      Button(action: self.model.cameraPermissionsButtonTapped) {
+      Button(action: { self.model.request(.camera) }) {
         self.permissionsView(
           title: "Camera",
           subtitle: "Record AR Videos",
           systemImage: "camera.fill",
-          style: self.model.userPermissionsValues.camera ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.camera] == .authorized ? .green : Color(.systemGray6)
         )
       }
-      Button(action: self.model.microphonePermissionsButtonTapped) {
+      Button(action: { self.model.request(.microphone) }) {
         self.permissionsView(
           title: "Microphone",
           subtitle: "Add sound to your AR videos",
           systemImage: "microphone.fill",
-          style: self.model.userPermissionsValues.microphone ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.microphone] == .authorized ? .green : Color(.systemGray6)
         )
       }
-      Button(action: self.model.photoLibraryPermissionsButtonTapped) {
+      Button(action: { self.model.request(.photos) }) {
         self.permissionsView(
           title: "Photo Library",
           subtitle: "Save your AR videos",
           systemImage: "photo.stack",
-          style: self.model.userPermissionsValues.photos ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.photos] == .authorized ? .green : Color(.systemGray6)
         )
       }
     }

@@ -1,15 +1,18 @@
 import Sharing
 import Foundation
 
-struct UserPermissionsState: Codable {
-  var camera = false
-  var microphone = false
-  var photos = false
-}
+typealias UserPermissionsState = Dictionary<
+  UserPermissionsClient.Feature,
+  UserPermissionsClient.Status
+>
 
 extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Default {
   static var userPermissions: Self {
-    Self[.fileStorage(.shared("userPermissions")), default: UserPermissionsState()]
+    Self[.fileStorage(.shared("userPermissions")), default: [
+      .camera: .undetermined,
+      .microphone: .undetermined,
+      .photos: .undetermined
+    ]]
   }
 }
 

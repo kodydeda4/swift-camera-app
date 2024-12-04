@@ -7,19 +7,18 @@ import DependenciesMacros
 
 @DependencyClient
 struct UserPermissionsClient: Sendable {
-  var status: @Sendable (PrivacyFeature) -> Status
+  var status: @Sendable (Feature) -> Status
   = { _ in reportIssue("\(Self.self).status"); return .undetermined }
   
-  var request: @Sendable (PrivacyFeature) async -> Bool
+  var request: @Sendable (Feature) async -> Bool
   = { _ in reportIssue("\(Self.self).request"); return false }
   
-  enum PrivacyFeature {
+  enum Feature: Codable, CaseIterable {
     case camera
     case microphone
     case photos
   }
-  
-  enum Status {
+  enum Status: Codable {
     case undetermined
     case authorized
     case denied

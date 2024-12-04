@@ -29,8 +29,10 @@ final class MainModel {
     case userPermissions(UserPermissionsModel)
   }
   
-  var hasUserPermissions: Bool {
-    (userPermissionsValues.camera && userPermissionsValues.microphone && userPermissionsValues.photos)
+  var hasFullPermissions: Bool {
+    self.userPermissionsValues[.camera] == .authorized &&
+    self.userPermissionsValues[.microphone] == .authorized &&
+    self.userPermissionsValues[.photos] == .authorized
   }
   
   var isDeleteButtonDisabled: Bool {
@@ -62,9 +64,9 @@ final class MainModel {
     Task.detached {
       await withTaskGroup(of: Void.self) { taskGroup in
         taskGroup.addTask {
-          //          for await event in await self.recordingDelegate.events {
-          //            await self.handleRecordingDelegateEvent(event)
-          //          }
+//          for await event in await self.recordingDelegate.events {
+//            await self.handleRecordingDelegateEvent(event)
+//          }
         }
       }
     }
@@ -109,7 +111,7 @@ struct MainView: View {
   var body: some View {
     NavigationStack {
       Group {
-        if self.model.hasUserPermissions {
+        if self.model.hasFullPermissions {
           ARViewContainer(model: self.model)
             .edgesIgnoringSafeArea(.all)
         } else {

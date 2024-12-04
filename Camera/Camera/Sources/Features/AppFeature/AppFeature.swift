@@ -3,6 +3,7 @@ import SwiftUINavigation
 import AVFoundation
 import Photos
 import Sharing
+import Dependencies
 
 /* --------------------------------------------------------------------------------------------
  
@@ -40,6 +41,12 @@ final class AppModel {
   @ObservationIgnored
   @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   
+  @ObservationIgnored
+  @Shared(.userPermissions) var userPermissionsValues
+  
+  @ObservationIgnored
+  @Dependency(\.userPermissions) var userPermissions
+
   @CasePathable
   enum Destination {
     case main(MainModel)
@@ -50,6 +57,18 @@ final class AppModel {
     self.destination = self.isOnboardingComplete
     ? .main(MainModel())
     : .onboarding(OnboardingModel())
+  }
+  
+  func task() async {
+    await self.refreshUserPermissions()
+  }
+  
+  private func refreshUserPermissions() async {
+    UserPermissionsClient.Feature.allCases.forEach { feature in
+      self.$userPermissionsValues.withLock {
+        $0[feature] = self.userPermissions.status(feature)
+      }
+    }
   }
 
   private func bind() {
@@ -89,6 +108,7 @@ struct AppView: View {
         ProgressView()
       }
     }
+    .task { await self.model.task() }
   }
 }
 
