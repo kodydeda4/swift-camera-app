@@ -7,8 +7,11 @@ import DependenciesMacros
 
 @DependencyClient
 struct UserPermissionsClient: Sendable {
-  var status: @Sendable (Feature) -> Status = { _ in .undetermined }
-  var request: @Sendable (Feature) async -> Bool = { _ in false }
+  var status: @Sendable (Feature) -> Status
+  = { _ in reportIssue("\(Self.self).status"); return .undetermined }
+  
+  var request: @Sendable (Feature) async -> Bool
+  = { _ in reportIssue("\(Self.self).request"); return false }
   
   enum Feature: Codable, CaseIterable {
     case camera
