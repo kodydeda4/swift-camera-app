@@ -60,10 +60,10 @@ final class AppModel {
   }
   
   func task() async {
-    await self.refreshUserPermissions()
+    await self.syncUserPermissions()
   }
   
-  private func refreshUserPermissions() async {
+  private func syncUserPermissions() async {
     UserPermissionsClient.Feature.allCases.forEach { feature in
       self.$userPermissionsValues.withLock {
         $0[feature] = self.userPermissions.status(feature)
