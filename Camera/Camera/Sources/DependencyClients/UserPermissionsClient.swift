@@ -26,66 +26,64 @@ struct UserPermissionsClient: Sendable {
 }
 
 extension UserPermissionsClient: DependencyKey {
-  static var liveValue: UserPermissionsClient {
-    return Self(
-      status: { privacyFeature in
-        switch privacyFeature {
+  static var liveValue = Self(
+    status: { 
+      switch $0 {
+        
+      case .camera:
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
           
-        case .camera:
-          switch AVCaptureDevice.authorizationStatus(for: .video) {
-            
-          case .notDetermined:
-            return .undetermined
-            
-          case .authorized:
-            return .authorized
-            
-          default:
-            return .denied
-          }
+        case .notDetermined:
+          return .undetermined
           
-        case .microphone:
-          switch AVAudioApplication.shared.recordPermission {
-            
-          case .undetermined:
-            return .undetermined
-            
-          case .granted:
-            return .authorized
-            
-          default:
-            return .denied
-          }
+        case .authorized:
+          return .authorized
           
-        case .photos:
-          switch PHPhotoLibrary.authorizationStatus(for: .addOnly) {
-            
-          case .notDetermined:
-            return .undetermined
-            
-          case .authorized:
-            return .authorized
-            
-          default:
-            return .denied
-          }
+        default:
+          return .denied
         }
-      },
-      request: { privacyFeature in
-        switch privacyFeature {
+        
+      case .microphone:
+        switch AVAudioApplication.shared.recordPermission {
           
-        case .camera:
-          await AVCaptureDevice.requestAccess(for: .video)
+        case .undetermined:
+          return .undetermined
           
-        case .microphone:
-          await AVAudioApplication.requestRecordPermission()
+        case .granted:
+          return .authorized
           
-        case .photos:
-          await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+        default:
+          return .denied
+        }
+        
+      case .photos:
+        switch PHPhotoLibrary.authorizationStatus(for: .addOnly) {
+          
+        case .notDetermined:
+          return .undetermined
+          
+        case .authorized:
+          return .authorized
+          
+        default:
+          return .denied
         }
       }
-    )
-  }
+    },
+    request: {
+      switch $0 {
+        
+      case .camera:
+        await AVCaptureDevice.requestAccess(for: .video)
+        
+      case .microphone:
+        await AVAudioApplication.requestRecordPermission()
+        
+      case .photos:
+        await PHPhotoLibrary.requestAuthorization(for: .addOnly) == .authorized
+      }
+    }
+  )
 }
 
 extension UserPermissionsClient {
