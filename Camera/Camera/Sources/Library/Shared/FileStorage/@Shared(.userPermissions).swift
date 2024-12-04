@@ -8,11 +8,7 @@ typealias UserPermissionsState = Dictionary<
 
 extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Default {
   static var userPermissions: Self {
-    Self[.fileStorage(.shared("userPermissions")), default: [
-      .camera: .undetermined,
-      .microphone: .undetermined,
-      .photos: .undetermined
-    ]]
+    Self[.fileStorage(.shared("userPermissions")), default: [:]]
   }
 }
 
