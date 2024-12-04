@@ -8,11 +8,11 @@ extension MainView {
         .scaledToFit()
         .frame(width: 60, height: 60)
         .foregroundColor(.secondary)
-      
+
       Text("Permissions Required")
         .font(.title2)
         .fontWeight(.bold)
-      
+
       Text("AR Camera requires device permissions to work properly.")
         .fontWeight(.semibold)
         .foregroundColor(Color(.systemGray))

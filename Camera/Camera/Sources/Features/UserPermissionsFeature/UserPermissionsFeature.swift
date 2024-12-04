@@ -1,16 +1,17 @@
-import SwiftUI
 import AVFoundation
-import Photos
-import Sharing
 import Dependencies
 import IssueReporting
+import Photos
+import Sharing
+import SwiftUI
 
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
   var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
-  var onContinueButtonTapped: () -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
+  var onContinueButtonTapped: ()
+    -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
   @ObservationIgnored
   @Shared(.userPermissions) var userPermissionsValues
@@ -23,9 +24,9 @@ final class UserPermissionsModel: Identifiable {
   
   var isContinueButtonDisabled: Bool {
     let hasFullPermissions =
-    self.userPermissionsValues[.camera] == .authorized &&
-    self.userPermissionsValues[.microphone] == .authorized &&
-    self.userPermissionsValues[.photos] == .authorized
+      self.userPermissionsValues[.camera] == .authorized &&
+      self.userPermissionsValues[.microphone] == .authorized &&
+      self.userPermissionsValues[.photos] == .authorized
     
     return !hasFullPermissions
   }
@@ -47,7 +48,8 @@ final class UserPermissionsModel: Identifiable {
     case .denied:
       try? self.application.openSettings()
       
-    case .undetermined, .none:
+    case .none,
+         .undetermined:
       Task {
         let newValue = await self.userPermissions.request(feature)
         self.$userPermissionsValues.withLock {
@@ -96,7 +98,9 @@ struct UserPermissionsView: View {
           title: "Camera",
           subtitle: "Record AR Videos",
           systemImage: "camera.fill",
-          style: self.model.userPermissionsValues[.camera] == .authorized ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.camera] == .authorized
+            ? .green
+            : Color(.systemGray6)
         )
       }
       Button(action: { self.model.request(.microphone) }) {
@@ -104,7 +108,9 @@ struct UserPermissionsView: View {
           title: "Microphone",
           subtitle: "Add sound to your AR videos",
           systemImage: "microphone.fill",
-          style: self.model.userPermissionsValues[.microphone] == .authorized ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.microphone] == .authorized
+            ? .green
+            : Color(.systemGray6)
         )
       }
       Button(action: { self.model.request(.photos) }) {
@@ -112,7 +118,9 @@ struct UserPermissionsView: View {
           title: "Photo Library",
           subtitle: "Save your AR videos",
           systemImage: "photo.stack",
-          style: self.model.userPermissionsValues[.photos] == .authorized ? .green : Color(.systemGray6)
+          style: self.model.userPermissionsValues[.photos] == .authorized
+            ? .green
+            : Color(.systemGray6)
         )
       }
     }

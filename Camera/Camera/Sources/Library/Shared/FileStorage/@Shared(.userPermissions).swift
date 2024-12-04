@@ -1,5 +1,5 @@
-import Sharing
 import Foundation
+import Sharing
 
 extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Default {
   static var userPermissions: Self {

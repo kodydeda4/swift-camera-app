@@ -1,6 +1,6 @@
-import SwiftUI
 import Dependencies
 import DependenciesMacros
+import SwiftUI
 
 @DependencyClient
 struct ApplicationClient: Sendable {

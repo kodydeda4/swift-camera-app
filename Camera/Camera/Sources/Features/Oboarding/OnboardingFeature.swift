@@ -1,8 +1,8 @@
+import AVFoundation
+import IssueReporting
+import Photos
 import SwiftUI
 import SwiftUINavigation
-import AVFoundation
-import Photos
-import IssueReporting
 
 @Observable
 @MainActor
@@ -14,21 +14,21 @@ final class OnboardingModel {
   enum Destination {
     case userPermissions(UserPermissionsModel)
   }
-  
+
   func continueButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
   }
 
   private func bind() {
     switch destination {
-      
+
     case let .userPermissions(model):
       model.onContinueButtonTapped = { [weak self] in
         self?.onCompletion()
       }
-      
+
     case .none:
-     break
+      break
     }
   }
 }
@@ -37,13 +37,13 @@ final class OnboardingModel {
 
 struct OnboardingView: View {
   @Bindable var model: OnboardingModel
-  
+
   var body: some View {
     NavigationStack {
       VStack {
         VStack {
           Spacer()
-          
+
           Image(systemName: "camera.fill")
             .resizable()
             .scaledToFit()
@@ -52,15 +52,15 @@ struct OnboardingView: View {
             .padding()
             .background(Color.orange.opacity(0.6))
             .clipShape(Circle())
-          
+
           Text("AR Camera")
             .font(.title)
             .bold()
-          
+
           Text("Record Videos with AR Objects.")
             .foregroundColor(.secondary)
             .padding(.bottom)
-          
+
           Button("Continue") {
             self.model.continueButtonTapped()
           }

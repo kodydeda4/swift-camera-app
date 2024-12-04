@@ -1,37 +1,37 @@
-import SwiftUI
-import SwiftUINavigation
 import AVFoundation
+import Dependencies
 import Photos
 import Sharing
-import Dependencies
+import SwiftUI
+import SwiftUINavigation
 
 /* --------------------------------------------------------------------------------------------
  
- @DEDA
+  @DEDA
  
- - [x] Camera
- - [x] Video Recording
- - [x] UserPermissions
- - [x] Bind && Unimplemented
- - [x] Destination
- - [x] Swift Dependencies
- - [ ] SPM
- - [ ] SwiftUI Preview Compiler Directive
- - [ ] ARKit integration
- - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
- - [ ] Build version
- - [ ] Finished recording toast / progress
- - [ ] DesignSystem
- - [ ] Logs
- - [ ] Swift Format
- - [ ] Unit Tests
- - [ ] swift 6
- - [ ] Git Flow release version
+  - [x] Camera
+  - [x] Video Recording
+  - [x] UserPermissions
+  - [x] Bind && Unimplemented
+  - [x] Destination
+  - [x] Swift Dependencies
+  - [ ] SPM
+  - [ ] SwiftUI Preview Compiler Directive
+  - [ ] ARKit integration
+  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
+  - [ ] Build version
+  - [ ] Finished recording toast / progress
+  - [ ] DesignSystem
+  - [ ] Logs
+  - [ ] Swift Format
+  - [ ] Unit Tests
+  - [ ] swift 6
+  - [ ] Git Flow release version
 
- Modern SwiftUI - PointFree
- https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
+  Modern SwiftUI - PointFree
+  https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
  
--------------------------------------------------------------------------------------------- */
+ -------------------------------------------------------------------------------------------- */
 
 @Observable
 @MainActor
@@ -55,8 +55,8 @@ final class AppModel {
   
   init() {
     self.destination = self.isOnboardingComplete
-    ? .main(MainModel())
-    : .onboarding(OnboardingModel())
+      ? .main(MainModel())
+      : .onboarding(OnboardingModel())
   }
   
   func task() async {

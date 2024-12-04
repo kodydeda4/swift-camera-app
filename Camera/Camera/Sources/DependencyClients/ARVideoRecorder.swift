@@ -1,13 +1,13 @@
+import ARKit
 import AsyncAlgorithms
 import AVFoundation
-import PhotosUI
-import SwiftUI
-import Photos
-import SwiftUINavigation
-import Sharing
 import Dependencies
+import Photos
+import PhotosUI
 import RealityKit
-import ARKit
+import Sharing
+import SwiftUI
+import SwiftUINavigation
 
 // MARK: Internal
 // @DEDA
@@ -38,7 +38,8 @@ class ARVideoRecorder {
   }
   
   func startRecording() {
-    let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mp4")
+    let outputURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("\(UUID().uuidString).mp4")
     setupAssetWriter(outputURL: outputURL)
     
     recordingStartTime = CACurrentMediaTime()
@@ -65,14 +66,18 @@ class ARVideoRecorder {
       assetWriter.status == .writing,
       let pixelBufferAdaptor = pixelBufferAdaptor,
       assetWriterInput.isReadyForMoreMediaData
-    else { return }
+    else {
+      return
+    }
     
     let currentTime = CACurrentMediaTime()
     let elapsedTime = currentTime - (recordingStartTime ?? currentTime)
     
     Task.detached {
       await self.arView.snapshot(saveToHDR: false) { image in
-        guard let pixelBuffer = image?.cgImage?.toPixelBuffer() else { return }
+        guard let pixelBuffer = image?.cgImage?.toPixelBuffer() else {
+          return
+        }
         pixelBufferAdaptor.append(
           pixelBuffer,
           withPresentationTime: CMTime(seconds: elapsedTime, preferredTimescale: 600)
@@ -136,8 +141,17 @@ extension CGImage {
       kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue!
     ] as CFDictionary
     
-    CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32ARGB, attrs, &pixelBuffer)
-    guard let buffer = pixelBuffer else { return nil }
+    CVPixelBufferCreate(
+      kCFAllocatorDefault,
+      width,
+      height,
+      kCVPixelFormatType_32ARGB,
+      attrs,
+      &pixelBuffer
+    )
+    guard let buffer = pixelBuffer else {
+      return nil
+    }
     
     CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
     let pixelData = CVPixelBufferGetBaseAddress(buffer)
@@ -178,7 +192,9 @@ struct ARViewContainer: UIViewRepresentable {
     // Load the coffee model and anchor it in the real world.
     let anchorEntity = AnchorEntity(plane: .any)
     guard let modelEntity = try? Entity.loadModel(named: "coffee")
-    else { return }
+    else {
+      return
+    }
     anchorEntity.addChild(modelEntity)
     uiView.scene.addAnchor(anchorEntity)
   }

@@ -1,12 +1,12 @@
-import SwiftUI
-import SwiftUINavigation
-import AVFoundation
-import UIKit
-import AVFoundation
 import AsyncAlgorithms
 import AVFoundation
-import Photos
+import AVFoundation
+import AVFoundation
 import IssueReporting
+import Photos
+import SwiftUI
+import SwiftUINavigation
+import UIKit
 
 @Observable
 @MainActor
@@ -16,7 +16,7 @@ final class ARObjectPickerModel: Identifiable {
   func cancelButtonTapped() {
     self.dismiss()
   }
-  
+
   func saveButtonTapped() {
     self.dismiss()
   }
@@ -26,12 +26,12 @@ final class ARObjectPickerModel: Identifiable {
 
 struct ARObjectPickerSheet: View {
   @Bindable var model: ARObjectPickerModel
-  
+
   var body: some View {
     NavigationStack {
       VStack {
         Text("AR Object Picker")
-        
+
         Button("Save") {
           self.model.saveButtonTapped()
         }

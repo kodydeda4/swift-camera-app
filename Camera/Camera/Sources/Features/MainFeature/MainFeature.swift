@@ -1,13 +1,13 @@
+import ARKit
 import AsyncAlgorithms
 import AVFoundation
-import PhotosUI
-import SwiftUI
-import Photos
-import SwiftUINavigation
-import Sharing
 import Dependencies
+import Photos
+import PhotosUI
 import RealityKit
-import ARKit
+import Sharing
+import SwiftUI
+import SwiftUINavigation
 
 @MainActor
 @Observable
@@ -31,8 +31,8 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissionsValues[.camera] == .authorized &&
-    self.userPermissionsValues[.microphone] == .authorized &&
-    self.userPermissionsValues[.photos] == .authorized
+      self.userPermissionsValues[.microphone] == .authorized &&
+      self.userPermissionsValues[.photos] == .authorized
   }
   
   var isDeleteButtonDisabled: Bool {
@@ -41,8 +41,8 @@ final class MainModel {
   
   func recordingButtonTapped() {
     !self.isRecording
-    ? self.recorder?.startRecording()
-    : self.recorder?.stopRecording { url in self.saveVideoToPhotos(url: url) }
+      ? self.recorder?.startRecording()
+      : self.recorder?.stopRecording { url in self.saveVideoToPhotos(url: url) }
     self.isRecording.toggle()
   }
   
