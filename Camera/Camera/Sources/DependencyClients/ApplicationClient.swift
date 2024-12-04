@@ -4,7 +4,7 @@ import SwiftUI
 
 @DependencyClient
 struct ApplicationClient: Sendable {
-  var openSettings: @Sendable () throws -> Void
+  var openSettings: @Sendable () async throws -> Void
 }
 
 extension ApplicationClient: DependencyKey {
@@ -14,10 +14,10 @@ extension ApplicationClient: DependencyKey {
         guard let url = URL(string: UIApplication.openSettingsURLString) else {
           throw AnyError("UIApplication.openSettingsURLString")
         }
-        guard UIApplication.shared.canOpenURL(url) else {
+        guard await UIApplication.shared.canOpenURL(url) else {
           throw AnyError("UIApplication.shared.canOpenURL")
         }
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        await UIApplication.shared.open(url, options: [:], completionHandler: nil)
       }
     )
   }

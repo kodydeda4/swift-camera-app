@@ -46,7 +46,9 @@ final class UserPermissionsModel: Identifiable {
       break
       
     case .denied:
-      try? self.application.openSettings()
+      Task {
+        try? await self.application.openSettings()
+      }
       
     case .none,
          .undetermined:
