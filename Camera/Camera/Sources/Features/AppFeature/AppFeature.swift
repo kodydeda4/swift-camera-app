@@ -63,6 +63,7 @@ final class AppModel {
     await self.syncUserPermissions()
   }
   
+  /// Sync user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
     UserPermissionsClient.Feature.allCases.forEach { feature in
       self.$userPermissionsValues.withLock {
