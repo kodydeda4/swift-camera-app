@@ -8,18 +8,14 @@ struct ApplicationClient: Sendable {
 }
 
 extension ApplicationClient: DependencyKey {
-  static var liveValue: ApplicationClient {
-    return Self(
-      openSettings: {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else {
-          throw AnyError("UIApplication.openSettingsURLString")
-        }
-        guard await UIApplication.shared.canOpenURL(url) else {
-          throw AnyError("UIApplication.shared.canOpenURL")
-        }
-        await UIApplication.shared.open(url, options: [:], completionHandler: nil)
-      }
-    )
+  static var liveValue = Self {
+    guard let url = URL(string: UIApplication.openSettingsURLString) else {
+      throw AnyError("UIApplication.openSettingsURLString")
+    }
+    guard UIApplication.shared.canOpenURL(url) else {
+      throw AnyError("UIApplication.shared.canOpenURL")
+    }
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
 }
 
