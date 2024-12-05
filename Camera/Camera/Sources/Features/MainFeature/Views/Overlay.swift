@@ -21,8 +21,8 @@ fileprivate extension MainView {
       Text("AR Camera")
         .font(.title)
         .fontWeight(.bold)
-        .foregroundColor(.white)
-      
+        .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
+
       Spacer()
       
       Button(action: self.model.settingsButtonTapped) {
