@@ -58,20 +58,6 @@ final class MainModel {
     //...
   }
   
-  func task() async {
-    // self.startCaptureSession(with: .default(for: .video))
-    
-    Task.detached {
-      await withTaskGroup(of: Void.self) { taskGroup in
-        taskGroup.addTask {
-//          for await event in await self.recordingDelegate.events {
-//            await self.handleRecordingDelegateEvent(event)
-//          }
-        }
-      }
-    }
-  }
-  
   private func bind() {
     switch destination {
       
@@ -121,7 +107,6 @@ struct MainView: View {
     }
     .navigationBarBackButtonHidden()
     .overlay(content: self.overlay)
-    .task { await self.model.task() }
     .sheet(item: $model.destination.userPermissions) { model in
       UserPermissionsSheet(model: model)
     }

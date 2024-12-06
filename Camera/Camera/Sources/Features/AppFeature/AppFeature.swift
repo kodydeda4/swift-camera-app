@@ -7,29 +7,29 @@ import SwiftUINavigation
 
 /* --------------------------------------------------------------------------------------------
  
-  @DEDA
+ @DEDA
  
-  - [x] Camera
-  - [x] Video Recording
-  - [x] UserPermissions
-  - [x] Bind && Unimplemented
-  - [x] Destination
-  - [x] Swift Dependencies
-  - [ ] SPM
-  - [ ] SwiftUI Preview Compiler Directive
-  - [ ] ARKit integration
-  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
-  - [ ] Build version
-  - [ ] Finished recording toast / progress
-  - [ ] DesignSystem
-  - [ ] Logs
-  - [ ] Swift Format
-  - [ ] Unit Tests
-  - [ ] swift 6
-  - [ ] Git Flow release version
-
-  Modern SwiftUI - PointFree
-  https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
+ - [x] Camera
+ - [x] Video Recording
+ - [x] UserPermissions
+ - [x] Bind && Unimplemented
+ - [x] Destination
+ - [x] Swift Dependencies
+ - [ ] SPM
+ - [ ] SwiftUI Preview Compiler Directive
+ - [ ] ARKit integration
+ - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
+ - [ ] Build version
+ - [ ] Finished recording toast / progress
+ - [ ] DesignSystem
+ - [ ] Logs
+ - [ ] Swift Format
+ - [ ] Unit Tests
+ - [ ] swift 6
+ - [ ] Git Flow release version
+ 
+ Modern SwiftUI - PointFree
+ https://github.com/pointfreeco/episode-code-samples/tree/main/0220-modern-swiftui-pt7
  
  -------------------------------------------------------------------------------------------- */
 
@@ -37,7 +37,7 @@ import SwiftUINavigation
 @MainActor
 final class AppModel {
   var destination: Destination? { didSet { self.bind() } }
-
+  
   @ObservationIgnored
   @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   
@@ -46,7 +46,7 @@ final class AppModel {
   
   @ObservationIgnored
   @Dependency(\.userPermissions) var userPermissionsClient
-
+  
   @CasePathable
   enum Destination {
     case main(MainModel)
@@ -55,12 +55,18 @@ final class AppModel {
   
   init() {
     self.destination = self.isOnboardingComplete
-      ? .main(MainModel())
-      : .onboarding(OnboardingModel())
+    ? .main(MainModel())
+    : .onboarding(OnboardingModel())
   }
   
-  func task() async {
-    await self.syncUserPermissions()
+  var task: Task<Void, Never> {
+    Task.detached {
+      await withTaskGroup(of: Void.self) { taskGroup in
+        taskGroup.addTask {
+          await self.syncUserPermissions()
+        }
+      }
+    }
   }
   
   /// Update user permissions when the app starts or returns from the background.
@@ -71,7 +77,7 @@ final class AppModel {
       }
     }
   }
-
+  
   private func bind() {
     switch destination {
       
@@ -109,7 +115,7 @@ struct AppView: View {
         ProgressView()
       }
     }
-    .task { await self.model.task() }
+    .task { await self.model.task.cancellableValue }
   }
 }
 
