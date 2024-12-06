@@ -42,10 +42,10 @@ final class AppModel {
   @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   
   @ObservationIgnored
-  @Shared(.userPermissions) var userPermissionsValues
+  @Shared(.userPermissions) var userPermissions
   
   @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissions
+  @Dependency(\.userPermissions) var userPermissionsClient
 
   @CasePathable
   enum Destination {
@@ -66,8 +66,8 @@ final class AppModel {
   /// Update user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
     UserPermissionsClient.Feature.allCases.forEach { feature in
-      self.$userPermissionsValues.withLock {
-        $0[feature] = self.userPermissions.status(feature)
+      self.$userPermissions.withLock {
+        $0[feature] = self.userPermissionsClient.status(feature)
       }
     }
   }

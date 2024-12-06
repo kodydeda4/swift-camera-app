@@ -18,10 +18,10 @@ final class MainModel {
   var recorder: ARVideoRecorder?
   
   @ObservationIgnored
-  @Shared(.userPermissions) var userPermissionsValues
+  @Shared(.userPermissions) var userPermissions
   
   @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissions
+  @Dependency(\.userPermissions) var userPermissionsClient
   
   @CasePathable
   enum Destination {
@@ -30,9 +30,9 @@ final class MainModel {
   }
   
   var hasFullPermissions: Bool {
-    self.userPermissionsValues[.camera] == .authorized &&
-      self.userPermissionsValues[.microphone] == .authorized &&
-      self.userPermissionsValues[.photos] == .authorized
+    self.userPermissions[.camera] == .authorized &&
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
   
   var isDeleteButtonDisabled: Bool {
