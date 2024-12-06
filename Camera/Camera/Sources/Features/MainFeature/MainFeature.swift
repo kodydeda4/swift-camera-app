@@ -105,8 +105,6 @@ final class MainModel {
 
 // MARK: - SwiftUI
 
-// this is some changed code.
-
 struct MainView: View {
   @Bindable public var model: MainModel
   
