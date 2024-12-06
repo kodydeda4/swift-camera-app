@@ -1,4 +1,3 @@
-import AVFoundation
 import Dependencies
 import IssueReporting
 import Photos
@@ -9,9 +8,12 @@ import SwiftUI
 @MainActor
 final class UserPermissionsModel: Identifiable {
   let id = UUID()
-  var dismiss: () -> Void = unimplemented("UserPermissionsModel.dismiss")
-  var onContinueButtonTapped: ()
-  -> Void = unimplemented("UserPermissionsModel.onContinueButtonTapped")
+  
+  var dismiss: () -> Void
+  = unimplemented("UserPermissionsModel.dismiss")
+  
+  var onContinueButtonTapped: () -> Void
+  = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
   @ObservationIgnored
   @Shared(.userPermissions) var userPermissions

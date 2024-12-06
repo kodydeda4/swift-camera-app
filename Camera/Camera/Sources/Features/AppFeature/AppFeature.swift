@@ -1,6 +1,4 @@
-import AVFoundation
 import Dependencies
-import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation

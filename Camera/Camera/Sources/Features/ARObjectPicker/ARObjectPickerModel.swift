@@ -1,11 +1,5 @@
-import AsyncAlgorithms
-import AVFoundation
 import IssueReporting
-import Photos
 import SwiftUI
-import SwiftUINavigation
-import UIKit
-import Dependencies
 
 @Observable
 @MainActor

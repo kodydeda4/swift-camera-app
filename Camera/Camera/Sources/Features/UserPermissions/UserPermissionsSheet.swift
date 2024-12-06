@@ -1,7 +1,4 @@
-import AVFoundation
-import Photos
 import SwiftUI
-//import IssueReporting
 
 struct UserPermissionsSheet: View {
   @Bindable var model: UserPermissionsModel

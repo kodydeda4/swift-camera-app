@@ -1,9 +1,7 @@
 import AVFoundation
-import AVFoundation
 import Dependencies
 import DependenciesMacros
 import Photos
-import SwiftUI
 
 @DependencyClient
 struct UserPermissionsClient: Sendable {
