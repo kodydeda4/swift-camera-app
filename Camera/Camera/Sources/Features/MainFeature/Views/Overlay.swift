@@ -14,7 +14,11 @@ extension MainView {
 }
 
 fileprivate extension MainView {
-  private static let buttonSize: CGFloat = 24
+  
+  struct Style {
+    static let buttonSize: CGFloat = 24
+    static let buttonSizeRecording: CGFloat = 50
+  }
   
   private var top: some View {
     HStack {
@@ -29,7 +33,7 @@ fileprivate extension MainView {
         Image(systemName: "gear")
           .resizable()
           .scaledToFit()
-          .frame(width: Self.buttonSize, height: Self.buttonSize)
+          .frame(width: Style.buttonSize, height: Style.buttonSize)
           .padding(8)
           .background(.regularMaterial)
           .foregroundColor(.accentColor)
@@ -40,45 +44,57 @@ fileprivate extension MainView {
 
   private var bottom: some View {
     HStack {
-      Button(action: self.model.deleteButtonTapped) {
-        Image(systemName: "trash")
-          .resizable()
-          .scaledToFit()
-          .frame(width: Self.buttonSize, height: Self.buttonSize)
-          .foregroundColor(.red)
-          .padding(8)
-          .background(.regularMaterial)
-          .clipShape(Circle())
-      }
-      .disabled(self.model.isDeleteButtonDisabled)
-      
+      self.deleteButton
       Spacer()
-      
-      Button(action: self.model.newObjectButtonTapped) {
-        Image(systemName: "plus")
-          .resizable()
-          .scaledToFit()
-          .frame(width: Self.buttonSize, height: Self.buttonSize)
-          .padding(8)
-          .background(Color.blue)
-          .foregroundColor(.white)
-          .clipShape(Circle())
-      }
-      
+      self.recordingButton
       Spacer()
-      
-      Button(action: self.model.recordingButtonTapped) {
-        Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
-          .resizable()
-          .scaledToFit()
-          .frame(width: Self.buttonSize, height: Self.buttonSize)
-          .padding(8)
-          .background(.regularMaterial)
-          .foregroundColor(self.model.isRecording ? .red : .gray)
-          .clipShape(Circle())
-      }
+      self.arObjectPickerButton
     }
     .padding(.horizontal)
+    .disabled(!self.model.hasFullPermissions)
+  }
+  
+  private var deleteButton: some View {
+    Button(action: self.model.deleteButtonTapped) {
+      Image(systemName: "trash")
+        .resizable()
+        .scaledToFit()
+        .fontWeight(.semibold)
+        .frame(width: Style.buttonSize, height: Style.buttonSize)
+        .foregroundColor(.red)
+        .padding(8)
+        .background(.regularMaterial)
+        .clipShape(Circle())
+    }
+    .disabled(self.model.isDeleteButtonDisabled)
+  }
+  
+  private var recordingButton: some View {
+    Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
+      .resizable()
+      .scaledToFit()
+      .fontWeight(.semibold)
+      .frame(
+        width: Style.buttonSizeRecording,
+        height: Style.buttonSizeRecording
+      )
+      .padding(8)
+      .background(.regularMaterial)
+      .foregroundColor(self.model.isRecording ? .red : .gray)
+      .clipShape(Circle())
+  }
+  
+  private var arObjectPickerButton: some View {
+    Button(action: self.model.newObjectButtonTapped) {
+      Image(systemName: "plus")
+        .resizable()
+        .scaledToFit()
+        .frame(width: Style.buttonSize, height: Style.buttonSize)
+        .padding(8)
+        .background(.regularMaterial)
+        .foregroundColor(.accentColor)
+        .clipShape(Circle())
+    }
   }
 }
 
