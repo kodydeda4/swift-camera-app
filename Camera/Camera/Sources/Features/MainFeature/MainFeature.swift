@@ -59,7 +59,7 @@ final class MainModel {
   }
   
   func task() async {
-    //    self.startCaptureSession(with: .default(for: .video))
+    // self.startCaptureSession(with: .default(for: .video))
     
     Task.detached {
       await withTaskGroup(of: Void.self) { taskGroup in
