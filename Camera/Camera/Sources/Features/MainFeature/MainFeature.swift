@@ -4,7 +4,6 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-
 @MainActor
 @Observable
 final class MainModel {
