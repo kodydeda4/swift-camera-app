@@ -25,14 +25,15 @@ final class UserPermissionsModel: Identifiable {
   @Dependency(\.application) var application
   
   var isContinueButtonDisabled: Bool {
-    let hasFullPermissions =
+    !hasFullPermissions
+  }
+  
+  var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
     self.userPermissions[.microphone] == .authorized &&
     self.userPermissions[.photos] == .authorized
-    
-    return !hasFullPermissions
   }
-  
+
   func cancelButtonTapped() {
     self.dismiss()
   }
