@@ -14,12 +14,12 @@ extension MainView {
 }
 
 fileprivate extension MainView {
-  
+
   struct Style {
     static let buttonSize: CGFloat = 24
     static let buttonSizeRecording: CGFloat = 50
   }
-  
+
   private var top: some View {
     HStack {
       Text("AR Camera")
@@ -28,7 +28,7 @@ fileprivate extension MainView {
         .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
 
       Spacer()
-      
+
       Button(action: self.model.settingsButtonTapped) {
         Image(systemName: "gear")
           .resizable()
@@ -53,7 +53,7 @@ fileprivate extension MainView {
     .padding(.horizontal)
     .disabled(!self.model.hasFullPermissions)
   }
-  
+
   private var deleteButton: some View {
     Button(action: self.model.deleteButtonTapped) {
       Image(systemName: "trash")
@@ -68,7 +68,7 @@ fileprivate extension MainView {
     }
     .disabled(self.model.isDeleteButtonDisabled)
   }
-  
+
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
@@ -85,7 +85,7 @@ fileprivate extension MainView {
         .clipShape(Circle())
     }
   }
-  
+
   private var arObjectPickerButton: some View {
     Button(action: self.model.newObjectButtonTapped) {
       Image(systemName: "plus")

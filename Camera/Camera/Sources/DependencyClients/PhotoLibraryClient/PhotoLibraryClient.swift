@@ -5,11 +5,11 @@ import Photos
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
   internal var _value: PHPhotoLibrary
-  
+
   internal init(value: () -> PHPhotoLibrary) {
     self._value = value()
   }
-  
+
   func callAsFunction() -> PHPhotoLibrary {
     self._value
   }

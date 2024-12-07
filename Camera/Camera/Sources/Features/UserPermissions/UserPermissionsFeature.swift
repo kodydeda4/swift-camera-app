@@ -10,10 +10,10 @@ final class UserPermissionsModel: Identifiable {
   let id = UUID()
   
   var dismiss: () -> Void
-  = unimplemented("UserPermissionsModel.dismiss")
+    = unimplemented("UserPermissionsModel.dismiss")
   
   var onContinueButtonTapped: () -> Void
-  = unimplemented("UserPermissionsModel.onContinueButtonTapped")
+    = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
   @ObservationIgnored
   @Shared(.userPermissions) var userPermissions
@@ -30,8 +30,8 @@ final class UserPermissionsModel: Identifiable {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-    self.userPermissions[.microphone] == .authorized &&
-    self.userPermissions[.photos] == .authorized
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
 
   func cancelButtonTapped() {
@@ -54,7 +54,7 @@ final class UserPermissionsModel: Identifiable {
       }
       
     case .none,
-        .undetermined:
+         .undetermined:
       Task {
         let newValue = await self.userPermissionsClient.request(feature)
         self.$userPermissions.withLock {
@@ -85,8 +85,8 @@ struct UserPermissionsView: View {
             subtitle: "Record AR Videos",
             systemImage: "camera.fill",
             style: self.model.userPermissions[.camera] == .authorized
-            ? .green
-            : Color(.systemGray6)
+              ? .green
+              : Color(.systemGray6)
           )
         }
         Button(action: { self.model.request(.microphone) }) {
@@ -95,8 +95,8 @@ struct UserPermissionsView: View {
             subtitle: "Add sound to your AR videos",
             systemImage: "microphone.fill",
             style: self.model.userPermissions[.microphone] == .authorized
-            ? .green
-            : Color(.systemGray6)
+              ? .green
+              : Color(.systemGray6)
           )
         }
         Button(action: { self.model.request(.photos) }) {
@@ -105,8 +105,8 @@ struct UserPermissionsView: View {
             subtitle: "Save your AR videos",
             systemImage: "photo.stack",
             style: self.model.userPermissions[.photos] == .authorized
-            ? .green
-            : Color(.systemGray6)
+              ? .green
+              : Color(.systemGray6)
           )
         }
       }

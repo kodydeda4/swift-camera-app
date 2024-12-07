@@ -53,8 +53,8 @@ final class AppModel {
   
   init() {
     self.destination = self.isOnboardingComplete
-    ? .main(MainModel())
-    : .onboarding(OnboardingModel())
+      ? .main(MainModel())
+      : .onboarding(OnboardingModel())
   }
   
   var task: Task<Void, Never> {

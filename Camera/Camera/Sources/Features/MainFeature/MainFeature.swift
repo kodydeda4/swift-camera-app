@@ -1,10 +1,10 @@
+import ARKit
 import Dependencies
 import Photos
+import RealityKit
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import ARKit
-import RealityKit
 
 // RealityKit Tutorial // Pick and Place Multiple 3D Models
 // 36 mins
@@ -45,8 +45,8 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-    self.userPermissions[.microphone] == .authorized &&
-    self.userPermissions[.photos] == .authorized
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
   
   var isDeleteButtonDisabled: Bool {

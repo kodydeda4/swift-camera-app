@@ -1,6 +1,6 @@
 import IssueReporting
-import SwiftUI
 import Sharing
+import SwiftUI
 
 @Observable
 @MainActor
