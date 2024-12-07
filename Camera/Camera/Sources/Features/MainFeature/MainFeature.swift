@@ -10,6 +10,9 @@ import RealityKit
 // 36 mins
 // https://www.youtube.com/watch?v=9R_G0EI-UoI
 
+// TODO:
+// After you select a new model, you should remove pre-existing models.
+
 @MainActor
 @Observable
 final class MainModel {
@@ -104,8 +107,11 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer(model: model)
-            .edgesIgnoringSafeArea(.all)
+          ARViewContainer(delegate: .init(
+            makeUIView: self.model.makeUIView,
+            updateUIView: self.model.updateUIView
+          ))
+          .edgesIgnoringSafeArea(.all)
         } else {
           self.permissionsRequired
         }
@@ -123,6 +129,7 @@ struct MainView: View {
 }
 
 // MARK: ARContainer
+
 extension MainModel {
   func makeUIView() -> ARView {
     let arView = ARView(frame: .zero)
@@ -148,13 +155,18 @@ extension MainModel {
 }
 
 struct ARViewContainer: UIViewRepresentable {
-  @Bindable var model: MainModel
+  var delegate: Delegate
+  
+  struct Delegate {
+    var makeUIView: () -> ARView
+    var updateUIView: (ARView) -> Void
+  }
   
   func makeUIView(context: Context) -> ARView {
-    self.model.makeUIView()
+    self.delegate.makeUIView()
   }
   func updateUIView(_ uiView: ARView, context: Context) {
-    self.model.updateUIView(uiView)
+    self.delegate.updateUIView(uiView)
   }
 }
 
