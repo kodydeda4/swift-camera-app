@@ -3,6 +3,8 @@ import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
+import ARKit
+import RealityKit
 
 // RealityKit Tutorial // Pick and Place Multiple 3D Models
 // 36 mins
@@ -64,7 +66,7 @@ final class MainModel {
   func deleteButtonTapped() {
     //...
   }
-  
+
   private func startRecording() {
     self.recorder?.startRecording()
   }
@@ -86,7 +88,7 @@ final class MainModel {
     case let .arObjectPicker(model):
       model.$selection = self.$entityResource
       model.dismiss = { [weak self] in self?.destination = .none }
-      
+
     case .none:
       break
     }
@@ -102,10 +104,8 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer(resource: $model.entityResource) { arView in
-            self.model.recorder = ARVideoRecorder(arView: arView)
-          }
-          .edgesIgnoringSafeArea(.all)
+          ARViewContainer(model: model)
+            .edgesIgnoringSafeArea(.all)
         } else {
           self.permissionsRequired
         }
@@ -119,6 +119,42 @@ struct MainView: View {
     .sheet(item: $model.destination.arObjectPicker) { model in
       ARObjectPickerSheet(model: model)
     }
+  }
+}
+
+// MARK: ARContainer
+extension MainModel {
+  func makeUIView() -> ARView {
+    let arView = ARView(frame: .zero)
+    let config = ARWorldTrackingConfiguration()
+    config.planeDetection = [.horizontal, .vertical]
+    config.environmentTexturing = .automatic
+    arView.session.run(config)
+    self.recorder = ARVideoRecorder(arView: arView)
+    return arView
+  }
+  
+  func updateUIView(_ uiView: ARView) {
+    guard
+      let entityResource,
+      let modelEntity = try? Entity.loadModel(named: entityResource.rawValue)
+    else {
+      return
+    }
+    let anchorEntity = AnchorEntity(plane: .any)
+    anchorEntity.addChild(modelEntity)
+    uiView.scene.addAnchor(anchorEntity)
+  }
+}
+
+struct ARViewContainer: UIViewRepresentable {
+  @Bindable var model: MainModel
+  
+  func makeUIView(context: Context) -> ARView {
+    self.model.makeUIView()
+  }
+  func updateUIView(_ uiView: ARView, context: Context) {
+    self.model.updateUIView(uiView)
   }
 }
 

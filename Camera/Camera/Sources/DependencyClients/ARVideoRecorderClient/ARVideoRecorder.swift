@@ -173,30 +173,3 @@ extension CGImage {
   }
 }
 
-struct ARViewContainer: UIViewRepresentable {
-  @Binding var resource: EntityResource?
-  var arView: (ARView) -> Void
-  
-  func makeUIView(context: Context) -> ARView {
-    let arView = ARView(frame: .zero)
-    let config = ARWorldTrackingConfiguration()
-    config.planeDetection = [.horizontal, .vertical]
-    config.environmentTexturing = .automatic
-    arView.session.run(config)
-    self.arView(arView)
-    return arView
-  }
-  
-  func updateUIView(_ uiView: ARView, context: Context) {
-    // Load the coffee model and anchor it in the real world.
-    let anchorEntity = AnchorEntity(plane: .any)
-    guard
-      let resource,
-      let modelEntity = try? Entity.loadModel(named: resource.rawValue)
-    else {
-      return
-    }
-    anchorEntity.addChild(modelEntity)
-    uiView.scene.addAnchor(anchorEntity)
-  }
-}
