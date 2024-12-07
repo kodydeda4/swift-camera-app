@@ -4,19 +4,19 @@ import Photos
 
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
-  var performChanges: @Sendable (@escaping () -> Void) -> Void
+  internal var _value: PHPhotoLibrary
+  
+  internal init(photoLibrary: () -> PHPhotoLibrary) {
+    self._value = photoLibrary()
+  }
+  
+  func callAsFunction() -> PHPhotoLibrary {
+    self._value
+  }
 }
 
 extension PhotoLibraryClient: DependencyKey {
-  static var liveValue: Self {
-    let photoLibrary = PHPhotoLibrary.shared()
-    
-    return Self(
-      performChanges: {
-        photoLibrary.performChanges($0)
-      }
-    )
-  }
+  static var liveValue = Self { .shared() }
 }
 
 extension DependencyValues {

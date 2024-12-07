@@ -74,7 +74,7 @@ final class MainModel {
   
   private func stopRecording() {
     self.recorder?.stopRecording { url in
-      self.photoLibrary.performChanges({
+      self.photoLibrary().performChanges({
         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
       })
     }
