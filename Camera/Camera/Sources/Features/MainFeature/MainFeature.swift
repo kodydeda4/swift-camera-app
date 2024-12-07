@@ -54,6 +54,18 @@ final class MainModel {
     //...
   }
   
+  private func startRecording() {
+    self.recorder?.startRecording()
+  }
+  
+  private func stopRecording() {
+    self.recorder?.stopRecording { url in
+      self.photoLibrary().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+      })
+    }
+  }
+  
   private func bind() {
     switch destination {
       
@@ -65,18 +77,6 @@ final class MainModel {
       
     case .none:
       break
-    }
-  }
-  
-  private func startRecording() {
-    self.recorder?.startRecording()
-  }
-  
-  private func stopRecording() {
-    self.recorder?.stopRecording { url in
-      self.photoLibrary().performChanges({
-        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-      })
     }
   }
 }
