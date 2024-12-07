@@ -11,7 +11,7 @@ final class ARObjectPickerModel: Identifiable {
   
   var dismiss: () -> Void = unimplemented("ARObjectPickerModel.dismiss")
   
-  public init(selection: Shared<EntityResource?> = .init(value: .none)) {
+  public init(selection: Shared<EntityResource?> = Shared(value: .none)) {
     self._selection = selection
   }
   
