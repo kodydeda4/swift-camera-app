@@ -70,18 +70,20 @@ fileprivate extension MainView {
   }
   
   private var recordingButton: some View {
-    Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
-      .resizable()
-      .scaledToFit()
-      .fontWeight(.semibold)
-      .frame(
-        width: Style.buttonSizeRecording,
-        height: Style.buttonSizeRecording
-      )
-      .padding(8)
-      .background(.regularMaterial)
-      .foregroundColor(self.model.isRecording ? .red : .gray)
-      .clipShape(Circle())
+    Button(action: self.model.recordingButtonTapped) {
+      Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
+        .resizable()
+        .scaledToFit()
+        .fontWeight(.semibold)
+        .frame(
+          width: Style.buttonSizeRecording,
+          height: Style.buttonSizeRecording
+        )
+        .padding(8)
+        .background(.regularMaterial)
+        .foregroundColor(self.model.isRecording ? .red : .gray)
+        .clipShape(Circle())
+    }
   }
   
   private var arObjectPickerButton: some View {

@@ -18,6 +18,9 @@ final class MainModel {
   @ObservationIgnored
   @Dependency(\.userPermissions) var userPermissionsClient
   
+  @ObservationIgnored
+  @Dependency(\.photoLibrary) var photoLibrary
+
   @CasePathable
   enum Destination {
     case arObjectPicker(ARObjectPickerModel)
@@ -26,8 +29,8 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
+    self.userPermissions[.microphone] == .authorized &&
+    self.userPermissions[.photos] == .authorized
   }
   
   var isDeleteButtonDisabled: Bool {
@@ -35,9 +38,7 @@ final class MainModel {
   }
   
   func recordingButtonTapped() {
-    !self.isRecording
-      ? self.recorder?.startRecording()
-      : self.recorder?.stopRecording { url in self.saveVideoToPhotos(url: url) }
+    !self.isRecording ? self.startRecording() : self.stopRecording()
     self.isRecording.toggle()
   }
   
@@ -67,19 +68,15 @@ final class MainModel {
     }
   }
   
-  internal func saveVideoToPhotos(url: URL) {
-    PHPhotoLibrary.requestAuthorization { status in
-      if status == .authorized {
-        PHPhotoLibrary.shared().performChanges({
-          PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { success, error in
-          if success {
-            print("Video saved to Photos!")
-          } else {
-            print("Failed to save video: \(error?.localizedDescription ?? "Unknown error")")
-          }
-        }
-      }
+  private func startRecording() {
+    self.recorder?.startRecording()
+  }
+  
+  private func stopRecording() {
+    self.recorder?.stopRecording { url in
+      self.photoLibrary.performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+      })
     }
   }
 }
@@ -113,6 +110,16 @@ struct MainView: View {
 
 // MARK: - SwiftUI Previews
 
-#Preview {
+#Preview("Happy path") {
+  let value: Dictionary<
+    UserPermissionsClient.Feature,
+    UserPermissionsClient.Status
+  > = [
+    .camera: .authorized,
+    .microphone: .authorized,
+    .photos: .authorized,
+  ]
+  @Shared(.userPermissions) var userPermissions = value
+  
   MainView(model: MainModel())
 }
