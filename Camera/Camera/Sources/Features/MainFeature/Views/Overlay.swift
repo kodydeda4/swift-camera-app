@@ -4,7 +4,6 @@ extension MainView {
   internal func overlay() -> some View {
     VStack {
       self.top
-      Text("\(self.model.entityResource?.rawValue)")//@DEDA
       Spacer()
       self.bottom
     }
