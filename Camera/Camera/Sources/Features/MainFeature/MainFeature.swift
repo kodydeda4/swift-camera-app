@@ -4,6 +4,24 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+enum EntityResource:
+  String, CaseIterable, Identifiable,
+  CustomStringConvertible
+{
+  case coffee
+  case guitar
+  case pancakes
+  case robot
+  
+  var id: Self {
+    self
+  }
+  
+  var description: String {
+    rawValue.capitalized
+  }
+}
+
 @MainActor
 @Observable
 final class MainModel {
@@ -13,6 +31,9 @@ final class MainModel {
   var recorder: ARVideoRecorder?
   
   @ObservationIgnored
+  @Shared var entityResource: EntityResource?
+
+  @ObservationIgnored
   @Shared(.userPermissions) var userPermissions
   
   @ObservationIgnored
@@ -20,6 +41,10 @@ final class MainModel {
   
   @ObservationIgnored
   @Dependency(\.photoLibrary) var photoLibrary
+  
+  public init(entityResource: Shared<EntityResource?> = Shared(value: .none)) {
+    self._entityResource = entityResource
+  }
   
   @CasePathable
   enum Destination {
@@ -73,6 +98,7 @@ final class MainModel {
       model.dismiss = { [weak self] in self?.destination = .none }
       
     case let .arObjectPicker(model):
+      model.$selection = self.$entityResource
       model.dismiss = { [weak self] in self?.destination = .none }
       
     case .none:
@@ -90,7 +116,7 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer { arView in
+          ARViewContainer(resource: $model.entityResource) { arView in
             self.model.recorder = ARVideoRecorder(arView: arView)
           }
           .edgesIgnoringSafeArea(.all)

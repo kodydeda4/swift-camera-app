@@ -96,8 +96,8 @@ class ARVideoRecorder {
     
     assetWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4)
     
-    // Define video settings with dynamic resolution
-    let settings: [String: Any] = [
+    // Create an AVAssetWriterInput
+    assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: [
       AVVideoCodecKey: AVVideoCodecType.h264,
       AVVideoWidthKey: NSNumber(value: videoWidth),
       AVVideoHeightKey: NSNumber(value: videoHeight),
@@ -106,10 +106,8 @@ class ARVideoRecorder {
         AVVideoProfileLevelKey: AVVideoProfileLevelH264BaselineAutoLevel, // Use a simpler profile
         AVVideoMaxKeyFrameIntervalKey: NSNumber(value: 15) // More frequent keyframes
       ]
-    ]
+    ])
     
-    // Create an AVAssetWriterInput with the settings
-    assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
     assetWriterInput?.expectsMediaDataInRealTime = true
     
     // Configure the pixel buffer adaptor with dynamic dimensions
@@ -122,7 +120,7 @@ class ARVideoRecorder {
       ]
     )
     
-    if let assetWriter = assetWriter, let assetWriterInput = assetWriterInput {
+    if let assetWriter, let assetWriterInput {
       assetWriter.add(assetWriterInput)
       assetWriter.startWriting()
       assetWriter.startSession(atSourceTime: .zero)
@@ -176,6 +174,7 @@ extension CGImage {
 }
 
 struct ARViewContainer: UIViewRepresentable {
+  @Binding var resource: EntityResource?
   var arView: (ARView) -> Void
   
   func makeUIView(context: Context) -> ARView {
@@ -191,7 +190,9 @@ struct ARViewContainer: UIViewRepresentable {
   func updateUIView(_ uiView: ARView, context: Context) {
     // Load the coffee model and anchor it in the real world.
     let anchorEntity = AnchorEntity(plane: .any)
-    guard let modelEntity = try? Entity.loadModel(named: "coffee")
+    guard
+      let resource,
+      let modelEntity = try? Entity.loadModel(named: resource.rawValue)
     else {
       return
     }
@@ -199,4 +200,3 @@ struct ARViewContainer: UIViewRepresentable {
     uiView.scene.addAnchor(anchorEntity)
   }
 }
-
