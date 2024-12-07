@@ -4,6 +4,10 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// RealityKit Tutorial // Pick and Place Multiple 3D Models
+// 36 mins
+// https://www.youtube.com/watch?v=9R_G0EI-UoI
+
 @MainActor
 @Observable
 final class MainModel {
