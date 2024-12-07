@@ -176,7 +176,7 @@ extension CGImage {
 }
 
 struct ARViewContainer: UIViewRepresentable {
-  @Bindable var model: MainModel
+  var arView: (ARView) -> Void
   
   func makeUIView(context: Context) -> ARView {
     let arView = ARView(frame: .zero)
@@ -184,7 +184,7 @@ struct ARViewContainer: UIViewRepresentable {
     config.planeDetection = [.horizontal, .vertical]
     config.environmentTexturing = .automatic
     arView.session.run(config)
-    self.model.recorder = ARVideoRecorder(arView: arView)
+    self.arView(arView)
     return arView
   }
   

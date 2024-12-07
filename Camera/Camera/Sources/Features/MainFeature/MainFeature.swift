@@ -20,7 +20,7 @@ final class MainModel {
   
   @ObservationIgnored
   @Dependency(\.photoLibrary) var photoLibrary
-
+  
   @CasePathable
   enum Destination {
     case arObjectPicker(ARObjectPickerModel)
@@ -90,8 +90,10 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer(model: self.model)
-            .edgesIgnoringSafeArea(.all)
+          ARViewContainer { arView in
+            self.model.recorder = ARVideoRecorder(arView: arView)
+          }
+          .edgesIgnoringSafeArea(.all)
         } else {
           self.permissionsRequired
         }
