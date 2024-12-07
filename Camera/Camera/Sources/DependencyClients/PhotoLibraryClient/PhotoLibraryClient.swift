@@ -6,8 +6,8 @@ import Photos
 struct PhotoLibraryClient: Sendable {
   internal var _value: PHPhotoLibrary
   
-  internal init(photoLibrary: () -> PHPhotoLibrary) {
-    self._value = photoLibrary()
+  internal init(value: () -> PHPhotoLibrary) {
+    self._value = value()
   }
   
   func callAsFunction() -> PHPhotoLibrary {
