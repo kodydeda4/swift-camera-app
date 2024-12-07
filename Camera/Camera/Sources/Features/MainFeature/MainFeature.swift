@@ -4,23 +4,6 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-enum EntityResource:
-  String, CaseIterable, Identifiable,
-  CustomStringConvertible
-{
-  case coffee
-  case guitar
-  case pancakes
-  case robot
-  
-  var id: Self {
-    self
-  }
-  
-  var description: String {
-    rawValue.capitalized
-  }
-}
 
 @MainActor
 @Observable
