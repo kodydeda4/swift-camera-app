@@ -107,10 +107,10 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer(delegate: .init(
-            makeUIView: self.model.makeUIView,
-            updateUIView: self.model.updateUIView
-          ))
+          ARViewContainer(
+            make: self.model.makeUIView,
+            update: self.model.updateUIView
+          )
           .edgesIgnoringSafeArea(.all)
         } else {
           self.permissionsRequired
@@ -148,6 +148,7 @@ extension MainModel {
     else {
       return
     }
+    // uiView.scene.removeAnchor(anchor)
     let anchorEntity = AnchorEntity(plane: .any)
     anchorEntity.addChild(modelEntity)
     uiView.scene.addAnchor(anchorEntity)
@@ -155,18 +156,14 @@ extension MainModel {
 }
 
 struct ARViewContainer: UIViewRepresentable {
-  var delegate: Delegate
-  
-  struct Delegate {
-    var makeUIView: () -> ARView
-    var updateUIView: (ARView) -> Void
-  }
+  var make: () -> ARView
+  var update: (ARView) -> Void
   
   func makeUIView(context: Context) -> ARView {
-    self.delegate.makeUIView()
+    self.make()
   }
   func updateUIView(_ uiView: ARView, context: Context) {
-    self.delegate.updateUIView(uiView)
+    self.update(uiView)
   }
 }
 
