@@ -1,8 +1,7 @@
 import AsyncAlgorithms
 import AVFoundation
 
-// @DEDA idk rename it to mirror the protocol
-public final class MovieCaptureDelegate: NSObject {
+public final class CaptureFileOutputRecordingDelegate: NSObject {
   public let events = AsyncChannel<Event>()
 
   public enum Event {
@@ -17,7 +16,7 @@ public final class MovieCaptureDelegate: NSObject {
 
 // MARK: - Computed Properties
 
-extension MovieCaptureDelegate: AVCaptureFileOutputRecordingDelegate {
+extension CaptureFileOutputRecordingDelegate: AVCaptureFileOutputRecordingDelegate {
   public func fileOutput(
     _ output: AVCaptureFileOutput,
     didFinishRecordingTo outputFileURL: URL,
