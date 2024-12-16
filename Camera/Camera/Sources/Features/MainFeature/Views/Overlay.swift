@@ -28,7 +28,7 @@ fileprivate extension MainView {
 
       Spacer()
 
-      Button(action: self.model.settingsButtonTapped) {
+      Button(action: self.model.permissionsButtonTapped) {
         Image(systemName: "gear")
           .resizable()
           .scaledToFit()

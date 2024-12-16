@@ -162,7 +162,6 @@ private extension MainModel {
   }
 }
 
-
 // MARK: - SwiftUI
 
 struct MainView: View {
