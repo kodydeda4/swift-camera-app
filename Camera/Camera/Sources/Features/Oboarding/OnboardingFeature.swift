@@ -53,11 +53,11 @@ struct OnboardingView: View {
             .background(Color.orange.opacity(0.6))
             .clipShape(Circle())
 
-          Text("AR Camera")
+          Text("Camera")
             .font(.title)
             .bold()
 
-          Text("Record Videos with AR Objects.")
+          Text("Record Videos.")
             .foregroundColor(.secondary)
             .padding(.bottom)
 

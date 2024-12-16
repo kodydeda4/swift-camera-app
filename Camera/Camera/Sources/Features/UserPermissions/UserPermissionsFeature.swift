@@ -82,7 +82,7 @@ struct UserPermissionsView: View {
         Button(action: { self.model.request(.camera) }) {
           self.permissionsView(
             title: "Camera",
-            subtitle: "Record AR Videos",
+            subtitle: "Record Videos",
             systemImage: "camera.fill",
             style: self.model.userPermissions[.camera] == .authorized
               ? .green
@@ -92,7 +92,7 @@ struct UserPermissionsView: View {
         Button(action: { self.model.request(.microphone) }) {
           self.permissionsView(
             title: "Microphone",
-            subtitle: "Add sound to your AR videos",
+            subtitle: "Add sound to your videos",
             systemImage: "microphone.fill",
             style: self.model.userPermissions[.microphone] == .authorized
               ? .green
@@ -102,7 +102,7 @@ struct UserPermissionsView: View {
         Button(action: { self.model.request(.photos) }) {
           self.permissionsView(
             title: "Photo Library",
-            subtitle: "Save your AR videos",
+            subtitle: "Save your videos",
             systemImage: "photo.stack",
             style: self.model.userPermissions[.photos] == .authorized
               ? .green

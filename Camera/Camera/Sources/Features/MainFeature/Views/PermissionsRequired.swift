@@ -13,7 +13,7 @@ extension MainView {
         .font(.title2)
         .fontWeight(.bold)
 
-      Text("AR Camera requires device permissions to work properly.")
+      Text("Camera requires device permissions to work properly.")
         .fontWeight(.semibold)
         .foregroundColor(Color(.systemGray))
 
