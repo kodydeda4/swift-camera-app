@@ -9,15 +9,12 @@ import AVFoundation
 @Observable
 final class MainModel {
   internal var isRecording = false
-  internal var recordingDurationSeconds = 0
   internal let avCaptureSession = AVCaptureSession()
   internal var avCaptureDevice: AVCaptureDevice?
   internal var avCaptureDeviceInput: AVCaptureDeviceInput?
   internal var avCaptureMovieFileOutput = AVCaptureMovieFileOutput()
-  internal let avVideoAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
   internal let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   internal var recordingDelegate = MovieCaptureDelegate()
-  internal var isVideoPermissionGranted: Bool { avVideoAuthorizationStatus == .authorized }
   
   var destination: Destination? { didSet { self.bind() } }
   
@@ -66,6 +63,9 @@ final class MainModel {
   
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        await self._request(device: AVCaptureDevice.default(for: .video))
+      }
       taskGroup.addTask {
         for await event in await self.recordingDelegate.events {
           await self._handleRecordingDelegateEvent(event)

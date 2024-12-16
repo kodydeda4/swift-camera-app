@@ -72,4 +72,44 @@ extension MainModel {
       }
     }
   }
+  
+  /// @DEDA setup the device.
+  internal func _request(device value: AVCaptureDevice?) {
+    self.avCaptureDevice = value
+    
+    guard let value else {
+      print("❌ requestDefaultAVCaptureDeviceResponse is false")
+      return
+    }
+    
+    self.avCaptureDeviceInput = try? AVCaptureDeviceInput(device: value)
+    
+    guard let input = avCaptureDeviceInput else {
+      print("❌ avCaptureDeviceInput is nil")
+      return
+    }
+    let output = avCaptureMovieFileOutput
+    //          guard let output = state.avCaptureDeviceOutput else {
+    //            print("❌ avCaptureDeviceOutput is nil")
+    //            return .none
+    //          }
+    
+    print("✅ input and output are non-nil")
+    
+    if self.avCaptureSession.canAddInput(input) {
+      self.avCaptureSession.addInput(input)
+      print("✅ added input")
+    }
+    if self.avCaptureSession.canAddOutput(output) {
+      self.avCaptureSession.addOutput(output)
+      print("✅ added output")
+    }
+    self.avVideoPreviewLayer.session = self.avCaptureSession
+    
+    //@DEDA
+    Task.detached {
+      await self.avCaptureSession.startRunning()
+      print("✅ captureSession.startRunning()")
+    }
+  }
 }
