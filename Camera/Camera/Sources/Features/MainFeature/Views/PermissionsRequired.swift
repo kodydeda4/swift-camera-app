@@ -27,6 +27,7 @@ extension MainView {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .multilineTextAlignment(.center)
+    .padding(.horizontal)
   }
 }
 
