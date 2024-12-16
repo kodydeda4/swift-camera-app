@@ -17,8 +17,8 @@ extension MainView {
         .fontWeight(.semibold)
         .foregroundColor(Color(.systemGray))
 
-      Button(action: self.model.settingsButtonTapped) {
-        Text("Settings")
+      Button(action: self.model.permissionsButtonTapped) {
+        Text("Permissions")
           .frame(maxWidth: .infinity)
       }
       .buttonStyle(.borderedProminent)

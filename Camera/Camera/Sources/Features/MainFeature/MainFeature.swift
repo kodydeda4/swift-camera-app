@@ -46,7 +46,7 @@ final class MainModel {
     self.isRecording.toggle()
   }
   
-  func settingsButtonTapped() {
+  func permissionsButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
   }
 
