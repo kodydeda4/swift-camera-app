@@ -4,19 +4,19 @@ import SwiftUI
 
 extension MainView {
   @MainActor internal var camera: some View {
-    AVCaptureVideoPreviewLayerView(avVideoPreviewLayer: self.model.avVideoPreviewLayer)
+    AVCaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
   }
 }
 
 private struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
-  let avVideoPreviewLayer: AVCaptureVideoPreviewLayer
+  let captureVideoPreviewLayer: AVCaptureVideoPreviewLayer
   typealias UIViewControllerType = UIViewController
 
   func makeUIViewController(context: Context) -> UIViewController {
     let viewController = UIViewController()
     viewController.view.backgroundColor = .black
-    viewController.view.layer.addSublayer(avVideoPreviewLayer)
-    avVideoPreviewLayer.frame = viewController.view.bounds
+    viewController.view.layer.addSublayer(captureVideoPreviewLayer)
+    captureVideoPreviewLayer.frame = viewController.view.bounds
     return viewController
   }
 

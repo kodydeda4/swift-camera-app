@@ -8,27 +8,27 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  internal var isRecording = false
-  internal let avCaptureSession = AVCaptureSession()
-  internal var avCaptureDevice: AVCaptureDevice?
-  internal var avCaptureDeviceInput: AVCaptureDeviceInput?
-  internal var avCaptureMovieFileOutput = AVCaptureMovieFileOutput()
-  internal let avVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  internal var recordingDelegate = CaptureFileOutputRecordingDelegate()
-  
+  private(set) var captureSession = AVCaptureSession()
+  private(set) var captureDevice: AVCaptureDevice?
+  private(set) var captureDeviceInput: AVCaptureDeviceInput?
+  private(set) var captureMovieFileOutput = AVCaptureMovieFileOutput()
+  private(set) var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
+  private(set) var captureFileOutputRecordingDelegate = CaptureFileOutputRecordingDelegate()
+  private(set) var isRecording = false
+
   var destination: Destination? { didSet { self.bind() } }
   
   @ObservationIgnored
-  @Shared(.userPermissions) var userPermissions
+  @Shared(.userPermissions) private var userPermissions
   
   @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissionsClient
+  @Dependency(\.userPermissions) private var userPermissionsClient
   
   @ObservationIgnored
-  @Dependency(\.photoLibrary) var photoLibrary
+  @Dependency(\.photoLibrary) private var photoLibrary
   
   @ObservationIgnored
-  @Dependency(\.uuid) var uuid
+  @Dependency(\.uuid) private var uuid
   
   @CasePathable
   enum Destination {
@@ -42,7 +42,7 @@ final class MainModel {
   }
   
   func recordingButtonTapped() {
-    !self.isRecording ? self.startRecording() : self.stopRecording()
+    try? !isRecording ? startRecording() : stopRecording()
     self.isRecording.toggle()
   }
   
@@ -60,7 +60,7 @@ final class MainModel {
         }
       }
       taskGroup.addTask {
-        for await event in await self.recordingDelegate.events {
+        for await event in await self.captureFileOutputRecordingDelegate.events {
           await self.handleRecordingDelegateEvent(event)
         }
       }
@@ -82,48 +82,42 @@ private extension MainModel {
   }
   
   func startCaptureSession() throws {
+    // 1. Verify device inputs & outputs
     guard let device = AVCaptureDevice.default(for: .video) else {
       throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
     }
     
     let input = try AVCaptureDeviceInput(device: device)
-    let output = self.avCaptureMovieFileOutput
+    let output = self.captureMovieFileOutput
     
-    guard self.avCaptureSession.canAddInput(input) else {
+    guard self.captureSession.canAddInput(input) else {
       throw AnyError("self.avCaptureSession.canAddInput(input) returned false.")
     }
-    guard self.avCaptureSession.canAddOutput(output) else {
+    guard self.captureSession.canAddOutput(output) else {
       throw AnyError("self.avCaptureSession.canAddOutput(output) returned false.")
     }
     
-    self.avCaptureDevice = device
-    self.avCaptureDeviceInput = input
-    self.avCaptureSession.addInput(input)
-    self.avCaptureSession.addOutput(output)
-    self.avVideoPreviewLayer.session = self.avCaptureSession
+    // 2. State.set
+    self.captureDevice = device
+    self.captureDeviceInput = input
+    self.captureSession.addInput(input)
+    self.captureSession.addOutput(output)
+    self.captureVideoPreviewLayer.session = self.captureSession
     
     //@DEDA
     Task.detached {
-      await self.avCaptureSession.startRunning()
+      await self.captureSession.startRunning()
     }
   }
-
-  func startRecording() {
-    let movieOutput = self.avCaptureMovieFileOutput
-    
-    guard !self.avCaptureMovieFileOutput.isRecording else {
-      self.stopRecording()
-      return
-    }
-    
-    guard let connection = movieOutput.connection(with: .video) else {
-      print("❌ Configuration error. No video connection found")
-      return
+  
+  func startRecording() throws {
+    guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
+      throw AnyError("movieOutput.connection(with: .video) returned nil")
     }
     
     // Configure connection for HEVC capture.
-    if movieOutput.availableVideoCodecTypes.contains(.hevc) {
-      movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: connection)
+    if self.captureMovieFileOutput.availableVideoCodecTypes.contains(.hevc) {
+      self.captureMovieFileOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: connection)
     }
     
     // Enable video stabilization if the connection supports it.
@@ -131,21 +125,14 @@ private extension MainModel {
       connection.preferredVideoStabilizationMode = .auto
     }
     
-    movieOutput.startRecording(
-      to: URL.movieFileOutput(id: self.uuid()),
-      recordingDelegate: self.recordingDelegate
+    self.captureMovieFileOutput.startRecording(
+      to: .movieFileOutput(uuid()),
+      recordingDelegate: self.captureFileOutputRecordingDelegate
     )
-    
-    self.isRecording = true
-    print("✅ started recording")
-    return
   }
   
   func stopRecording() {
-    self.avCaptureMovieFileOutput.stopRecording()
-    self.isRecording = false
-    print("✅ stopped recording")
-    return
+    self.captureMovieFileOutput.stopRecording()
   }
   
   func handleRecordingDelegateEvent(_ event: CaptureFileOutputRecordingDelegate.Event) {
