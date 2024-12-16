@@ -1,17 +1,8 @@
-import ARKit
 import Dependencies
 import Photos
-import RealityKit
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-
-// RealityKit Tutorial // Pick and Place Multiple 3D Models
-// 36 mins
-// https://www.youtube.com/watch?v=9R_G0EI-UoI
-
-// TODO:
-// After you select a new model, you should remove pre-existing models.
 
 @MainActor
 @Observable
@@ -19,10 +10,6 @@ final class MainModel {
   var isRecording = false
   var recordingDurationSeconds = 0
   var destination: Destination? { didSet { self.bind() } }
-  var recorder: ARVideoRecorder?
-  
-  @ObservationIgnored
-  @Shared var entityResource: EntityResource?
 
   @ObservationIgnored
   @Shared(.userPermissions) var userPermissions
@@ -33,13 +20,8 @@ final class MainModel {
   @ObservationIgnored
   @Dependency(\.photoLibrary) var photoLibrary
   
-  public init(entityResource: Shared<EntityResource?> = Shared(value: .none)) {
-    self._entityResource = entityResource
-  }
-  
   @CasePathable
   enum Destination {
-    case arObjectPicker(ARObjectPickerModel)
     case userPermissions(UserPermissionsModel)
   }
   
@@ -62,34 +44,26 @@ final class MainModel {
     self.destination = .userPermissions(UserPermissionsModel())
   }
   
-  func newObjectButtonTapped() {
-    self.destination = .arObjectPicker(ARObjectPickerModel())
-  }
-  
   func deleteButtonTapped() {
     //...
   }
 
   private func startRecording() {
-    self.recorder?.startRecording()
+//    self.recorder?.startRecording()
   }
   
   private func stopRecording() {
-    self.recorder?.stopRecording { url in
-      self.photoLibrary().performChanges({
-        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-      })
-    }
+//    self.recorder?.stopRecording { url in
+//      self.photoLibrary().performChanges({
+//        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+//      })
+//    }
   }
   
   private func bind() {
     switch destination {
       
     case let .userPermissions(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case let .arObjectPicker(model):
-      model.$selection = self.$entityResource
       model.dismiss = { [weak self] in self?.destination = .none }
 
     case .none:
@@ -107,11 +81,7 @@ struct MainView: View {
     NavigationStack {
       Group {
         if self.model.hasFullPermissions {
-          ARViewContainer(
-            make: self.model.makeUIView,
-            update: self.model.updateUIView
-          )
-          .edgesIgnoringSafeArea(.all)
+          self.camera
         } else {
           self.permissionsRequired
         }
@@ -122,48 +92,6 @@ struct MainView: View {
     .sheet(item: $model.destination.userPermissions) { model in
       UserPermissionsSheet(model: model)
     }
-    .sheet(item: $model.destination.arObjectPicker) { model in
-      ARObjectPickerSheet(model: model)
-    }
-  }
-}
-
-// MARK: ARContainer
-
-extension MainModel {
-  func makeUIView() -> ARView {
-    let arView = ARView(frame: .zero)
-    let config = ARWorldTrackingConfiguration()
-    config.planeDetection = [.horizontal, .vertical]
-    config.environmentTexturing = .automatic
-    arView.session.run(config)
-    self.recorder = ARVideoRecorder(arView: arView)
-    return arView
-  }
-  
-  func updateUIView(_ uiView: ARView) {
-    guard
-      let entityResource,
-      let modelEntity = try? Entity.loadModel(named: entityResource.rawValue)
-    else {
-      return
-    }
-    // uiView.scene.removeAnchor(anchor)
-    let anchorEntity = AnchorEntity(plane: .any)
-    anchorEntity.addChild(modelEntity)
-    uiView.scene.addAnchor(anchorEntity)
-  }
-}
-
-struct ARViewContainer: UIViewRepresentable {
-  var make: () -> ARView
-  var update: (ARView) -> Void
-  
-  func makeUIView(context: Context) -> ARView {
-    self.make()
-  }
-  func updateUIView(_ uiView: ARView, context: Context) {
-    self.update(uiView)
   }
 }
 

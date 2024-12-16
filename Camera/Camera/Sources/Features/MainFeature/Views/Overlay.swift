@@ -48,7 +48,6 @@ fileprivate extension MainView {
       Spacer()
       self.recordingButton
       Spacer()
-      self.arObjectPickerButton
     }
     .padding(.horizontal)
     .disabled(!self.model.hasFullPermissions)
@@ -82,19 +81,6 @@ fileprivate extension MainView {
         .padding(8)
         .background(.regularMaterial)
         .foregroundColor(self.model.isRecording ? .red : .gray)
-        .clipShape(Circle())
-    }
-  }
-
-  private var arObjectPickerButton: some View {
-    Button(action: self.model.newObjectButtonTapped) {
-      Image(systemName: "plus")
-        .resizable()
-        .scaledToFit()
-        .frame(width: Style.buttonSize, height: Style.buttonSize)
-        .padding(8)
-        .background(.regularMaterial)
-        .foregroundColor(.accentColor)
         .clipShape(Circle())
     }
   }

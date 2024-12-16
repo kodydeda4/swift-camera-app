@@ -12,8 +12,6 @@
 		335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02862CFF7F24009FBDAD /* Dependencies */; };
 		335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 335D02882CFF7F24009FBDAD /* DependenciesMacros */; };
 		335D028C2CFF7F5C009FBDAD /* Sharing in Frameworks */ = {isa = PBXBuildFile; productRef = 335D028B2CFF7F5C009FBDAD /* Sharing */; };
-		335D02942CFFA270009FBDAD /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 335D02932CFFA270009FBDAD /* ARKit.framework */; };
-		335D02962CFFA27B009FBDAD /* SceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 335D02952CFFA27B009FBDAD /* SceneKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,8 +62,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				335D02962CFFA27B009FBDAD /* SceneKit.framework in Frameworks */,
-				335D02942CFFA270009FBDAD /* ARKit.framework in Frameworks */,
 				335D02872CFF7F24009FBDAD /* Dependencies in Frameworks */,
 				335D02842CFF7ED4009FBDAD /* SwiftUINavigation in Frameworks */,
 				335D02892CFF7F24009FBDAD /* DependenciesMacros in Frameworks */,
