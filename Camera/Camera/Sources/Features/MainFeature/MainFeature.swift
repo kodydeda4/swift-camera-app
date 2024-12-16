@@ -54,7 +54,7 @@ final class MainModel {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         do {
-          try await self.setupCaptureSession()
+          try await self.startCaptureSession()
         } catch {
           print(error.localizedDescription)
         }
@@ -81,22 +81,18 @@ private extension MainModel {
     }
   }
   
-  func setupCaptureSession() throws {
-    guard let device = AVCaptureDevice.default(for: .video)
-    else {
+  func startCaptureSession() throws {
+    guard let device = AVCaptureDevice.default(for: .video) else {
       throw AnyError("AVCaptureDevice.default(for: .video) is nil.")
     }
     
     let input = try AVCaptureDeviceInput(device: device)
     let output = self.avCaptureMovieFileOutput
     
-    guard self.avCaptureSession.canAddInput(input)
-    else {
+    guard self.avCaptureSession.canAddInput(input) else {
       throw AnyError("Can't add input.")
     }
-    
-    guard self.avCaptureSession.canAddOutput(output)
-    else {
+    guard self.avCaptureSession.canAddOutput(output) else {
       throw AnyError("Can't add output.")
     }
     
