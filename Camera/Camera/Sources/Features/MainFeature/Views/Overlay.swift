@@ -25,9 +25,9 @@ fileprivate extension MainView {
         .font(.title)
         .fontWeight(.bold)
         .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
-      
+
       Spacer()
-      
+
       Button(action: self.model.settingsButtonTapped) {
         Image(systemName: "gear")
           .resizable()
@@ -40,7 +40,7 @@ fileprivate extension MainView {
       }
     }
   }
-  
+
   private var bottom: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.isRecording ? "circle.fill" : "circle")

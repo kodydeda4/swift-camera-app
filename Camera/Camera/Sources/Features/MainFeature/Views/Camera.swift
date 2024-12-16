@@ -1,6 +1,6 @@
-import SwiftUI
-import Sharing
 import AVFoundation
+import Sharing
+import SwiftUI
 
 extension MainView {
   @MainActor internal var camera: some View {
@@ -35,6 +35,6 @@ private struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
     .photos: .authorized,
   ]
   @Shared(.userPermissions) var userPermissions = value
-  
+
   MainView(model: MainModel())
 }

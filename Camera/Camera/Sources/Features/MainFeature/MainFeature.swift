@@ -1,9 +1,9 @@
+import AVFoundation
 import Dependencies
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import AVFoundation
 
 @MainActor
 @Observable
@@ -37,8 +37,8 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-    self.userPermissions[.microphone] == .authorized &&
-    self.userPermissions[.photos] == .authorized
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
   
   func recordingButtonTapped() {
@@ -83,16 +83,22 @@ private extension MainModel {
   
   func setupCaptureSession() throws {
     guard let device = AVCaptureDevice.default(for: .video)
-    else { throw AnyError("AVCaptureDevice.default(for: .video) is nil.") }
+    else {
+      throw AnyError("AVCaptureDevice.default(for: .video) is nil.")
+    }
     
     let input = try AVCaptureDeviceInput(device: device)
     let output = self.avCaptureMovieFileOutput
     
     guard self.avCaptureSession.canAddInput(input)
-    else { throw AnyError("Can't add input.") }
+    else {
+      throw AnyError("Can't add input.")
+    }
     
     guard self.avCaptureSession.canAddOutput(output)
-    else { throw AnyError("Can't add output.") }
+    else {
+      throw AnyError("Can't add output.")
+    }
     
     self.avCaptureDevice = device
     self.avCaptureDeviceInput = input
