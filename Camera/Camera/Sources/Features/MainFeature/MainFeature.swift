@@ -83,17 +83,17 @@ private extension MainModel {
   
   func startCaptureSession() throws {
     guard let device = AVCaptureDevice.default(for: .video) else {
-      throw AnyError("AVCaptureDevice.default(for: .video) is nil.")
+      throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
     }
     
     let input = try AVCaptureDeviceInput(device: device)
     let output = self.avCaptureMovieFileOutput
     
     guard self.avCaptureSession.canAddInput(input) else {
-      throw AnyError("Can't add input.")
+      throw AnyError("self.avCaptureSession.canAddInput(input) returned false.")
     }
     guard self.avCaptureSession.canAddOutput(output) else {
-      throw AnyError("Can't add output.")
+      throw AnyError("self.avCaptureSession.canAddOutput(output) returned false.")
     }
     
     self.avCaptureDevice = device
