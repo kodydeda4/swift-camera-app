@@ -53,7 +53,11 @@ final class MainModel {
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        await self.setupCaptureSession(for: AVCaptureDevice.default(for: .video))
+        do {
+          try await self.setupCaptureSession()
+        } catch {
+          print(error.localizedDescription)
+        }
       }
       taskGroup.addTask {
         for await event in await self.recordingDelegate.events {
@@ -77,46 +81,32 @@ private extension MainModel {
     }
   }
   
-  func setupCaptureSession(for device: AVCaptureDevice?) {
+  func setupCaptureSession() throws {
+    guard let device = AVCaptureDevice.default(for: .video)
+    else { throw AnyError("AVCaptureDevice.default(for: .video) is nil.") }
+    
+    let input = try AVCaptureDeviceInput(device: device)
+    let output = self.avCaptureMovieFileOutput
+    
+    guard self.avCaptureSession.canAddInput(input)
+    else { throw AnyError("Can't add input.") }
+    
+    guard self.avCaptureSession.canAddOutput(output)
+    else { throw AnyError("Can't add output.") }
+    
     self.avCaptureDevice = device
-    
-    guard let device else {
-      print("❌ requestDefaultAVCaptureDeviceResponse is false")
-      return
-    }
-    
-    self.avCaptureDeviceInput = try? AVCaptureDeviceInput(device: device)
-    
-    guard let input = avCaptureDeviceInput else {
-      print("❌ avCaptureDeviceInput is nil")
-      return
-    }
-    let output = avCaptureMovieFileOutput
-    //          guard let output = state.avCaptureDeviceOutput else {
-    //            print("❌ avCaptureDeviceOutput is nil")
-    //            return .none
-    //          }
-    
-    print("✅ input and output are non-nil")
-    
-    if self.avCaptureSession.canAddInput(input) {
-      self.avCaptureSession.addInput(input)
-      print("✅ added input")
-    }
-    if self.avCaptureSession.canAddOutput(output) {
-      self.avCaptureSession.addOutput(output)
-      print("✅ added output")
-    }
+    self.avCaptureDeviceInput = input
+    self.avCaptureSession.addInput(input)
+    self.avCaptureSession.addOutput(output)
     self.avVideoPreviewLayer.session = self.avCaptureSession
     
     //@DEDA
     Task.detached {
       await self.avCaptureSession.startRunning()
-      print("✅ captureSession.startRunning()")
     }
   }
 
-  func startRecording() -> Void {
+  func startRecording() {
     let movieOutput = self.avCaptureMovieFileOutput
     
     guard !self.avCaptureMovieFileOutput.isRecording else {
