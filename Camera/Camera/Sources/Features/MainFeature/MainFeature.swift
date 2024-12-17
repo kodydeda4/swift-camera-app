@@ -117,7 +117,10 @@ private extension MainModel {
     
     // Configure connection for HEVC capture.
     if self.captureMovieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.captureMovieFileOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: connection)
+      self.captureMovieFileOutput.setOutputSettings(
+        [AVVideoCodecKey: AVVideoCodecType.hevc],
+        for: connection
+      )
     }
     
     // Enable video stabilization if the connection supports it.
