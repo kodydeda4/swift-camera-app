@@ -5,15 +5,19 @@ import SwiftUI
 @DependencyClient
 struct ApplicationClient: Sendable {
   var openSettings: @Sendable () async throws -> Void
+  
+  struct Failure: Error, Equatable {
+    let rawValue: String
+  }
 }
 
 extension ApplicationClient: DependencyKey {
   static var liveValue = Self {
     guard let url = URL(string: UIApplication.openSettingsURLString) else {
-      throw AnyError("UIApplication.openSettingsURLString")
+      throw Failure(rawValue: "UIApplication.openSettingsURLString")
     }
     guard UIApplication.shared.canOpenURL(url) else {
-      throw AnyError("UIApplication.shared.canOpenURL")
+      throw Failure(rawValue: "UIApplication.shared.canOpenURL")
     }
     UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
