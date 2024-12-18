@@ -16,15 +16,19 @@ import SwiftUINavigation
  - [x] Swift Format
  - [x] Build version
  - [x] AppIcon
+ - [ ] Logs
+ - [ ] Unit Tests
+ - [ ] swift 6
+ - [ ] SPM
+
+  UI Rework
+ - [ ] Video Recording duration
  - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
  - [ ] SwiftUI Preview Compiler Directive
- - [ ] Logs
  - [ ] DesignSystem
- - [ ] Unit Tests
- - [ ] swift 6
- - [ ] SPM
+
 
  -------------------------------------------------------------------------------------------- */
 
