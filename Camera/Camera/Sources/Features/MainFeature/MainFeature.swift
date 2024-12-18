@@ -10,14 +10,8 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  private(set) var captureSession = AVCaptureSession()
-  private(set) var captureDevice: AVCaptureDevice?
-  private(set) var captureDeviceInput: AVCaptureDeviceInput?
-  private(set) var captureMovieFileOutput = AVCaptureMovieFileOutput()
-  private(set) var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  private(set) var captureFileOutputRecordingDelegate = CaptureFileOutputRecordingDelegate()
-  private(set) var isRecording = false
-  
+  var isRecording = false
+  var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
@@ -25,7 +19,7 @@ final class MainModel {
   @Shared(.userPermissions) private var userPermissions
   
   @ObservationIgnored
-  @Dependency(\.userPermissions) private var userPermissionsClient
+  @Dependency(\.camera) private var camera
   
   @ObservationIgnored
   @Dependency(\.photoLibrary) private var photoLibrary
@@ -49,8 +43,10 @@ final class MainModel {
   }
   
   func recordingButtonTapped() {
-    let result = Result { try !isRecording ? startRecording() : stopRecording() }
-    print("\(Self.self).recordingButtonTapped.\(result)")
+    !isRecording
+    ? camera.startRecording(self.movieFileOutput)
+    : camera.stopRecording()
+    self.isRecording.toggle()
   }
   
   func permissionsButtonTapped() {
@@ -58,19 +54,34 @@ final class MainModel {
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
-    let result = Result { try self.setZoomFactor(value) }
-    print("\(Self.self).setZoomFactor", result)
+    self.camera.setZoomFactor(value)
   }
   
   func switchCameraButtonTapped() {
-    let result = Result { try self.switchCamera() }
-    print("\(Self.self).switchCamera", result)
+    self.camera.switchCamera()
   }
   
   func captureLibraryButtonTapped() {
     //...
   }
   
+  func task() async {
+    await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        await self.camera.setup(self.captureVideoPreviewLayer)
+      }
+      taskGroup.addTask {
+        for await event in await self.camera.events() {
+          await self.handle(event)
+        }
+      }
+    }
+  }
+}
+
+// MARK: Private
+
+private extension MainModel {
   func bind() {
     switch destination {
       
@@ -82,190 +93,7 @@ final class MainModel {
     }
   }
   
-  func task() async {
-    await withTaskCancellationHandler {
-      await withTaskGroup(of: Void.self) { taskGroup in
-        taskGroup.addTask {
-          let result = await Result { try await self.configureSession() }
-          print("\(Self.self).configureSession", result)
-        }
-        taskGroup.addTask {
-          for await event in await self.captureFileOutputRecordingDelegate.events {
-            await self.handle(event)
-          }
-        }
-      }
-    } onCancel: { [captureSession = self.captureSession] in
-      print("\(Self.self).task cancelled")
-      captureSession.stopRunning()
-    }
-  }
-  
-  // MARK: - Private
-  
-  private func configureSession() throws {
-    self.captureSession.beginConfiguration()
-    
-    let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
-    let output = self.captureMovieFileOutput
-    
-    guard let device else {
-      throw AnyError("\(String(describing: device)) returned nil.")
-    }
-    guard let input = try? AVCaptureDeviceInput(device: device) else {
-      throw AnyError("Could not create input for \(device)")
-    }
-    guard self.captureSession.canAddInput(input) else {
-      throw AnyError("self.avCaptureSession.canAddInput(input) returned false.")
-    }
-    guard self.captureSession.canAddOutput(output) else {
-      throw AnyError("self.avCaptureSession.canAddOutput(output) returned false.")
-    }
-    
-    self.captureDevice = device
-    self.captureDeviceInput = input
-    self.captureSession.addInput(input)
-    self.captureSession.addOutput(output)
-    self.captureSession.commitConfiguration()
-    self.captureVideoPreviewLayer.session = self.captureSession
-    self.startSession()
-  }
-  
-  private func startSession() {
-    guard !self.captureSession.isRunning else {
-      print("\(Self.self).startSession was called while the session was already running.")
-      return
-    }
-    Task.detached {
-      await self.captureSession.startRunning()
-    }
-  }
-  
-  private func switchCamera() throws {
-    guard let captureDeviceInput else {
-      return
-    }
-    
-    self.captureSession.beginConfiguration()
-    self.captureSession.removeInput(captureDeviceInput)
-    
-    let discoverySession = AVCaptureDevice.DiscoverySession(
-      deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
-      mediaType: .video,
-      position: .unspecified
-    )
-    
-    let newPosition: AVCaptureDevice.Position = captureDeviceInput.device.position == .back
-    ? .front
-    : .back
-    
-    guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition }) else {
-      throw AnyError("Failed to switch camera. Reverting to original.")
-    }
-    guard let newInput = try? AVCaptureDeviceInput(device: newDevice) else {
-      throw AnyError("Failed to create new video device input.")
-    }
-    guard self.captureSession.canAddInput(newInput) else {
-      throw AnyError("Cannot ad input \(newDevice)")
-    }
-    
-    self.captureSession.addInput(newInput)
-    self.captureDeviceInput = newInput
-    self.captureSession.commitConfiguration()
-  }
-  
-  private func setZoomFactor(_ zoomFactor: CGFloat) throws {
-//    @DEDA
-//    The minimum "zoomFactor" property of an AVCaptureDevice can't be less than 1.0 according to the Apple Docs.
-//    It's a little confusing becuase depending on what camera you've selected, a zoom factor of 1 will be a different field of view or optical view angle.
-//    The default iPhone camera app shows a label reading "0.5" but that's just a label for the ultra wide lens in relation to the standard camera's zoom factor.
-//
-//    You're already getting the minZoomFactor from the device, (which will probably be 1),
-//    so you should use the device's min and max that you're reading to set the bounds of the factor you input into "captureDevice.videoZoomFactor".
-//    Then when you;ve selected the ultra wide lens, setting the zoomfactor to 1 will be as wide as you can go!
-//    (a factor of 0.5 in relation to the standard lens's field of view).
-
-    guard let captureDevice else { return }
-    guard let captureDeviceInput else { return }
-
-    try captureDevice.lockForConfiguration()
-    
-    var newDeviceType: AVCaptureDevice.DeviceType {
-      // Camera supporting 0.5 == .builtInUltraWideCamera
-      guard !(zoomFactor < 1 && captureDevice.deviceType == .builtInWideAngleCamera) else {
-        return .builtInUltraWideCamera
-      }
-      
-      // Else use .builtInWideAngleCamera
-      return .builtInWideAngleCamera
-    }
-    
-    var newZoomFactor: CGFloat {
-      switch newDeviceType {
-      case .builtInUltraWideCamera: return 1
-      default: return zoomFactor
-      }
-    }
-    
-    let discoverySession = AVCaptureDevice.DiscoverySession(
-      deviceTypes: [newDeviceType],
-      mediaType: .video,
-      position: captureDevice.position
-    )
-    
-    guard let newDevice = discoverySession.devices.first else {
-      throw AnyError(".")
-    }
-    
-    let newInput = try AVCaptureDeviceInput(device: newDevice)
-    
-    self.captureSession.beginConfiguration()
-    self.captureSession.removeInput(captureDeviceInput)
-    
-    guard self.captureSession.canAddInput(newInput) else {
-      throw AnyError("Cannot add input \(newDevice)")
-    }
-    
-    self.captureSession.addInput(newInput)
-    self.captureDeviceInput = newInput
-    self.captureSession.commitConfiguration()
-    captureDevice.videoZoomFactor = newZoomFactor
-    captureDevice.unlockForConfiguration()
-  }
-  
-  private func startRecording() throws {
-    guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
-      throw AnyError("movieOutput.connection(with: .video) returned nil")
-    }
-    
-    // Configure connection for HEVC capture.
-    if self.captureMovieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.captureMovieFileOutput.setOutputSettings(
-        [AVVideoCodecKey: AVVideoCodecType.hevc],
-        for: connection
-      )
-    }
-    
-    // Enable video stabilization if the connection supports it.
-    if connection.isVideoStabilizationSupported {
-      connection.preferredVideoStabilizationMode = .auto
-    }
-    
-    self.captureMovieFileOutput.startRecording(
-      to: URL.temporaryDirectory
-        .appending(component: self.uuid().uuidString)
-        .appendingPathExtension(for: .quickTimeMovie),
-      recordingDelegate: self.captureFileOutputRecordingDelegate
-    )
-    self.isRecording = true
-  }
-  
-  private func stopRecording() {
-    self.captureMovieFileOutput.stopRecording()
-    self.isRecording = false
-  }
-  
-  private func handle(_ event: CaptureFileOutputRecordingDelegate.Event) {
+  func handle(_ event: CameraClient.Event) {
     switch event {
       
     case let .fileOutput(_, outputFileURL, _, _):
@@ -275,6 +103,12 @@ final class MainModel {
         })
       }
     }
+  }
+  
+  var movieFileOutput: URL {
+    URL.temporaryDirectory
+      .appending(component: self.uuid().uuidString)
+      .appendingPathExtension(for: .quickTimeMovie)
   }
 }
 
