@@ -180,12 +180,16 @@ final class MainModel {
     try captureDevice.lockForConfiguration()
     
     // Clamp the zoom factor to the device's limits
-    let clampedZoomFactor = min(max(zoomFactor, captureDevice.minAvailableVideoZoomFactor), captureDevice.maxAvailableVideoZoomFactor)
-    print("new zoom factor: \(clampedZoomFactor) | input: \(zoomFactor)")
-    captureDevice.videoZoomFactor = clampedZoomFactor
+    guard zoomFactor >= captureDevice.minAvailableVideoZoomFactor else {
+      throw AnyError("zoomFactor \(zoomFactor) is too low. The minAvailableVideoZoomFactor for this device is: \(captureDevice.minAvailableVideoZoomFactor)")
+    }
+    guard zoomFactor <= captureDevice.maxAvailableVideoZoomFactor else {
+      throw AnyError("zoomFactor \(zoomFactor) is too high. The maxAvailableVideoZoomFactor for this device is: \(captureDevice.maxAvailableVideoZoomFactor)")
+    }
+    
+    captureDevice.videoZoomFactor = zoomFactor
     captureDevice.unlockForConfiguration()
   }
-
   
   private func startRecording() throws {
     guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
