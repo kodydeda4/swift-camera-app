@@ -14,11 +14,11 @@ import SwiftUINavigation
  - [x] Destination
  - [x] Swift Dependencies
  - [x] Swift Format
- - [ ] Build version
+ - [x] Build version
  - [ ] AppIcon
+ - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
- 
  - [ ] SwiftUI Preview Compiler Directive
  - [ ] Logs
  - [ ] DesignSystem
