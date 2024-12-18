@@ -6,11 +6,12 @@ extension MainView {
   @MainActor internal var camera: some View {
     //@DEDA plz fix
     Group {
-      if true {
-        Image(.cameraPreview)
-      } else {
+//      if true {
+//        Image(.cameraPreview)
         CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
-      }
+//      } else {
+//        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
+//      }
     }
     .ignoresSafeArea()
   }

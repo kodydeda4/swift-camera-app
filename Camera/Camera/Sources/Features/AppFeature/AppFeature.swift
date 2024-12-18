@@ -15,7 +15,7 @@ import SwiftUINavigation
  - [x] Swift Dependencies
  - [x] Swift Format
  - [x] Build version
- - [ ] AppIcon
+ - [x] AppIcon
  - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
