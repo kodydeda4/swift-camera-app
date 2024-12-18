@@ -189,48 +189,48 @@ final class MainModel {
     guard let captureDeviceInput else { return }
 
     try captureDevice.lockForConfiguration()
-
-    if zoomFactor >= 1 {
-      // builtInWideAngleCamera
-      captureDevice.videoZoomFactor = zoomFactor
-      captureDevice.unlockForConfiguration()
-    } else {
-      // builtInUltraWideCamera
-      let availableDevices: [AVCaptureDevice] = AVCaptureDevice.DiscoverySession(
-        deviceTypes: [.builtInWideAngleCamera, .builtInDualCamera, .builtInUltraWideCamera],
-        mediaType: .video,
-        position: .unspecified
-      )
-        .devices
-        .filter { $0.position == captureDevice.position }
-        .filter { device in
-          if zoomFactor < 1 {
-            return device.deviceType == .builtInUltraWideCamera
-          } else {
-            return device.deviceType == .builtInWideAngleCamera
-          }
-        }
-      
-      guard let newDevice = availableDevices.first else {
-        throw AnyError(".")
+    
+    var newDeviceType: AVCaptureDevice.DeviceType {
+      // Camera supporting 0.5 == .builtInUltraWideCamera
+      guard !(zoomFactor < 1 && captureDevice.deviceType == .builtInWideAngleCamera) else {
+        return .builtInUltraWideCamera
       }
       
-      let newInput = try AVCaptureDeviceInput(device: newDevice)
-      
-      
-      self.captureSession.beginConfiguration()
-      self.captureSession.removeInput(captureDeviceInput)
-      
-      guard self.captureSession.canAddInput(newInput) else {
-        throw AnyError("Cannot add input \(newDevice)")
-      }
-      
-      self.captureSession.addInput(newInput)
-      self.captureDeviceInput = newInput
-      self.captureSession.commitConfiguration()
-      captureDevice.videoZoomFactor = 1
-      captureDevice.unlockForConfiguration()
+      // Else use .builtInWideAngleCamera
+      return .builtInWideAngleCamera
     }
+    
+    var newZoomFactor: CGFloat {
+      switch newDeviceType {
+      case .builtInUltraWideCamera: return 1
+      default: return zoomFactor
+      }
+    }
+    
+    let discoverySession = AVCaptureDevice.DiscoverySession(
+      deviceTypes: [newDeviceType],
+      mediaType: .video,
+      position: captureDevice.position
+    )
+    
+    guard let newDevice = discoverySession.devices.first else {
+      throw AnyError(".")
+    }
+    
+    let newInput = try AVCaptureDeviceInput(device: newDevice)
+    
+    self.captureSession.beginConfiguration()
+    self.captureSession.removeInput(captureDeviceInput)
+    
+    guard self.captureSession.canAddInput(newInput) else {
+      throw AnyError("Cannot add input \(newDevice)")
+    }
+    
+    self.captureSession.addInput(newInput)
+    self.captureDeviceInput = newInput
+    self.captureSession.commitConfiguration()
+    captureDevice.videoZoomFactor = newZoomFactor
+    captureDevice.unlockForConfiguration()
   }
   
   private func startRecording() throws {
