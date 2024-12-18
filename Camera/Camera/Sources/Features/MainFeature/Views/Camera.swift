@@ -11,7 +11,8 @@ extension MainView {
       CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
 //      } else {
 //        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
-//      }
+      
+      //      }
     }
     .ignoresSafeArea()
   }

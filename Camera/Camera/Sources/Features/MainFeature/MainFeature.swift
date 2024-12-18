@@ -40,13 +40,17 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
+    self.userPermissions[.microphone] == .authorized &&
+    self.userPermissions[.photos] == .authorized
+  }
+  
+  var isSwitchCameraButtonDisabled: Bool {
+    self.isRecording
   }
   
   func recordingButtonTapped() {
-    try? !isRecording ? startRecording() : stopRecording()
-    self.isRecording.toggle()
+    let result = Result { try !isRecording ? startRecording() : stopRecording() }
+    print("\(Self.self).recordingButtonTapped.\(result)")
   }
   
   func permissionsButtonTapped() {
@@ -55,13 +59,13 @@ final class MainModel {
   
   func switchCameraButtonTapped() {
     let result = Result { try self.switchCamera() }
-    print(result)
+    print("\(Self.self).switchCamera", result)
   }
   
   func captureLibraryButtonTapped() {
     //...
   }
-
+  
   func bind() {
     switch destination {
       
@@ -74,18 +78,22 @@ final class MainModel {
   }
   
   func task() async {
-    await withTaskGroup(of: Void.self) { taskGroup in
-      taskGroup.addTask {
-        let result = await Result { try await self.configureSession() }
-        print(result)
-      }
-      taskGroup.addTask {
-        for await event in await self.captureFileOutputRecordingDelegate.events {
-          await self.handle(event)
+    await withTaskCancellationHandler {
+      await withTaskGroup(of: Void.self) { taskGroup in
+        taskGroup.addTask {
+          let result = await Result { try await self.configureSession() }
+          print(result)
+        }
+        taskGroup.addTask {
+          for await event in await self.captureFileOutputRecordingDelegate.events {
+            await self.handle(event)
+          }
         }
       }
+    } onCancel: { [captureSession = self.captureSession] in
+      print("Session cancelled.")
+      captureSession.stopRunning()
     }
-    // @DEDA.. on cancellation, captureSession.stopRunning()
   }
   
   // MARK: - Private
@@ -95,7 +103,7 @@ final class MainModel {
     
     let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
     let output = self.captureMovieFileOutput
-
+    
     guard let device else {
       throw AnyError("\(String(describing: device)) returned nil.")
     }
@@ -145,8 +153,8 @@ final class MainModel {
     )
     
     let newPosition: AVCaptureDevice.Position = captureDeviceInput.device.position == .back
-      ? .front
-      : .back
+    ? .front
+    : .back
     
     guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition })
     else {
@@ -188,10 +196,12 @@ final class MainModel {
         .appendingPathExtension(for: .quickTimeMovie),
       recordingDelegate: self.captureFileOutputRecordingDelegate
     )
+    self.isRecording = true
   }
   
   private func stopRecording() {
     self.captureMovieFileOutput.stopRecording()
+    self.isRecording = false
   }
   
   private func handle(_ event: CaptureFileOutputRecordingDelegate.Event) {
@@ -214,14 +224,10 @@ struct MainView: View {
   
   var body: some View {
     NavigationStack {
-      ZStack {
-        Group {
-          if self.model.hasFullPermissions {
-            self.camera
-          } else {
-            self.permissionsRequired
-          }
-        }
+      if self.model.hasFullPermissions {
+        self.camera
+      } else {
+        self.permissionsRequired
       }
     }
     .navigationBarBackButtonHidden()

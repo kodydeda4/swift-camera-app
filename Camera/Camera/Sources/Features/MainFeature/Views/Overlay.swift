@@ -107,7 +107,7 @@ fileprivate extension MainView {
         .clipShape(Circle())
     }
     .padding(.horizontal)
-    .disabled(!self.model.hasFullPermissions)
+    .disabled(self.model.isSwitchCameraButtonDisabled)
   }
 }
 

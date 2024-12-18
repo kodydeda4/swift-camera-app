@@ -16,24 +16,30 @@ import SwiftUINavigation
  - [x] Swift Format
  - [x] Build version
  - [x] AppIcon
+ - [x] Front facing camera
  - [ ] Logs
  - [ ] Unit Tests
  - [ ] swift 6
  - [ ] SPM
- - [ ] Front facing camera
- - [ ] Different zooms
- - [ ] Camera Roll / Recorded video list w/preview and playback?..
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
+ 
+ Idk Features
+ - [ ] Handle app backgrounding
+ - [ ] Camera Roll / Recorded video list w/preview and playback
+ - [ ] Different zooms
+ - [ ] Record video vs take picture
+ - [ ] Save to an album for the app specifically?
+ - [ ] Notifications for when something was saved to your camera roll
 
   UI Rework
+ - [ ] Haptic feedback for recording button
  - [ ] Video Recording duration
  - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
  - [ ] SwiftUI Preview Compiler Directive
  - [ ] DesignSystem
-
 
  -------------------------------------------------------------------------------------------- */
 
