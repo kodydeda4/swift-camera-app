@@ -54,12 +54,10 @@ final class AppModel {
       : .onboarding(OnboardingModel())
   }
   
-  var task: Task<Void, Never> {
-    Task.detached {
-      await withTaskGroup(of: Void.self) { taskGroup in
-        taskGroup.addTask {
-          await self.syncUserPermissions()
-        }
+  func task() async {
+    await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        await self.syncUserPermissions()
       }
     }
   }
@@ -110,7 +108,7 @@ struct AppView: View {
         ProgressView()
       }
     }
-    .task { await self.model.task.cancellableValue }
+    .task { await self.model.task() }
   }
 }
 

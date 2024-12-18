@@ -21,10 +21,14 @@ extension MainView {
 fileprivate extension MainView {
   private var top: some View {
     HStack {
-      Text("Camera")
-        .font(.title)
-        .fontWeight(.bold)
-        .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
+      VStack(alignment: .leading) {
+        Text("Camera")
+          .font(.title)
+          .fontWeight(.bold)
+
+        Text(self.model.buildNumber.description)
+      }
+      .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
 
       Spacer()
 

@@ -3,7 +3,7 @@ import AVFoundation
 
 final class CaptureFileOutputRecordingDelegate: NSObject {
   let events = AsyncChannel<Event>()
-  
+
   enum Event {
     case fileOutput(
       _ output: AVCaptureFileOutput,

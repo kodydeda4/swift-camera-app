@@ -15,6 +15,7 @@ final class MainModel {
   private(set) var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   private(set) var captureFileOutputRecordingDelegate = CaptureFileOutputRecordingDelegate()
   private(set) var isRecording = false
+  var buildNumber: Build.Number { Build.number }
 
   var destination: Destination? { didSet { self.bind() } }
   
