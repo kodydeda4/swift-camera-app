@@ -156,7 +156,7 @@ private extension MainModel {
 // MARK: - SwiftUI
 
 struct MainView: View {
-  @Bindable public var model: MainModel
+  @Bindable var model: MainModel
   
   var body: some View {
     NavigationStack {
