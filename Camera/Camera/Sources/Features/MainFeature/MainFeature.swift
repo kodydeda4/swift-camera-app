@@ -57,6 +57,11 @@ final class MainModel {
     self.destination = .userPermissions(UserPermissionsModel())
   }
   
+  func zoomButtonTapped(_ value: CGFloat) {
+    let result = Result { try self.setZoomFactor(value) }
+    print("\(Self.self).setZoomFactor", result)
+  }
+  
   func switchCameraButtonTapped() {
     let result = Result { try self.switchCamera() }
     print("\(Self.self).switchCamera", result)
@@ -82,7 +87,7 @@ final class MainModel {
       await withTaskGroup(of: Void.self) { taskGroup in
         taskGroup.addTask {
           let result = await Result { try await self.configureSession() }
-          print(result)
+          print("\(Self.self).configureSession", result)
         }
         taskGroup.addTask {
           for await event in await self.captureFileOutputRecordingDelegate.events {
@@ -91,7 +96,7 @@ final class MainModel {
         }
       }
     } onCancel: { [captureSession = self.captureSession] in
-      print("Session cancelled.")
+      print("\(Self.self).task cancelled")
       captureSession.stopRunning()
     }
   }
@@ -137,8 +142,6 @@ final class MainModel {
   }
   
   private func switchCamera() throws {
-    print("switchCamera")
-    
     guard let captureDeviceInput else {
       return
     }
@@ -171,6 +174,18 @@ final class MainModel {
     self.captureDeviceInput = newInput
     self.captureSession.commitConfiguration()
   }
+  
+  private func setZoomFactor(_ zoomFactor: CGFloat) throws {
+    guard let captureDevice else { return }
+    try captureDevice.lockForConfiguration()
+    
+    // Clamp the zoom factor to the device's limits
+    let clampedZoomFactor = min(max(zoomFactor, captureDevice.minAvailableVideoZoomFactor), captureDevice.maxAvailableVideoZoomFactor)
+    print("new zoom factor: \(clampedZoomFactor) | input: \(zoomFactor)")
+    captureDevice.videoZoomFactor = clampedZoomFactor
+    captureDevice.unlockForConfiguration()
+  }
+
   
   private func startRecording() throws {
     guard let connection = self.captureMovieFileOutput.connection(with: .video) else {

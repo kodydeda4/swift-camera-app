@@ -25,13 +25,13 @@ fileprivate extension MainView {
         Text("Camera")
           .font(.title)
           .fontWeight(.bold)
-
+        
         Text(self.model.buildNumber.description)
       }
       .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
-
+      
       Spacer()
-
+      
       Button(action: self.model.permissionsButtonTapped) {
         Image(systemName: "gear")
           .resizable()
@@ -44,17 +44,32 @@ fileprivate extension MainView {
       }
     }
   }
-
+  
   private var bottom: some View {
-    HStack {
-      self.captureLibraryButton
-      Spacer()
-      self.recordingButton
-      Spacer()
-      self.switchCameraButton
+    VStack {
+      self.zoomButtons.padding(.bottom)
+      
+      HStack {
+        self.captureLibraryButton
+        Spacer()
+        self.recordingButton
+        Spacer()
+        self.switchCameraButton
+      }
     }
   }
-
+  
+  private var zoomButtons: some View {
+    HStack {
+      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
+        Button("\(value.formattedDescription)x") {
+          self.model.zoomButtonTapped(value)
+        }
+        .buttonStyle(.bordered)
+      }
+    }
+  }
+  
   private var captureLibraryButton: some View {
     Button(action: self.model.captureLibraryButtonTapped) {
       Image(systemName: "photo.on.rectangle.angled")
@@ -71,7 +86,7 @@ fileprivate extension MainView {
     .padding(.horizontal)
     .disabled(!self.model.hasFullPermissions)
   }
-
+  
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
@@ -90,7 +105,7 @@ fileprivate extension MainView {
     .padding(.horizontal)
     .disabled(!self.model.hasFullPermissions)
   }
-
+  
   private var switchCameraButton: some View {
     Button(action: self.model.switchCameraButtonTapped) {
       Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
@@ -108,6 +123,16 @@ fileprivate extension MainView {
     }
     .padding(.horizontal)
     .disabled(self.model.isSwitchCameraButtonDisabled)
+  }
+}
+
+extension CGFloat {
+  var formattedDescription: String {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
+    formatter.minimumFractionDigits = 0
+    formatter.roundingMode = .halfUp
+    return formatter.string(for: self)!
   }
 }
 
