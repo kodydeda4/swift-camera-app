@@ -1,10 +1,10 @@
 import AsyncAlgorithms
 import AVFoundation
 
-public final class CaptureFileOutputRecordingDelegate: NSObject {
-  public let events = AsyncChannel<Event>()
+final class CaptureFileOutputRecordingDelegate: NSObject {
+  let events = AsyncChannel<Event>()
   
-  public enum Event {
+  enum Event {
     case fileOutput(
       _ output: AVCaptureFileOutput,
       didFinishRecordingTo: URL,
@@ -17,7 +17,7 @@ public final class CaptureFileOutputRecordingDelegate: NSObject {
 // MARK: - Computed Properties
 
 extension CaptureFileOutputRecordingDelegate: AVCaptureFileOutputRecordingDelegate {
-  public func fileOutput(
+  func fileOutput(
     _ output: AVCaptureFileOutput,
     didFinishRecordingTo outputFileURL: URL,
     from connections: [AVCaptureConnection],
