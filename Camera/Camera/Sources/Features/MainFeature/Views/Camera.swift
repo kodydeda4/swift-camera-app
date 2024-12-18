@@ -8,7 +8,7 @@ extension MainView {
     Group {
 //      if true {
 //        Image(.cameraPreview)
-        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
+      CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
 //      } else {
 //        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
 //      }

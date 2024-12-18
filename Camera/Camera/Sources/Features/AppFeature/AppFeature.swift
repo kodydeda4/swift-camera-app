@@ -23,6 +23,8 @@ import SwiftUINavigation
  - [ ] Front facing camera
  - [ ] Different zooms
  - [ ] Camera Roll / Recorded video list w/preview and playback?..
+ - [ ] App demo for onboarding
+ - [ ] App demo for camera/mainfeature
 
   UI Rework
  - [ ] Video Recording duration

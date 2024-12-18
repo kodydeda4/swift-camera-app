@@ -44,7 +44,7 @@ fileprivate extension MainView {
       }
     }
   }
-  
+
   private var bottom: some View {
     HStack {
       self.captureLibraryButton
@@ -54,7 +54,7 @@ fileprivate extension MainView {
       self.switchCameraButton
     }
   }
-  
+
   private var captureLibraryButton: some View {
     Button(action: self.model.captureLibraryButtonTapped) {
       Image(systemName: "photo.on.rectangle.angled")
@@ -90,7 +90,7 @@ fileprivate extension MainView {
     .padding(.horizontal)
     .disabled(!self.model.hasFullPermissions)
   }
-  
+
   private var switchCameraButton: some View {
     Button(action: self.model.switchCameraButtonTapped) {
       Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")

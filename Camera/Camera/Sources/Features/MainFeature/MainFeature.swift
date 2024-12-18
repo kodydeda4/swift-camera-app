@@ -5,6 +5,8 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// @DEDA looks like if you come back to the app after backgrounding, video recording no longer works.
+
 @MainActor
 @Observable
 final class MainModel {
@@ -52,7 +54,8 @@ final class MainModel {
   }
   
   func switchCameraButtonTapped() {
-    //...
+    let result = Result { try self.switchCamera() }
+    print(result)
   }
   
   func captureLibraryButtonTapped() {
@@ -73,11 +76,8 @@ final class MainModel {
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        do {
-          try await self.startCaptureSession()
-        } catch {
-          print(error.localizedDescription)
-        }
+        let result = await Result { try await self.configureSession() }
+        print(result)
       }
       taskGroup.addTask {
         for await event in await self.captureFileOutputRecordingDelegate.events {
@@ -85,18 +85,23 @@ final class MainModel {
         }
       }
     }
+    // @DEDA.. on cancellation, captureSession.stopRunning()
   }
   
   // MARK: - Private
   
-  private func startCaptureSession() throws {
-    guard let device = AVCaptureDevice.default(for: .video) else {
-      throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
-    }
+  private func configureSession() throws {
+    self.captureSession.beginConfiguration()
     
-    let input = try AVCaptureDeviceInput(device: device)
+    let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
     let output = self.captureMovieFileOutput
-    
+
+    guard let device else {
+      throw AnyError("\(String(describing: device)) returned nil.")
+    }
+    guard let input = try? AVCaptureDeviceInput(device: device) else {
+      throw AnyError("Could not create input for \(device)")
+    }
     guard self.captureSession.canAddInput(input) else {
       throw AnyError("self.avCaptureSession.canAddInput(input) returned false.")
     }
@@ -108,11 +113,55 @@ final class MainModel {
     self.captureDeviceInput = input
     self.captureSession.addInput(input)
     self.captureSession.addOutput(output)
+    self.captureSession.commitConfiguration()
     self.captureVideoPreviewLayer.session = self.captureSession
-    
+    self.startSession()
+  }
+  
+  private func startSession() {
+    guard !self.captureSession.isRunning else {
+      print("\(Self.self).startSession was called while the session was already running.")
+      return
+    }
     Task.detached {
       await self.captureSession.startRunning()
     }
+  }
+  
+  private func switchCamera() throws {
+    print("switchCamera")
+    
+    guard let captureDeviceInput else {
+      return
+    }
+    
+    self.captureSession.beginConfiguration()
+    self.captureSession.removeInput(captureDeviceInput)
+    
+    let discoverySession = AVCaptureDevice.DiscoverySession(
+      deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
+      mediaType: .video,
+      position: .unspecified
+    )
+    
+    let newPosition: AVCaptureDevice.Position = captureDeviceInput.device.position == .back
+      ? .front
+      : .back
+    
+    guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition })
+    else {
+      throw AnyError("Failed to switch camera. Reverting to original.")
+    }
+    guard let newInput = try? AVCaptureDeviceInput(device: newDevice) else {
+      throw AnyError("Failed to create new video device input.")
+    }
+    guard self.captureSession.canAddInput(newInput) else {
+      throw AnyError("Cannot ad input \(newDevice)")
+    }
+    
+    self.captureSession.addInput(newInput)
+    self.captureDeviceInput = newInput
+    self.captureSession.commitConfiguration()
   }
   
   private func startRecording() throws {
