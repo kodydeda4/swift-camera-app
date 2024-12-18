@@ -62,10 +62,14 @@ fileprivate extension MainView {
   private var zoomButtons: some View {
     HStack {
       ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-        Button("\(value.formattedDescription)x") {
+        Button {
           self.model.zoomButtonTapped(value)
+        } label: {
+          Text("\(value.formattedDescription)x")
+            .foregroundColor(self.model.camera.zoom == value ? .white : .accentColor)
+            .padding()
+            .background(self.model.camera.zoom == value ? Color.accentColor : Color.clear)
         }
-        .buttonStyle(.bordered)
       }
     }
   }
@@ -89,7 +93,7 @@ fileprivate extension MainView {
   
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
-      Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
+      Image(systemName: self.model.camera.isRecording ? "circle.fill" : "circle")
         .resizable()
         .scaledToFit()
         .fontWeight(.semibold)
@@ -99,7 +103,7 @@ fileprivate extension MainView {
         )
         .padding(8)
         .background(.regularMaterial)
-        .foregroundColor(self.model.isRecording ? .red : .gray)
+        .foregroundColor(self.model.camera.isRecording ? .red : .gray)
         .clipShape(Circle())
     }
     .padding(.horizontal)
@@ -118,7 +122,7 @@ fileprivate extension MainView {
         )
         .padding(8)
         .background(.regularMaterial)
-        .foregroundColor(self.model.isRecording ? .red : .gray)
+        .foregroundColor(self.model.camera.isRecording ? .red : .gray)
         .clipShape(Circle())
     }
     .padding(.horizontal)

@@ -8,22 +8,14 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  var isRecording = false
-  var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
-  @ObservationIgnored
-  @Shared(.userPermissions) private var userPermissions
-  
-  @ObservationIgnored
-  @Dependency(\.camera) private var camera
-  
-  @ObservationIgnored
-  @Dependency(\.photoLibrary) private var photoLibrary
-  
-  @ObservationIgnored
-  @Dependency(\.uuid) private var uuid
+  @ObservationIgnored @Shared(.userPermissions) private var userPermissions
+  @ObservationIgnored @Shared(.camera) var camera
+  @ObservationIgnored @Dependency(\.camera) private var cameraClient
+  @ObservationIgnored @Dependency(\.photoLibrary) private var photoLibrary
+  @ObservationIgnored @Dependency(\.uuid) private var uuid
   
   @CasePathable
   enum Destination {
@@ -37,14 +29,13 @@ final class MainModel {
   }
   
   var isSwitchCameraButtonDisabled: Bool {
-    self.isRecording
+    self.camera.isRecording
   }
   
   func recordingButtonTapped() {
-    !isRecording
-    ? camera.startRecording(self.movieFileOutput)
-    : camera.stopRecording()
-    self.isRecording.toggle()
+    !self.camera.isRecording
+    ? cameraClient.startRecording(self.movieFileOutput)
+    : cameraClient.stopRecording()
   }
   
   func permissionsButtonTapped() {
@@ -52,11 +43,11 @@ final class MainModel {
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
-    self.camera.zoom(value)
+    self.cameraClient.zoom(value)
   }
   
   func switchCameraButtonTapped() {
-    self.camera.switchCamera()
+    self.cameraClient.switchCamera()
   }
   
   func captureLibraryButtonTapped() {
@@ -66,10 +57,7 @@ final class MainModel {
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        await self.camera.connect(self.captureVideoPreviewLayer)
-      }
-      taskGroup.addTask {
-        for await event in await self.camera.events() {
+        for await event in await self.cameraClient.events() {
           await self.handle(event)
         }
       }
