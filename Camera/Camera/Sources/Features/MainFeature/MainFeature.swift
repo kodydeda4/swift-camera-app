@@ -159,8 +159,7 @@ final class MainModel {
     ? .front
     : .back
     
-    guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition })
-    else {
+    guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition }) else {
       throw AnyError("Failed to switch camera. Reverting to original.")
     }
     guard let newInput = try? AVCaptureDeviceInput(device: newDevice) else {
@@ -176,19 +175,62 @@ final class MainModel {
   }
   
   private func setZoomFactor(_ zoomFactor: CGFloat) throws {
+//    @DEDA
+//    The minimum "zoomFactor" property of an AVCaptureDevice can't be less than 1.0 according to the Apple Docs.
+//    It's a little confusing becuase depending on what camera you've selected, a zoom factor of 1 will be a different field of view or optical view angle.
+//    The default iPhone camera app shows a label reading "0.5" but that's just a label for the ultra wide lens in relation to the standard camera's zoom factor.
+//
+//    You're already getting the minZoomFactor from the device, (which will probably be 1),
+//    so you should use the device's min and max that you're reading to set the bounds of the factor you input into "captureDevice.videoZoomFactor".
+//    Then when you;ve selected the ultra wide lens, setting the zoomfactor to 1 will be as wide as you can go!
+//    (a factor of 0.5 in relation to the standard lens's field of view).
+
     guard let captureDevice else { return }
+    guard let captureDeviceInput else { return }
+
     try captureDevice.lockForConfiguration()
-    
-    // Clamp the zoom factor to the device's limits
-    guard zoomFactor >= captureDevice.minAvailableVideoZoomFactor else {
-      throw AnyError("zoomFactor \(zoomFactor) is too low. The minAvailableVideoZoomFactor for this device is: \(captureDevice.minAvailableVideoZoomFactor)")
+
+    if zoomFactor >= 1 {
+      // builtInWideAngleCamera
+      captureDevice.videoZoomFactor = zoomFactor
+      captureDevice.unlockForConfiguration()
+    } else {
+      // builtInUltraWideCamera
+      let availableDevices: [AVCaptureDevice] = AVCaptureDevice.DiscoverySession(
+        deviceTypes: [.builtInWideAngleCamera, .builtInDualCamera, .builtInUltraWideCamera],
+        mediaType: .video,
+        position: .unspecified
+      )
+        .devices
+        .filter { $0.position == captureDevice.position }
+        .filter { device in
+          if zoomFactor < 1 {
+            return device.deviceType == .builtInUltraWideCamera
+          } else {
+            return device.deviceType == .builtInWideAngleCamera
+          }
+        }
+      
+      guard let newDevice = availableDevices.first else {
+        throw AnyError(".")
+      }
+      
+      let newInput = try AVCaptureDeviceInput(device: newDevice)
+      
+      
+      self.captureSession.beginConfiguration()
+      self.captureSession.removeInput(captureDeviceInput)
+      
+      guard self.captureSession.canAddInput(newInput) else {
+        throw AnyError("Cannot add input \(newDevice)")
+      }
+      
+      self.captureSession.addInput(newInput)
+      self.captureDeviceInput = newInput
+      self.captureSession.commitConfiguration()
+      captureDevice.videoZoomFactor = 1
+      captureDevice.unlockForConfiguration()
     }
-    guard zoomFactor <= captureDevice.maxAvailableVideoZoomFactor else {
-      throw AnyError("zoomFactor \(zoomFactor) is too high. The maxAvailableVideoZoomFactor for this device is: \(captureDevice.maxAvailableVideoZoomFactor)")
-    }
-    
-    captureDevice.videoZoomFactor = zoomFactor
-    captureDevice.unlockForConfiguration()
   }
   
   private func startRecording() throws {
