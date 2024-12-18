@@ -1,15 +1,15 @@
 import Foundation
 
 struct Build {
-  static var number: Number {
-    (Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
-      .flatMap(Int.init)
-      .flatMap(Number.init)
+  static var version: Version {
+    (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
+      .flatMap(Double.init)
+      .flatMap(Version.init)
       .unsafelyUnwrapped
   }
 
-  struct Number: Equatable, Codable, CustomStringConvertible {
-    var rawValue: Int
+  struct Version: Equatable, Codable, CustomStringConvertible {
+    var rawValue: Double
 
     var description: String {
       "v\(rawValue)"

@@ -9,7 +9,7 @@ import SwiftUINavigation
 final class OnboardingModel {
   var destination: Destination? { didSet { self.bind() } }
   var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
-  var buildNumber: Build.Number { Build.number }
+  var buildNumber: Build.Version { Build.version }
 
   @CasePathable
   enum Destination {
