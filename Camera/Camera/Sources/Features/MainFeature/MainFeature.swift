@@ -54,7 +54,7 @@ final class MainModel {
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
-    self.camera.setZoomFactor(value)
+    self.camera.zoom(value)
   }
   
   func switchCameraButtonTapped() {

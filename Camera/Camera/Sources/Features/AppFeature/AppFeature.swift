@@ -17,6 +17,8 @@ import SwiftUINavigation
  - [x] Build version
  - [x] AppIcon
  - [x] Front facing camera
+ - [x] CameraClient
+ - [ ] Different zooms
  - [ ] Logs
  - [ ] Unit Tests
  - [ ] swift 6
@@ -27,7 +29,6 @@ import SwiftUINavigation
  Idk Features
  - [ ] Handle app backgrounding
  - [ ] Camera Roll / Recorded video list w/preview and playback
- - [ ] Different zooms
  - [ ] Record video vs take picture
  - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll
