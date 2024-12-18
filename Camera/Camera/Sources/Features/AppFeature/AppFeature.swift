@@ -25,7 +25,9 @@ import SwiftUINavigation
  - [ ] SPM
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
- 
+ // @DEDA looks like if you come back to the app after backgrounding, video recording no longer works.
+
+
  Idk Features
  - [ ] Handle app backgrounding
  - [ ] Camera Roll / Recorded video list w/preview and playback

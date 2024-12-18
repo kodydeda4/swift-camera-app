@@ -5,8 +5,6 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-// @DEDA looks like if you come back to the app after backgrounding, video recording no longer works.
-
 @MainActor
 @Observable
 final class MainModel {
@@ -68,7 +66,7 @@ final class MainModel {
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        await self.camera.setup(self.captureVideoPreviewLayer)
+        await self.camera.connect(self.captureVideoPreviewLayer)
       }
       taskGroup.addTask {
         for await event in await self.camera.events() {
@@ -93,7 +91,7 @@ private extension MainModel {
     }
   }
   
-  func handle(_ event: CameraClient.Event) {
+  func handle(_ event: CameraClient.DelegateEvent) {
     switch event {
       
     case let .fileOutput(_, outputFileURL, _, _):
