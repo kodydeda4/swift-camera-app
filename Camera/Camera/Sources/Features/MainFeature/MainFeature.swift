@@ -82,7 +82,6 @@ private extension MainModel {
   }
   
   func startCaptureSession() throws {
-    // 1. Verify device inputs & outputs
     guard let device = AVCaptureDevice.default(for: .video) else {
       throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
     }
@@ -97,14 +96,12 @@ private extension MainModel {
       throw AnyError("self.avCaptureSession.canAddOutput(output) returned false.")
     }
     
-    // 2. State.set
     self.captureDevice = device
     self.captureDeviceInput = input
     self.captureSession.addInput(input)
     self.captureSession.addOutput(output)
     self.captureVideoPreviewLayer.session = self.captureSession
     
-    //@DEDA
     Task.detached {
       await self.captureSession.startRunning()
     }
