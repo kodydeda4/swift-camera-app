@@ -1,0 +1,27 @@
+--swiftversion 6.0
+
+# rules
+--rules fileHeader
+--rules indent
+--rules braces
+--rules sortSwitchCases
+--rules sortImports
+--rules wrap
+--rules wraparguments
+--rules wrapEnumCases
+--rules wrapMultilineStatementBraces
+--rules wrapConditionalBodies
+--rules wrapSwitchCases
+--rules isEmpty
+--rules void
+--rules elseOnSameLine
+
+# options
+--indent 2
+--closingparen balanced
+--wraparguments before-first
+--wrapternary before-operators
+--wrapcollections before-first
+--wrapparameters before-first
+--guardelse next-line
+--maxwidth 100

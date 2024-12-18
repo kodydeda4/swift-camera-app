@@ -1,0 +1,121 @@
+import Dependencies
+import Sharing
+import SwiftUI
+import SwiftUINavigation
+
+/* --------------------------------------------------------------------------------------------
+ 
+ @DEDA
+ 
+ - [x] Camera
+ - [x] Video Recording
+ - [x] UserPermissions
+ - [x] Bind && Unimplemented
+ - [x] Destination
+ - [x] Swift Dependencies
+ - [x] Swift Format
+ - [ ] Build version
+ - [ ] AppIcon
+ - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
+ - [ ] Finished recording toast / progress
+ 
+ - [ ] SwiftUI Preview Compiler Directive
+ - [ ] Logs
+ - [ ] DesignSystem
+ - [ ] Unit Tests
+ - [ ] swift 6
+ - [ ] SPM
+
+ -------------------------------------------------------------------------------------------- */
+
+@Observable
+@MainActor
+final class AppModel {
+  var destination: Destination? { didSet { self.bind() } }
+  
+  @ObservationIgnored
+  @Shared(.isOnboardingComplete) var isOnboardingComplete = false
+  
+  @ObservationIgnored
+  @Shared(.userPermissions) var userPermissions
+  
+  @ObservationIgnored
+  @Dependency(\.userPermissions) var userPermissionsClient
+  
+  @CasePathable
+  enum Destination {
+    case main(MainModel)
+    case onboarding(OnboardingModel)
+  }
+  
+  init() {
+    self.destination = self.isOnboardingComplete
+      ? .main(MainModel())
+      : .onboarding(OnboardingModel())
+  }
+  
+  var task: Task<Void, Never> {
+    Task.detached {
+      await withTaskGroup(of: Void.self) { taskGroup in
+        taskGroup.addTask {
+          await self.syncUserPermissions()
+        }
+      }
+    }
+  }
+  
+  /// Update user permissions when the app starts or returns from the background.
+  private func syncUserPermissions() async {
+    UserPermissionsClient.Feature.allCases.forEach { feature in
+      self.$userPermissions.withLock {
+        $0[feature] = self.userPermissionsClient.status(feature)
+      }
+    }
+  }
+  
+  private func bind() {
+    switch destination {
+      
+    case .main:
+      break
+      
+    case let .onboarding(model):
+      model.onCompletion = { [weak self] in
+        self?.$isOnboardingComplete.withLock { $0 = true }
+        self?.destination = .main(MainModel())
+      }
+      
+    case .none:
+      break
+    }
+  }
+}
+
+// MARK: - SwiftUI
+
+struct AppView: View {
+  @Bindable var model: AppModel
+  
+  var body: some View {
+    Group {
+      switch self.model.destination {
+        
+      case let .main(model):
+        MainView(model: model)
+        
+      case let .onboarding(model):
+        OnboardingView(model: model)
+        
+      case .none:
+        ProgressView()
+      }
+    }
+    .task { await self.model.task.cancellableValue }
+  }
+}
+
+// MARK: - SwiftUI Previews
+
+#Preview {
+  AppView(model: AppModel())
+}
