@@ -15,8 +15,8 @@ final class MainModel {
   private(set) var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
   private(set) var captureFileOutputRecordingDelegate = CaptureFileOutputRecordingDelegate()
   private(set) var isRecording = false
+  
   var buildNumber: Build.Version { Build.version }
-
   var destination: Destination? { didSet { self.bind() } }
   
   @ObservationIgnored
@@ -50,26 +50,6 @@ final class MainModel {
   func permissionsButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
   }
-
-  func task() async {
-    await withTaskGroup(of: Void.self) { taskGroup in
-      taskGroup.addTask {
-        do {
-          try await self.startCaptureSession()
-        } catch {
-          print(error.localizedDescription)
-        }
-      }
-      taskGroup.addTask {
-        for await event in await self.captureFileOutputRecordingDelegate.events {
-          await self.handleRecordingDelegateEvent(event)
-        }
-      }
-    }
-  }
-}
-
-private extension MainModel {
   
   func bind() {
     switch destination {
@@ -82,7 +62,26 @@ private extension MainModel {
     }
   }
   
-  func startCaptureSession() throws {
+  func task() async {
+    await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        do {
+          try await self.startCaptureSession()
+        } catch {
+          print(error.localizedDescription)
+        }
+      }
+      taskGroup.addTask {
+        for await event in await self.captureFileOutputRecordingDelegate.events {
+          await self.handle(event)
+        }
+      }
+    }
+  }
+  
+  // MARK: - Private
+  
+  private func startCaptureSession() throws {
     guard let device = AVCaptureDevice.default(for: .video) else {
       throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
     }
@@ -108,7 +107,7 @@ private extension MainModel {
     }
   }
   
-  func startRecording() throws {
+  private func startRecording() throws {
     guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
       throw AnyError("movieOutput.connection(with: .video) returned nil")
     }
@@ -134,11 +133,11 @@ private extension MainModel {
     )
   }
   
-  func stopRecording() {
+  private func stopRecording() {
     self.captureMovieFileOutput.stopRecording()
   }
   
-  func handleRecordingDelegateEvent(_ event: CaptureFileOutputRecordingDelegate.Event) {
+  private func handle(_ event: CaptureFileOutputRecordingDelegate.Event) {
     switch event {
       
     case let .fileOutput(_, outputFileURL, _, _):

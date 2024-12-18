@@ -4,11 +4,19 @@ import SwiftUI
 
 extension MainView {
   @MainActor internal var camera: some View {
-    AVCaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
+    //@DEDA plz fix
+    Group {
+      if true {
+        Image(.cameraPreview)
+      } else {
+        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
+      }
+    }
+    .ignoresSafeArea()
   }
 }
 
-private struct AVCaptureVideoPreviewLayerView: UIViewControllerRepresentable {
+private struct CaptureVideoPreviewLayerView: UIViewControllerRepresentable {
   let captureVideoPreviewLayer: AVCaptureVideoPreviewLayer
   typealias UIViewControllerType = UIViewController
 
