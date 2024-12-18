@@ -129,7 +129,9 @@ private extension MainModel {
     }
     
     self.captureMovieFileOutput.startRecording(
-      to: .movieFileOutput(uuid()),
+      to: URL.temporaryDirectory
+        .appending(component: self.uuid().uuidString)
+        .appendingPathExtension(for: .quickTimeMovie),
       recordingDelegate: self.captureFileOutputRecordingDelegate
     )
   }
@@ -141,20 +143,7 @@ private extension MainModel {
   func handleRecordingDelegateEvent(_ event: CaptureFileOutputRecordingDelegate.Event) {
     switch event {
       
-    case let .fileOutput(
-      output,
-      didFinishRecordingTo: outputFileURL,
-      from: connections,
-      error: error
-    ):
-      print(output, outputFileURL, connections, error as Any)
-      
-      guard self.userPermissions[.photos] == .authorized else {
-        print("photo library read write access not granted.")
-        return
-      }
-      
-      //@DEDA
+    case let .fileOutput(_, outputFileURL, _, _):
       Task.detached {
         try await self.photoLibrary().performChanges({
           PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
