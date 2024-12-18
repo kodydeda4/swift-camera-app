@@ -13,18 +13,19 @@ import SwiftUINavigation
  - [x] Bind && Unimplemented
  - [x] Destination
  - [x] Swift Dependencies
- - [ ] SPM
- - [ ] SwiftUI Preview Compiler Directive
- - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
+ - [x] Swift Format
  - [ ] Build version
+ - [ ] AppIcon
+ - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
- - [ ] DesignSystem
+ 
+ - [ ] SwiftUI Preview Compiler Directive
  - [ ] Logs
- - [ ] Swift Format
+ - [ ] DesignSystem
  - [ ] Unit Tests
  - [ ] swift 6
- - [ ] Git Flow release version
- 
+ - [ ] SPM
+
  -------------------------------------------------------------------------------------------- */
 
 @Observable
