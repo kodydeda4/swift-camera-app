@@ -51,6 +51,14 @@ final class MainModel {
     self.destination = .userPermissions(UserPermissionsModel())
   }
   
+  func switchCameraButtonTapped() {
+    //...
+  }
+  
+  func captureLibraryButtonTapped() {
+    //...
+  }
+
   func bind() {
     switch destination {
       
@@ -157,11 +165,13 @@ struct MainView: View {
   
   var body: some View {
     NavigationStack {
-      Group {
-        if self.model.hasFullPermissions {
-          self.camera
-        } else {
-          self.permissionsRequired
+      ZStack {
+        Group {
+          if self.model.hasFullPermissions {
+            self.camera
+          } else {
+            self.permissionsRequired
+          }
         }
       }
     }

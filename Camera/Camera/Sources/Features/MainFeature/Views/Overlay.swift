@@ -44,10 +44,56 @@ fileprivate extension MainView {
       }
     }
   }
-
+  
   private var bottom: some View {
+    HStack {
+      self.captureLibraryButton
+      Spacer()
+      self.recordingButton
+      Spacer()
+      self.switchCameraButton
+    }
+  }
+  
+  private var captureLibraryButton: some View {
+    Button(action: self.model.captureLibraryButtonTapped) {
+      Image(systemName: "photo.on.rectangle.angled")
+        .resizable()
+        .scaledToFit()
+        .fontWeight(.semibold)
+        .frame(
+          width: Style.buttonSizeRecording,
+          height: Style.buttonSizeRecording
+        )
+        .padding(8)
+        .foregroundColor(.gray)
+    }
+    .padding(.horizontal)
+    .disabled(!self.model.hasFullPermissions)
+  }
+
+  private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.isRecording ? "circle.fill" : "circle")
+        .resizable()
+        .scaledToFit()
+        .fontWeight(.semibold)
+        .frame(
+          width: Style.buttonSizeRecording,
+          height: Style.buttonSizeRecording
+        )
+        .padding(8)
+        .background(.regularMaterial)
+        .foregroundColor(self.model.isRecording ? .red : .gray)
+        .clipShape(Circle())
+    }
+    .padding(.horizontal)
+    .disabled(!self.model.hasFullPermissions)
+  }
+  
+  private var switchCameraButton: some View {
+    Button(action: self.model.switchCameraButtonTapped) {
+      Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
         .resizable()
         .scaledToFit()
         .fontWeight(.semibold)

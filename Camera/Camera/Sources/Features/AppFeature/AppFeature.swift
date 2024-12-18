@@ -20,6 +20,9 @@ import SwiftUINavigation
  - [ ] Unit Tests
  - [ ] swift 6
  - [ ] SPM
+ - [ ] Front facing camera
+ - [ ] Different zooms
+ - [ ] Camera Roll / Recorded video list w/preview and playback?..
 
   UI Rework
  - [ ] Video Recording duration
