@@ -107,76 +107,16 @@ private extension CameraModel {
     switch event {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
-      //      self.photoLibrary().performChanges({
-      //        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-      //      })
-      
       Task {
-        _ = try? await self.createPhotoLibraryAlbum()
-        
-        try await self.photoLibrary().performChanges({
-          guard let album = self.fetchAlbum() else {
-            print("Album not found")
-            return
-          }
-          // Save the video to the album
-          let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-          if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
-            let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
-            albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
-          }
-        })
+        if let album = try? await self.photoLibrary.fetch(.appPhotoAlbum) {
+          try await self.photoLibrary.save(outputFileURL, album)
+        } else {
+          let album = try await self.photoLibrary.create(.appPhotoAlbum)
+          try await self.photoLibrary.save(outputFileURL, album)
+        }
       }
     }
   }
-  
-  private func fetchAlbum() -> PHAssetCollection? {
-    let prFetchOptions = PHFetchOptions()
-    prFetchOptions.predicate = NSPredicate(format: "title = %@", String.appPhotoAlbum)
-
-    let result = PHAssetCollection.fetchAssetCollections(
-      with: .album,
-      subtype: .any,
-      options: prFetchOptions
-    )
-
-    return result.firstObject
-  }
-  
-  @discardableResult func createPhotoLibraryAlbum() async throws -> PHAssetCollection {
-    try await Future<PHAssetCollection, AnyError> { promise in
-      var assetCollectionPlaceholder: PHObjectPlaceholder!
-      
-      PHPhotoLibrary.shared().performChanges({
-        let createAlbumRequest = PHAssetCollectionChangeRequest
-          .creationRequestForAssetCollection(withTitle: String.appPhotoAlbum)
-        
-        assetCollectionPlaceholder = createAlbumRequest.placeholderForCreatedAssetCollection
-        
-      }, completionHandler: { success, error in
-        guard success else {
-          promise(.failure(AnyError("unableToGetCollection")))
-          return
-        }
-        
-        let collectionFetchResult = PHAssetCollection
-          .fetchAssetCollections(
-            withLocalIdentifiers: [assetCollectionPlaceholder.localIdentifier],
-            options: nil
-          )
-        
-        guard let assetCollection = collectionFetchResult.firstObject else {
-          promise(.failure(AnyError("unableToGetCollection")))
-          return
-        }
-        
-        promise(.success(assetCollection))
-      })
-    }
-    .value
-  }
-  
-  //  appPhotoAlbum
   
   var movieFileOutput: URL {
     URL.temporaryDirectory
