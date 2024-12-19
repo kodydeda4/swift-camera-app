@@ -5,122 +5,16 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-// @DEDA extract the mainfeature from the camera feature.
-// Create a tabview that you can switch between, kinda like snapchat.
-// The camera roll will you show you all the videos you recorded.
-// The main view will just be the recording screen.
-// You can navigate to user permissions from either page.
-// You could use GRDB to save details about a video and display them in a grid or smnthn.
-
 @MainActor
 @Observable
 final class MainModel {
-  var buildNumber: Build.Version { Build.version }
-  var destination: Destination? { didSet { self.bind() } }
+  var cameraModel = CameraModel()
+  var libraryModel = LibraryModel()
+  var tab = Tab.camera
   
-  // Shared
-  @ObservationIgnored @Shared(.camera) var camera
-  @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
-
-  // Dependencies
-  @ObservationIgnored @Dependency(\.camera) var cameraClient
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
-  @ObservationIgnored @Dependency(\.uuid) var uuid
-  
-  @CasePathable
-  enum Destination {
-    case userPermissions(UserPermissionsModel)
-//    case cameraRoll(CameraRollModel)
-  }
-  
-  var hasFullPermissions: Bool {
-    self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
-  }
-  
-  var isSwitchCameraButtonDisabled: Bool {
-    self.camera.isRecording
-  }
-  
-  func recordingButtonTapped() {
-    _ = Result {
-      try !camera.isRecording
-        ? cameraClient.startRecording(self.movieFileOutput)
-        : cameraClient.stopRecording()
-      
-      self.$camera.isRecording.withLock { $0.toggle() }
-    }
-  }
-  
-  func permissionsButtonTapped() {
-    self.destination = .userPermissions(UserPermissionsModel())
-  }
-  
-  func zoomButtonTapped(_ value: CGFloat) {
-    _ = Result {
-      try self.cameraClient.zoom(value)
-      self.$camera.zoom.withLock { $0 = value }
-    }
-  }
-  
-  func switchCameraButtonTapped() {
-    _ = Result {
-      try self.cameraClient.switchCamera()
-    }
-  }
-  
-  func captureLibraryButtonTapped() {
-    // @DEDA unimplemented
-  }
-  
-  func task() async {
-    guard hasFullPermissions else {
-      return
-    }
-
-    // @DEDA when you return, start the session again.
-    await withTaskGroup(of: Void.self) { taskGroup in
-      taskGroup.addTask {
-        try? await self.cameraClient.connect(self.camera.captureVideoPreviewLayer)
-      }
-      taskGroup.addTask {
-        for await event in await self.cameraClient.events() {
-          await self.handle(event)
-        }
-      }
-    }
-  }
-}
-
-// MARK: Private
-
-private extension MainModel {
-  func bind() {
-    switch destination {
-      
-    case let .userPermissions(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case .none:
-      break
-    }
-  }
-  
-  func handle(_ event: CameraClient.DelegateEvent) {
-    switch event {
-      
-    case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
-      self.photoLibrary().performChanges({
-        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-      })
-    }
-  }
-  
-  var movieFileOutput: URL {
-    URL.temporaryDirectory
-      .appending(component: self.uuid().uuidString)
-      .appendingPathExtension(for: .quickTimeMovie)
+  enum Tab: Equatable {
+    case library
+    case camera
   }
 }
 
@@ -130,18 +24,14 @@ struct MainView: View {
   @Bindable var model: MainModel
   
   var body: some View {
-    NavigationStack {
-      if self.model.hasFullPermissions {
-        self.camera
-      } else {
-        self.permissionsRequired
-      }
-    }
-    .navigationBarBackButtonHidden()
-    .overlay(content: self.overlay)
-    .task { await self.model.task() }
-    .sheet(item: $model.destination.userPermissions) { model in
-      UserPermissionsSheet(model: model)
+    TabView(selection: self.$model.tab) {
+      LibraryView(model: self.model.libraryModel)
+        .tabItem { Label("Library", systemImage: "square.grid.2x2") }
+        .tag(MainModel.Tab.library)
+      
+      CameraView(model: self.model.cameraModel)
+        .tabItem { Label("Camera", systemImage: "camera") }
+        .tag(MainModel.Tab.camera)
     }
   }
 }

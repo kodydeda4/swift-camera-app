@@ -19,6 +19,9 @@ import SwiftUINavigation
  - [x] Front facing camera
  - [x] CameraClient
  - [x] SwiftUI Preview Compiler Directive
+ - [x] Save to an app-specific-photo-album
+ - [x] fetch and display videos from app-specific-photo-album.
+ - [ ] CRUD the videos
  - [ ] Different zooms
  - [ ] Fix app backgrounding
  - [ ] Logs
@@ -30,13 +33,14 @@ import SwiftUINavigation
 
  Idk Features
  - [ ] Handle app backgrounding
- - [ ] Camera Roll / Recorded video list w/preview and playback
  - [ ] Share videos from roll
  - [ ] Record video vs take picture
  - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll
+ - [ ] video metadata or grdb?
 
   UI Rework
+ - [ ] Sound effect when you tap a button.
  - [ ] Haptic feedback for recording button
  - [ ] Video Recording duration
  - [ ] Improve user permissions ui

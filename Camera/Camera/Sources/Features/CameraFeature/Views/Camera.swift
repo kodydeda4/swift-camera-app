@@ -2,8 +2,8 @@ import AVFoundation
 import Sharing
 import SwiftUI
 
-extension MainView {
-  @MainActor internal var camera: some View {
+extension CameraView {
+  @MainActor internal var cameraPreview: some View {
 #if targetEnvironment(simulator)
     Image(.cameraPreview)
 #else
@@ -36,11 +36,11 @@ private struct CaptureVideoPreviewLayerView: UIViewControllerRepresentable {
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .fullPermissions
   
-  MainView(model: MainModel())
+  CameraView(model: CameraModel())
 }
 
 #Preview("Permissions Required") {
   @Shared(.userPermissions) var userPermissions = .denied
   
-  MainView(model: MainModel())
+  CameraView(model: CameraModel())
 }

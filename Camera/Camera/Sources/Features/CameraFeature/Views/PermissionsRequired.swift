@@ -1,6 +1,6 @@
 import SwiftUI
 
-extension MainView {
+extension CameraView {
   @MainActor var permissionsRequired: some View {
     VStack {
       Image(systemName: "camera.fill")
@@ -34,5 +34,5 @@ extension MainView {
 // MARK: - SwiftUI Previews
 
 #Preview {
-  MainView(model: MainModel())
+  CameraView(model: CameraModel())
 }

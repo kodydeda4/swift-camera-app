@@ -6,7 +6,7 @@ private struct Style {
   static let buttonSizeRecording: CGFloat = 50
 }
 
-extension MainView {
+extension CameraView {
   internal func overlay() -> some View {
     VStack {
       self.top
@@ -19,7 +19,7 @@ extension MainView {
   }
 }
 
-fileprivate extension MainView {
+fileprivate extension CameraView {
   private var top: some View {
     HStack {
       VStack(alignment: .leading) {
@@ -51,8 +51,6 @@ fileprivate extension MainView {
       self.zoomButtons.padding(.bottom)
       
       HStack {
-        self.captureLibraryButton
-        Spacer()
         self.recordingButton
         Spacer()
         self.switchCameraButton
@@ -87,23 +85,6 @@ fileprivate extension MainView {
         .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
         .clipShape(Circle())
     }
-  }
-  
-  private var captureLibraryButton: some View {
-    Button(action: self.model.captureLibraryButtonTapped) {
-      Image(systemName: "photo.on.rectangle.angled")
-        .resizable()
-        .scaledToFit()
-        .fontWeight(.semibold)
-        .frame(
-          width: Style.buttonSizeRecording,
-          height: Style.buttonSizeRecording
-        )
-        .padding(8)
-        .foregroundColor(.gray)
-    }
-    .padding(.horizontal)
-    .disabled(!self.model.hasFullPermissions)
   }
   
   private var recordingButton: some View {
@@ -160,11 +141,11 @@ extension CGFloat {
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .fullPermissions
   
-  MainView(model: MainModel())
+  CameraView(model: CameraModel())
 }
 
 #Preview("Permissions Required") {
   @Shared(.userPermissions) var userPermissions = .denied
   
-  MainView(model: MainModel())
+  CameraView(model: CameraModel())
 }
