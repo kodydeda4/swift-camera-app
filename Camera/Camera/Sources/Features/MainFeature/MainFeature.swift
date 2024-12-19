@@ -10,6 +10,7 @@ import SwiftUINavigation
 // The camera roll will you show you all the videos you recorded.
 // The main view will just be the recording screen.
 // You can navigate to user permissions from either page.
+// You could use GRDB to save details about a video and display them in a grid or smnthn.
 
 @MainActor
 @Observable
