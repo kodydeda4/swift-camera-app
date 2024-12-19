@@ -19,6 +19,10 @@ struct CameraClient: Sendable {
     var rawValue: String
     
     init(_ rawValue: String = "") { self.rawValue = rawValue }
+    
+    static var cannotAddInput = Failure("Cannot add input")
+    static var cannotAddOutput = Failure("Cannot add input")
+    static var cannotMakeDeviceInput = Failure("Cannot make device input")
   }
   
   enum DelegateEvent {
@@ -53,27 +57,27 @@ extension CameraClient: DependencyKey {
     return Self(
       connect: { preview in
         let result = Result { try camera.connect(preview) }
-        print(result)
+        print("connect", result)
         return try result.get()
       },
       startRecording: { url in
         let result = Result { try camera.startRecording(to: url) }
-        print(result)
+        print("startRecording", result)
         return try result.get()
       },
       stopRecording: {
         let result = Result { camera.stopRecording() }
-        print(result)
+        print("stopRecording", result)
         return try result.get()
       },
       switchCamera: {
         let result = Result { try camera.switchCamera() }
-        print(result)
+        print("switchCamera", result)
         return try result.get()
       },
       zoom: { newValue in
         let result = Result { try camera.zoom(newValue) }
-        print(result)
+        print("zoom", result)
         return try result.get()
       },
       events: {
@@ -84,7 +88,9 @@ extension CameraClient: DependencyKey {
 }
 
 fileprivate final class Camera: NSObject {
+  
   // @DEDA PointFree error handling with line number?...
+  
   static let shared = Camera()
   let events = AsyncChannel<CameraClient.DelegateEvent>()
 
@@ -100,8 +106,8 @@ fileprivate final class Camera: NSObject {
     else { throw CameraClient.Failure("Couldn't setup inputs.") }
     
     self.session.beginConfiguration()
-    guard self.session.canAddInput(deviceInput) else { throw CameraClient.Failure("Can't add input") }
-    guard self.session.canAddOutput(self.movieFileOutput) else { throw CameraClient.Failure("Can't add output") }
+    guard self.session.canAddInput(deviceInput) else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddOutput(self.movieFileOutput) else { throw CameraClient.Failure.cannotAddOutput }
     self.session.addInput(deviceInput)
     self.session.addOutput(self.movieFileOutput)
     self.session.commitConfiguration()
@@ -128,11 +134,11 @@ fileprivate final class Camera: NSObject {
     guard
       let newDevice = discoverySession.devices.first,
       let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
-    else { throw CameraClient.Failure() }
+    else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure() }
+    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
@@ -159,7 +165,7 @@ fileprivate final class Camera: NSObject {
     guard
       let newDevice = discoverySession.devices.first,
       let newInput = try? AVCaptureDeviceInput(device: newDevice)
-    else { throw CameraClient.Failure() }
+    else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
