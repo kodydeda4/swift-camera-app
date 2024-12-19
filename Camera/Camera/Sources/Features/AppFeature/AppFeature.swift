@@ -19,18 +19,18 @@ import SwiftUINavigation
  - [x] Front facing camera
  - [x] CameraClient
  - [ ] Different zooms
+ - [ ] Fix app backgrounding
  - [ ] Logs
  - [ ] Unit Tests
  - [ ] swift 6
  - [ ] SPM
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
- // @DEDA looks like if you come back to the app after backgrounding, video recording no longer works.
-
 
  Idk Features
  - [ ] Handle app backgrounding
  - [ ] Camera Roll / Recorded video list w/preview and playback
+ - [ ] Share videos from roll
  - [ ] Record video vs take picture
  - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll
