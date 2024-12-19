@@ -51,7 +51,7 @@ extension DependencyValues {
 
 extension CameraClient: DependencyKey {
   static var liveValue: Self {
-    let camera = Camera.shared
+    let camera = Camera()
     
     return Self(
       connect: { preview in
@@ -89,8 +89,6 @@ extension CameraClient: DependencyKey {
 // @DEDA PointFree error handling with line number?...
 
 fileprivate final class Camera: NSObject {
-
-  static let shared = Camera()
   let events = AsyncChannel<CameraClient.DelegateEvent>()
 
   private var session: AVCaptureSession!
@@ -110,7 +108,7 @@ fileprivate final class Camera: NSObject {
       let deviceInput = try? AVCaptureDeviceInput(device: device)
     else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
-    // Update State.
+    // Self.init()
     self.session = AVCaptureSession()
     self.device = device
     self.deviceInput = deviceInput
@@ -122,9 +120,7 @@ fileprivate final class Camera: NSObject {
     self.session.addOutput(self.movieFileOutput)
     self.session.commitConfiguration()
     
-    Task.detached {
-      self.session.startRunning()
-    }
+    Task.detached { self.session.startRunning() }
     
     videoPreviewLayer.session = self.session
   }
@@ -144,8 +140,7 @@ fileprivate final class Camera: NSObject {
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput)
-    else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
@@ -153,9 +148,6 @@ fileprivate final class Camera: NSObject {
   
   /// Adjust the zoom - may require switching cameras.
   func zoom(_ videoZoomFactor: CGFloat) throws {
-    guard let device, let deviceInput else {
-      return
-    }
     
     let newDeviceType = !(videoZoomFactor < 1 && device.deviceType == .builtInWideAngleCamera)
     ? AVCaptureDevice.DeviceType.builtInWideAngleCamera
@@ -176,8 +168,7 @@ fileprivate final class Camera: NSObject {
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput)
-    else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
