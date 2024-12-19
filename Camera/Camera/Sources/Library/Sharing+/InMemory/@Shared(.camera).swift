@@ -1,5 +1,5 @@
-import Sharing
 import AVFoundation
+import Sharing
 
 struct CameraState: Equatable {
   var zoom = 1.0

@@ -106,7 +106,9 @@ fileprivate final class Camera: NSObject {
     guard
       let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
       let deviceInput = try? AVCaptureDeviceInput(device: device)
-    else { throw CameraClient.Failure.cannotMakeDeviceInput }
+    else {
+      throw CameraClient.Failure.cannotMakeDeviceInput
+    }
     
     // Self.init()
     self.session = AVCaptureSession()
@@ -136,11 +138,16 @@ fileprivate final class Camera: NSObject {
     guard
       let newDevice = discoverySession.devices.first,
       let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
-    else { throw CameraClient.Failure.cannotMakeDeviceInput }
+    else {
+      throw CameraClient.Failure.cannotMakeDeviceInput
+    }
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddInput(newDeviceInput)
+    else {
+      throw CameraClient.Failure.cannotAddInput
+    }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
@@ -165,21 +172,28 @@ fileprivate final class Camera: NSObject {
     // session configure
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddInput(newDeviceInput)
+    else {
+      throw CameraClient.Failure.cannotAddInput
+    }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
     
     // device configure
     try self.device.lockForConfiguration()
-    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera ? 1 : videoZoomFactor
+    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera
+      ? 1
+      : videoZoomFactor
     self.device.unlockForConfiguration()
   }
   
   /// Start recording video to a url.
   func startRecording(to url: URL) throws {
     guard let connection = self.movieFileOutput.connection(with: .video)
-    else { throw CameraClient.Failure() }
+    else {
+      throw CameraClient.Failure()
+    }
     
     // Configure connection for HEVC capture.
     if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {

@@ -38,8 +38,8 @@ final class MainModel {
   func recordingButtonTapped() {
     _ = Result {
       try !camera.isRecording
-      ? cameraClient.startRecording(self.movieFileOutput)
-      : cameraClient.stopRecording()
+        ? cameraClient.startRecording(self.movieFileOutput)
+        : cameraClient.stopRecording()
       
       self.$camera.isRecording.withLock { $0.toggle() }
     }
@@ -67,7 +67,9 @@ final class MainModel {
   }
   
   func task() async {
-    guard hasFullPermissions else { return }
+    guard hasFullPermissions else {
+      return
+    }
 
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
