@@ -8,10 +8,13 @@ extension MainView {
     Group {
 //      if true {
 //        Image(.cameraPreview)
-      CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.camera.captureVideoPreviewLayer)
+      CaptureVideoPreviewLayerView(
+        captureVideoPreviewLayer: self.model.camera
+          .captureVideoPreviewLayer
+      )
 //      } else {
 //        CaptureVideoPreviewLayerView(captureVideoPreviewLayer: self.model.captureVideoPreviewLayer)
-      
+
       //      }
     }
     .ignoresSafeArea()

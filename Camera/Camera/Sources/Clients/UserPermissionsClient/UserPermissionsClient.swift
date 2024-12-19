@@ -12,13 +12,13 @@ struct UserPermissionsClient: Sendable {
     = { _ in reportIssue("\(Self.self).request"); return false }
 
   typealias State = [Feature:Status]
-  
+
   enum Feature: Codable, CaseIterable {
     case camera
     case microphone
     case photos
   }
-  
+
   enum Status: Codable {
     case undetermined
     case authorized

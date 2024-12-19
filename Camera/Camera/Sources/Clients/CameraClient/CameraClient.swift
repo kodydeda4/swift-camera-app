@@ -115,10 +115,12 @@ fileprivate final class Camera: NSObject {
       throw CameraClient.Failure(rawValue: "Could not create input for \(device)")
     }
     guard self.captureSession.canAddInput(input) else {
-      throw CameraClient.Failure(rawValue: "self.avCaptureSession.canAddInput(input) returned false.")
+      throw CameraClient
+        .Failure(rawValue: "self.avCaptureSession.canAddInput(input) returned false.")
     }
     guard self.captureSession.canAddOutput(output) else {
-      throw CameraClient.Failure(rawValue: "self.avCaptureSession.canAddOutput(output) returned false.")
+      throw CameraClient
+        .Failure(rawValue: "self.avCaptureSession.canAddOutput(output) returned false.")
     }
     
     self.captureDevice = device
@@ -175,8 +177,12 @@ fileprivate final class Camera: NSObject {
     //    Then when you;ve selected the ultra wide lens, setting the zoomfactor to 1 will be as wide as you can go!
     //    (a factor of 0.5 in relation to the standard lens's field of view).
     
-    guard let captureDevice else { return }
-    guard let captureDeviceInput else { return }
+    guard let captureDevice else {
+      return
+    }
+    guard let captureDeviceInput else {
+      return
+    }
     
     try captureDevice.lockForConfiguration()
     

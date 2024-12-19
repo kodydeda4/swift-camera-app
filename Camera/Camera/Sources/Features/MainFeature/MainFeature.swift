@@ -27,8 +27,8 @@ final class MainModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-    self.userPermissions[.microphone] == .authorized &&
-    self.userPermissions[.photos] == .authorized
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
   
   var isSwitchCameraButtonDisabled: Bool {
@@ -37,8 +37,8 @@ final class MainModel {
   
   func recordingButtonTapped() {
     !self.camera.isRecording
-    ? cameraClient.startRecording(self.movieFileOutput)
-    : cameraClient.stopRecording()
+      ? cameraClient.startRecording(self.movieFileOutput)
+      : cameraClient.stopRecording()
   }
   
   func permissionsButtonTapped() {

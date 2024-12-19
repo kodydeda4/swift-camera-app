@@ -15,14 +15,12 @@ final class UserPermissionsModel: Identifiable {
   var onContinueButtonTapped: () -> Void
     = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
-  @ObservationIgnored
-  @Shared(.userPermissions) var userPermissions
+  // Shared
+  @ObservationIgnored @Shared(.userPermissions) var userPermissions
   
-  @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissionsClient
-  
-  @ObservationIgnored
-  @Dependency(\.application) var application
+  // Dependency
+  @ObservationIgnored @Dependency(\.userPermissions) var userPermissionsClient
+  @ObservationIgnored @Dependency(\.application) var application
   
   var isContinueButtonDisabled: Bool {
     !hasFullPermissions
