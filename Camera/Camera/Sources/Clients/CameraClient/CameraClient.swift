@@ -128,7 +128,7 @@ fileprivate final class Camera: NSObject {
   /// Switch between front & back camera.
   func switchCamera() throws {
     let discoverySession = AVCaptureDevice.DiscoverySession(
-      deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
+      deviceTypes: [.builtInWideAngleCamera],
       mediaType: .video,
       position: deviceInput.device.position == .back ? .front : .back
     )
@@ -166,6 +166,7 @@ fileprivate final class Camera: NSObject {
       let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
     else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
+    // session configure
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
     guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
@@ -173,7 +174,7 @@ fileprivate final class Camera: NSObject {
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
     
-    // update
+    // device configure
     try self.device.lockForConfiguration()
     self.device.videoZoomFactor = newVideoZoomFactor
     self.device.unlockForConfiguration()
