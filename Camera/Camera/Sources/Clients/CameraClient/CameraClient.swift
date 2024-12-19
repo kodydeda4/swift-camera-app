@@ -131,7 +131,10 @@ fileprivate final class Camera: NSObject {
     self.captureSession.addOutput(output)
     self.captureSession.commitConfiguration()
     self.$camera.captureVideoPreviewLayer.withLock { $0.session = self.captureSession }
-    self.captureSession.startRunning()
+    
+    Task.detached {
+      self.captureSession.startRunning()
+    }
   }
 
   func switchCamera() throws {
