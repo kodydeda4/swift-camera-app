@@ -67,10 +67,7 @@ final class MainModel {
   }
   
   func task() async {
-    // if hasFullPermissions {
-    //    try connect camera.setup()
-    //  }
-    //  print("@DEDA hasUserPermissions", self.hasFullPermissions)
+    guard hasFullPermissions else { return }
 
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {

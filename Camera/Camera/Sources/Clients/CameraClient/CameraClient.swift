@@ -169,7 +169,8 @@ fileprivate final class Camera: NSObject {
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newInput) else { throw CameraClient.Failure() }
+    guard self.session.canAddInput(newInput)
+    else { throw CameraClient.Failure.cannotAddInput }
     self.session.addInput(newInput)
     self.deviceInput = newInput
     self.session.commitConfiguration()
@@ -182,7 +183,8 @@ fileprivate final class Camera: NSObject {
   
   /// Start recording video to a url.
   func startRecording(to url: URL) throws {
-    guard let connection = self.movieFileOutput.connection(with: .video) else { throw CameraClient.Failure() }
+    guard let connection = self.movieFileOutput.connection(with: .video)
+    else { throw CameraClient.Failure() }
     
     // Configure connection for HEVC capture.
     if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {
@@ -197,10 +199,7 @@ fileprivate final class Camera: NSObject {
       connection.preferredVideoStabilizationMode = .auto
     }
     
-    self.movieFileOutput.startRecording(
-      to: url,
-      recordingDelegate: self
-    )
+    self.movieFileOutput.startRecording(to: url, recordingDelegate: self)
   }
   
   func stopRecording() {
