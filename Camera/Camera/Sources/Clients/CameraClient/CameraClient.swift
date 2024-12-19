@@ -149,23 +149,19 @@ fileprivate final class Camera: NSObject {
   /// Adjust the zoom - may require switching cameras.
   func zoom(_ videoZoomFactor: CGFloat) throws {
     
-    let newDeviceType = !(videoZoomFactor < 1 && device.deviceType == .builtInWideAngleCamera)
-    ? AVCaptureDevice.DeviceType.builtInWideAngleCamera
-    : AVCaptureDevice.DeviceType.builtInUltraWideCamera
+    var newDevice: AVCaptureDevice? {
+      AVCaptureDevice.DiscoverySession(
+        deviceTypes: [videoZoomFactor < 1 ? .builtInUltraWideCamera : .builtInWideAngleCamera],
+        mediaType: .video,
+        position: device.position
+      )
+      .devices.first
+    }
     
-    let newVideoZoomFactor = newDeviceType == .builtInUltraWideCamera ? 1 : videoZoomFactor
-    
-    let discoverySession = AVCaptureDevice.DiscoverySession(
-      deviceTypes: [newDeviceType],
-      mediaType: .video,
-      position: device.position
-    )
-    
-    guard
-      let newDevice = discoverySession.devices.first,
-      let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
-    else { throw CameraClient.Failure.cannotMakeDeviceInput }
-    
+    guard let newDevice, let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice) else {
+      throw CameraClient.Failure.cannotMakeDeviceInput
+    }
+
     // session configure
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
@@ -176,7 +172,7 @@ fileprivate final class Camera: NSObject {
     
     // device configure
     try self.device.lockForConfiguration()
-    self.device.videoZoomFactor = newVideoZoomFactor
+    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera ? 1 : videoZoomFactor
     self.device.unlockForConfiguration()
   }
   
