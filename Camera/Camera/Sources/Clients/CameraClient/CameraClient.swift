@@ -110,12 +110,13 @@ fileprivate final class Camera: NSObject {
       let deviceInput = try? AVCaptureDeviceInput(device: device)
     else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
+    // Update State.
     self.session = AVCaptureSession()
     self.device = device
     self.deviceInput = deviceInput
     self.movieFileOutput = AVCaptureMovieFileOutput()
     
-    // Configure session.
+    // Configure Session.
     self.session.beginConfiguration()
     self.session.addInput(deviceInput)
     self.session.addOutput(self.movieFileOutput)
