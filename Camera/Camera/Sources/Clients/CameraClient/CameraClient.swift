@@ -115,6 +115,7 @@ fileprivate final class Camera: NSObject {
     }
   }
 
+  /// Switch between front & back camera.
   func switchCamera() throws {
     guard let deviceInput else { return }
     
@@ -124,8 +125,10 @@ fileprivate final class Camera: NSObject {
       position: deviceInput.device.position == .back ? .front : .back
     )
     
-    guard let newDevice = discoverySession.devices.first else { throw CameraClient.Failure() }
-    guard let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice) else { throw CameraClient.Failure() }
+    guard
+      let newDevice = discoverySession.devices.first,
+      let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
+    else { throw CameraClient.Failure() }
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
@@ -135,31 +138,17 @@ fileprivate final class Camera: NSObject {
     self.session.commitConfiguration()
   }
   
+  /// Adjust the zoom - may require switching cameras.
   func zoom(_ videoZoomFactor: CGFloat) throws {
     guard let device, let deviceInput else {
       return
     }
     
-    var newDeviceType: AVCaptureDevice.DeviceType {
-      // Camera supporting 0.5 == .builtInUltraWideCamera
-      guard !(videoZoomFactor < 1 && device.deviceType == .builtInWideAngleCamera) else {
-        return .builtInUltraWideCamera
-      }
-      
-      // Else use .builtInWideAngleCamera
-      return .builtInWideAngleCamera
-    }
+    let newDeviceType = !(videoZoomFactor < 1 && device.deviceType == .builtInWideAngleCamera)
+    ? AVCaptureDevice.DeviceType.builtInWideAngleCamera
+    : AVCaptureDevice.DeviceType.builtInUltraWideCamera
     
-    var newVideoZoomFactor: CGFloat {
-      switch newDeviceType {
-        
-      case .builtInUltraWideCamera:
-        return 1
-        
-      default:
-        return videoZoomFactor
-      }
-    }
+    let newVideoZoomFactor = newDeviceType == .builtInUltraWideCamera ? 1 : videoZoomFactor
     
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [newDeviceType],
@@ -185,6 +174,7 @@ fileprivate final class Camera: NSObject {
     self.device?.unlockForConfiguration()
   }
   
+  /// Start recording video to a url.
   func startRecording(to url: URL) throws {
     guard let connection = self.movieFileOutput.connection(with: .video) else { throw CameraClient.Failure() }
     
