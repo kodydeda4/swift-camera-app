@@ -55,6 +55,8 @@ extension DependencyValues {
 
 // MARK: - Implementation
 
+// @DEDA implement Log4Swift
+
 extension CameraClient: DependencyKey {
   static var liveValue: Self {
     let camera = Camera.shared
