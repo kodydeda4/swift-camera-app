@@ -16,10 +16,9 @@ struct CameraClient: Sendable {
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
   struct Failure: Error, Equatable {
-    var rawValue: String
-    
+    let rawValue: String
     init(_ rawValue: String = "") { self.rawValue = rawValue }
-    
+
     static var cannotAddInput = Failure("Cannot add input")
     static var cannotAddOutput = Failure("Cannot add input")
     static var cannotMakeDeviceInput = Failure("Cannot make device input")
@@ -87,44 +86,50 @@ extension CameraClient: DependencyKey {
   }
 }
 
+// @DEDA PointFree error handling with line number?...
+
 fileprivate final class Camera: NSObject {
-  
-  // @DEDA PointFree error handling with line number?...
-  
+
   static let shared = Camera()
   let events = AsyncChannel<CameraClient.DelegateEvent>()
 
-  private var session = AVCaptureSession()
-  private var device: AVCaptureDevice?
-  private var deviceInput: AVCaptureDeviceInput?
-  private var movieFileOutput = AVCaptureMovieFileOutput()
+  private var session: AVCaptureSession!
+  private var device: AVCaptureDevice!
+  private var deviceInput: AVCaptureDeviceInput!
+  private var movieFileOutput: AVCaptureMovieFileOutput!
 
+  /// Sets up the capture session with necessary inputs and outputs,
+  /// connects to the video preview layer, and starts running the capture session in the background.
+  ///
+  /// - Note: This method is required to enable the functionality of other methods within the class.
+  /// - Note: Ensure that user permissions (e.g., camera and microphone) are verified before invoking this method.
   func connect(_ videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
+    
     guard
       let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
       let deviceInput = try? AVCaptureDeviceInput(device: device)
-    else { throw CameraClient.Failure("Couldn't setup inputs.") }
+    else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
+    self.session = AVCaptureSession()
+    self.device = device
+    self.deviceInput = deviceInput
+    self.movieFileOutput = AVCaptureMovieFileOutput()
+    
+    // Configure session.
     self.session.beginConfiguration()
-    guard self.session.canAddInput(deviceInput) else { throw CameraClient.Failure.cannotAddInput }
-    guard self.session.canAddOutput(self.movieFileOutput) else { throw CameraClient.Failure.cannotAddOutput }
     self.session.addInput(deviceInput)
     self.session.addOutput(self.movieFileOutput)
     self.session.commitConfiguration()
-    self.device = device
-    self.deviceInput = deviceInput
-
-    videoPreviewLayer.session = self.session
-
+    
     Task.detached {
       self.session.startRunning()
     }
+    
+    videoPreviewLayer.session = self.session
   }
 
   /// Switch between front & back camera.
   func switchCamera() throws {
-    guard let deviceInput else { return }
-    
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
       mediaType: .video,
@@ -138,7 +143,8 @@ fileprivate final class Camera: NSObject {
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure.cannotAddInput }
+    guard self.session.canAddInput(newDeviceInput)
+    else { throw CameraClient.Failure.cannotAddInput }
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
@@ -164,21 +170,21 @@ fileprivate final class Camera: NSObject {
     
     guard
       let newDevice = discoverySession.devices.first,
-      let newInput = try? AVCaptureDeviceInput(device: newDevice)
+      let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
     else { throw CameraClient.Failure.cannotMakeDeviceInput }
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newInput)
+    guard self.session.canAddInput(newDeviceInput)
     else { throw CameraClient.Failure.cannotAddInput }
-    self.session.addInput(newInput)
-    self.deviceInput = newInput
+    self.session.addInput(newDeviceInput)
+    self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
     
     // update
-    try self.device?.lockForConfiguration()
-    self.device?.videoZoomFactor = newVideoZoomFactor
-    self.device?.unlockForConfiguration()
+    try self.device.lockForConfiguration()
+    self.device.videoZoomFactor = newVideoZoomFactor
+    self.device.unlockForConfiguration()
   }
   
   /// Start recording video to a url.
@@ -206,6 +212,7 @@ fileprivate final class Camera: NSObject {
     self.movieFileOutput.stopRecording()
   }
 }
+
 
 extension Camera: AVCaptureFileOutputRecordingDelegate {
   func fileOutput(
