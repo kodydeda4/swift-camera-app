@@ -48,7 +48,7 @@ final class UserPermissionsModel: Identifiable {
       
     case .denied:
       Task {
-        try? await self.application.openSettings()
+        await self.application.open(URL(string: UIApplication.openSettingsURLString)!)
       }
       
     case .none,
