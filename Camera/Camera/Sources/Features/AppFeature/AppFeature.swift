@@ -82,6 +82,11 @@ final class AppModel {
   
   /// Update user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
+    UserPermissionsClient.Feature.allCases.forEach { feature in
+      self.$userPermissions.withLock {
+        $0[feature] = self.userPermissionsClient.status(feature)
+      }
+    }
   }
   
   private func bind() {

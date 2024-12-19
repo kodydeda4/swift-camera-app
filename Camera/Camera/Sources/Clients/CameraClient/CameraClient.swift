@@ -16,7 +16,9 @@ struct CameraClient: Sendable {
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
   struct Failure: Error, Equatable {
-    let rawValue: String
+    var rawValue: String
+    
+    init(_ rawValue: String = "") { self.rawValue = rawValue }
   }
   
   enum DelegateEvent {
@@ -82,105 +84,65 @@ extension CameraClient: DependencyKey {
 }
 
 fileprivate final class Camera: NSObject {
+  // @DEDA PointFree error handling with line number?...
   static let shared = Camera()
   let events = AsyncChannel<CameraClient.DelegateEvent>()
 
-  private var captureSession = AVCaptureSession()
-  private var captureDevice: AVCaptureDevice?
-  private var captureDeviceInput: AVCaptureDeviceInput?
-  private var captureMovieFileOutput = AVCaptureMovieFileOutput()
+  private var session = AVCaptureSession()
+  private var device: AVCaptureDevice?
+  private var deviceInput: AVCaptureDeviceInput?
+  private var movieFileOutput = AVCaptureMovieFileOutput()
 
-  func connect(_ captureVideoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
-    self.captureSession.beginConfiguration()
+  func connect(_ videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
+    guard
+      let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+      let deviceInput = try? AVCaptureDeviceInput(device: device)
+    else { throw CameraClient.Failure("Couldn't setup inputs.") }
     
-    let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
-    let output = self.captureMovieFileOutput
-    
-    guard let device else {
-      throw CameraClient.Failure(rawValue: "\(String(describing: device)) returned nil.")
-    }
-    guard let input = try? AVCaptureDeviceInput(device: device) else {
-      throw CameraClient.Failure(rawValue: "Could not create input for \(device)")
-    }
-    guard self.captureSession.canAddInput(input) else {
-      throw CameraClient
-        .Failure(rawValue: "self.avCaptureSession.canAddInput(input) returned false.")
-    }
-    guard self.captureSession.canAddOutput(output) else {
-      throw CameraClient
-        .Failure(rawValue: "self.avCaptureSession.canAddOutput(output) returned false.")
-    }
-    
-    self.captureDevice = device
-    self.captureDeviceInput = input
-    self.captureSession.addInput(input)
-    self.captureSession.addOutput(output)
-    self.captureSession.commitConfiguration()
-    
-    captureVideoPreviewLayer.session = self.captureSession
+    self.session.beginConfiguration()
+    guard self.session.canAddInput(deviceInput) else { throw CameraClient.Failure("Can't add input") }
+    guard self.session.canAddOutput(self.movieFileOutput) else { throw CameraClient.Failure("Can't add output") }
+    self.session.addInput(deviceInput)
+    self.session.addOutput(self.movieFileOutput)
+    self.session.commitConfiguration()
+    self.device = device
+    self.deviceInput = deviceInput
+
+    videoPreviewLayer.session = self.session
 
     Task.detached {
-      self.captureSession.startRunning()
+      self.session.startRunning()
     }
   }
 
   func switchCamera() throws {
-    guard let captureDeviceInput else {
-      return
-    }
-    
-    self.captureSession.beginConfiguration()
-    self.captureSession.removeInput(captureDeviceInput)
+    guard let deviceInput else { return }
     
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera],
       mediaType: .video,
-      position: .unspecified
+      position: deviceInput.device.position == .back ? .front : .back
     )
     
-    var newPosition: AVCaptureDevice.Position {
-      captureDeviceInput.device.position == .back ? .front : .back
-    }
+    guard let newDevice = discoverySession.devices.first else { throw CameraClient.Failure() }
+    guard let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice) else { throw CameraClient.Failure() }
     
-    guard let newDevice = discoverySession.devices.first(where: { $0.position == newPosition })
-    else {
-      throw CameraClient.Failure(rawValue: "Failed to switch camera. Reverting to original.")
-    }
-    guard let newInput = try? AVCaptureDeviceInput(device: newDevice) else {
-      throw CameraClient.Failure(rawValue: "Failed to create new video device input.")
-    }
-    guard self.captureSession.canAddInput(newInput) else {
-      throw CameraClient.Failure(rawValue: "Cannot ad input \(newDevice)")
-    }
-    
-    self.captureSession.addInput(newInput)
-    self.captureDeviceInput = newInput
-    self.captureSession.commitConfiguration()
+    self.session.beginConfiguration()
+    self.session.removeInput(deviceInput)
+    guard self.session.canAddInput(newDeviceInput) else { throw CameraClient.Failure() }
+    self.session.addInput(newDeviceInput)
+    self.deviceInput = newDeviceInput
+    self.session.commitConfiguration()
   }
   
-  func zoom(_ zoomFactor: CGFloat) throws {
-    //    @DEDA
-    //    The minimum "zoomFactor" property of an AVCaptureDevice can't be less than 1.0 according to the Apple Docs.
-    //    It's a little confusing becuase depending on what camera you've selected, a zoom factor of 1 will be a different field of view or optical view angle.
-    //    The default iPhone camera app shows a label reading "0.5" but that's just a label for the ultra wide lens in relation to the standard camera's zoom factor.
-    //
-    //    You're already getting the minZoomFactor from the device, (which will probably be 1),
-    //    so you should use the device's min and max that you're reading to set the bounds of the factor you input into "captureDevice.videoZoomFactor".
-    //    Then when you;ve selected the ultra wide lens, setting the zoomfactor to 1 will be as wide as you can go!
-    //    (a factor of 0.5 in relation to the standard lens's field of view).
-    
-    guard let captureDevice else {
+  func zoom(_ videoZoomFactor: CGFloat) throws {
+    guard let device, let deviceInput else {
       return
     }
-    guard let captureDeviceInput else {
-      return
-    }
-    
-    try captureDevice.lockForConfiguration()
     
     var newDeviceType: AVCaptureDevice.DeviceType {
       // Camera supporting 0.5 == .builtInUltraWideCamera
-      guard !(zoomFactor < 1 && captureDevice.deviceType == .builtInWideAngleCamera) else {
+      guard !(videoZoomFactor < 1 && device.deviceType == .builtInWideAngleCamera) else {
         return .builtInUltraWideCamera
       }
       
@@ -188,49 +150,47 @@ fileprivate final class Camera: NSObject {
       return .builtInWideAngleCamera
     }
     
-    var newZoomFactor: CGFloat {
+    var newVideoZoomFactor: CGFloat {
       switch newDeviceType {
-      case .builtInUltraWideCamera: return 1
-      default: return zoomFactor
+        
+      case .builtInUltraWideCamera:
+        return 1
+        
+      default:
+        return videoZoomFactor
       }
     }
     
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [newDeviceType],
       mediaType: .video,
-      position: captureDevice.position
+      position: device.position
     )
     
-    print(discoverySession)
+    guard
+      let newDevice = discoverySession.devices.first,
+      let newInput = try? AVCaptureDeviceInput(device: newDevice)
+    else { throw CameraClient.Failure() }
     
-    guard let newDevice = discoverySession.devices.first else {
-      throw CameraClient.Failure(rawValue: "Couldn't find a better device.")
-    }
+    self.session.beginConfiguration()
+    self.session.removeInput(deviceInput)
+    guard self.session.canAddInput(newInput) else { throw CameraClient.Failure() }
+    self.session.addInput(newInput)
+    self.deviceInput = newInput
+    self.session.commitConfiguration()
     
-    let newInput = try AVCaptureDeviceInput(device: newDevice)
-    
-    self.captureSession.beginConfiguration()
-    self.captureSession.removeInput(captureDeviceInput)
-    
-    guard self.captureSession.canAddInput(newInput) else {
-      throw CameraClient.Failure(rawValue: "Cannot add input \(newDevice)")
-    }
-    
-    self.captureSession.addInput(newInput)
-    self.captureDeviceInput = newInput
-    self.captureSession.commitConfiguration()
-    captureDevice.videoZoomFactor = newZoomFactor
-    captureDevice.unlockForConfiguration()
+    // update
+    try self.device?.lockForConfiguration()
+    self.device?.videoZoomFactor = newVideoZoomFactor
+    self.device?.unlockForConfiguration()
   }
   
   func startRecording(to url: URL) throws {
-    guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
-      throw CameraClient.Failure(rawValue: "movieOutput.connection(with: .video) returned nil")
-    }
+    guard let connection = self.movieFileOutput.connection(with: .video) else { throw CameraClient.Failure() }
     
     // Configure connection for HEVC capture.
-    if self.captureMovieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.captureMovieFileOutput.setOutputSettings(
+    if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {
+      self.movieFileOutput.setOutputSettings(
         [AVVideoCodecKey: AVVideoCodecType.hevc],
         for: connection
       )
@@ -241,14 +201,14 @@ fileprivate final class Camera: NSObject {
       connection.preferredVideoStabilizationMode = .auto
     }
     
-    self.captureMovieFileOutput.startRecording(
+    self.movieFileOutput.startRecording(
       to: url,
       recordingDelegate: self
     )
   }
   
   func stopRecording() {
-    self.captureMovieFileOutput.stopRecording()
+    self.movieFileOutput.stopRecording()
   }
 }
 
