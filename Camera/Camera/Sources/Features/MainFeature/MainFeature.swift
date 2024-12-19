@@ -12,13 +12,13 @@ final class MainModel {
   var destination: Destination? { didSet { self.bind() } }
   
   // Shared
-  @ObservationIgnored @Shared(.userPermissions) private var userPermissions
-  @ObservationIgnored @Shared(.camera) var camera
-  
+  @ObservationIgnored @SharedReader(.camera) var camera
+  @ObservationIgnored @Shared(.userPermissions) var userPermissions
+
   // Dependencies
-  @ObservationIgnored @Dependency(\.camera) private var cameraClient
-  @ObservationIgnored @Dependency(\.photoLibrary) private var photoLibrary
-  @ObservationIgnored @Dependency(\.uuid) private var uuid
+  @ObservationIgnored @Dependency(\.camera) var cameraClient
+  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.uuid) var uuid
   
   @CasePathable
   enum Destination {
