@@ -68,7 +68,7 @@ fileprivate extension MainView {
           Text("\(value.formattedDescription)x")
             .foregroundColor(self.model.camera.zoom == value ? .white : .accentColor)
             .padding()
-            .background(self.model.camera.zoom == value ? Color.accentColor : Color.clear)
+            .background(self.model.camera.zoom == value ? Color.accentColor : Color.white.opacity(0.25))
         }
       }
     }

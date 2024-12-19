@@ -12,7 +12,7 @@ final class MainModel {
   var destination: Destination? { didSet { self.bind() } }
   
   // Shared
-  @ObservationIgnored @SharedReader(.camera) var camera
+  @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
 
   // Dependencies
@@ -36,9 +36,13 @@ final class MainModel {
   }
   
   func recordingButtonTapped() {
-    !self.camera.isRecording
+    _ = Result {
+      try !camera.isRecording
       ? cameraClient.startRecording(self.movieFileOutput)
       : cameraClient.stopRecording()
+      
+      self.$camera.isRecording.withLock { $0.toggle() }
+    }
   }
   
   func permissionsButtonTapped() {
@@ -46,11 +50,16 @@ final class MainModel {
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
-    self.cameraClient.zoom(value)
+    _ = Result {
+      try self.cameraClient.zoom(value)
+      self.$camera.zoom.withLock { $0 = value }
+    }
   }
   
   func switchCameraButtonTapped() {
-    self.cameraClient.switchCamera()
+    _ = Result {
+      try self.cameraClient.switchCamera()
+    }
   }
   
   func captureLibraryButtonTapped() {
@@ -59,6 +68,9 @@ final class MainModel {
   
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        try? await self.cameraClient.connect(self.camera.captureVideoPreviewLayer)
+      }
       taskGroup.addTask {
         for await event in await self.cameraClient.events() {
           await self.handle(event)
@@ -85,7 +97,7 @@ private extension MainModel {
   func handle(_ event: CameraClient.DelegateEvent) {
     switch event {
       
-    case let .captureFileOutputRecording(.fileOutput(_, outputFileURL, _, _)):
+    case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       self.photoLibrary().performChanges({
         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
       })

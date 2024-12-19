@@ -1,35 +1,28 @@
 import AsyncAlgorithms
 import AVFoundation
 import Dependencies
-import Dependencies
 import DependenciesMacros
 import Photos
-import Sharing
 import SwiftUI
 import SwiftUINavigation
 
 @DependencyClient
 struct CameraClient: Sendable {
-  var startRecording: @Sendable (URL) -> Void
-  var stopRecording: @Sendable () -> Void
-  var switchCamera: @Sendable () -> Void
-  var zoom: @Sendable (CGFloat) -> Void
+  var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
+  var startRecording: @Sendable (URL) throws -> Void
+  var stopRecording: @Sendable () throws -> Void
+  var switchCamera: @Sendable () throws -> Void
+  var zoom: @Sendable (CGFloat) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
-  
-  struct State: Equatable {
-    var zoom = 1.0
-    var isRecording = false
-    var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  }
   
   struct Failure: Error, Equatable {
     let rawValue: String
   }
   
   enum DelegateEvent {
-    case captureFileOutputRecording(CaptureFileOutputRecording)
+    case avCaptureFileOutputRecordingDelegate(Self.AVCaptureFileOutputRecordingDelegate)
     
-    enum CaptureFileOutputRecording {
+    enum AVCaptureFileOutputRecordingDelegate {
       case fileOutput(
         _ output: AVCaptureFileOutput,
         didFinishRecordingTo: URL,
@@ -37,12 +30,6 @@ struct CameraClient: Sendable {
         error: Error?
       )
     }
-  }
-}
-
-extension SharedReaderKey where Self == InMemoryKey<CameraClient.State>.Default {
-  static var camera: Self {
-    Self[.inMemory("camera"), default: CameraClient.State()]
   }
 }
 
@@ -62,20 +49,30 @@ extension CameraClient: DependencyKey {
     let camera = Camera.shared
     
     return Self(
+      connect: { preview in
+        let result = Result { try camera.connect(preview) }
+        print(result)
+        return try result.get()
+      },
       startRecording: { url in
         let result = Result { try camera.startRecording(to: url) }
         print(result)
+        return try result.get()
       },
       stopRecording: {
-        camera.stopRecording()
+        let result = Result { camera.stopRecording() }
+        print(result)
+        return try result.get()
       },
       switchCamera: {
         let result = Result { try camera.switchCamera() }
         print(result)
+        return try result.get()
       },
       zoom: { newValue in
         let result = Result { try camera.zoom(newValue) }
         print(result)
+        return try result.get()
       },
       events: {
         camera.events
@@ -87,24 +84,13 @@ extension CameraClient: DependencyKey {
 fileprivate final class Camera: NSObject {
   static let shared = Camera()
   let events = AsyncChannel<CameraClient.DelegateEvent>()
-  @Shared(.camera) var camera
 
   private var captureSession = AVCaptureSession()
   private var captureDevice: AVCaptureDevice?
   private var captureDeviceInput: AVCaptureDeviceInput?
   private var captureMovieFileOutput = AVCaptureMovieFileOutput()
-  
-  override init() {
-    super.init()
-    
-    do {
-      try self.configureCaptureSession()
-    } catch {
-      print(error.localizedDescription)
-    }
-  }
-  
-  private func configureCaptureSession() throws {
+
+  func connect(_ captureVideoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
     self.captureSession.beginConfiguration()
     
     let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
@@ -130,8 +116,9 @@ fileprivate final class Camera: NSObject {
     self.captureSession.addInput(input)
     self.captureSession.addOutput(output)
     self.captureSession.commitConfiguration()
-    self.$camera.captureVideoPreviewLayer.withLock { $0.session = self.captureSession }
     
+    captureVideoPreviewLayer.session = self.captureSession
+
     Task.detached {
       self.captureSession.startRunning()
     }
@@ -234,7 +221,6 @@ fileprivate final class Camera: NSObject {
     self.captureSession.commitConfiguration()
     captureDevice.videoZoomFactor = newZoomFactor
     captureDevice.unlockForConfiguration()
-    self.$camera.zoom.withLock { $0 = zoomFactor }
   }
   
   func startRecording(to url: URL) throws {
@@ -259,12 +245,10 @@ fileprivate final class Camera: NSObject {
       to: url,
       recordingDelegate: self
     )
-    self.$camera.isRecording.withLock { $0 = true }
   }
   
   func stopRecording() {
     self.captureMovieFileOutput.stopRecording()
-    self.$camera.isRecording.withLock { $0 = false }
   }
 }
 
@@ -276,7 +260,7 @@ extension Camera: AVCaptureFileOutputRecordingDelegate {
     error: Error?
   ) {
     Task {
-      await events.send(.captureFileOutputRecording(.fileOutput(
+      await events.send(.avCaptureFileOutputRecordingDelegate(.fileOutput(
         output,
         didFinishRecordingTo: outputFileURL,
         from: connections,

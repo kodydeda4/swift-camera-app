@@ -2,7 +2,6 @@ import AVFoundation
 import Dependencies
 import DependenciesMacros
 import Photos
-import Sharing
 
 @DependencyClient
 struct UserPermissionsClient: Sendable {
@@ -10,8 +9,6 @@ struct UserPermissionsClient: Sendable {
     = { _ in reportIssue("\(Self.self).status"); return .undetermined }
   var request: @Sendable (Feature) async -> Bool
     = { _ in reportIssue("\(Self.self).request"); return false }
-
-  typealias State = [Feature:Status]
 
   enum Feature: Codable, CaseIterable {
     case camera
@@ -23,12 +20,6 @@ struct UserPermissionsClient: Sendable {
     case undetermined
     case authorized
     case denied
-  }
-}
-
-extension SharedReaderKey where Self == FileStorageKey<UserPermissionsClient.State>.Default {
-  static var userPermissions: Self {
-    Self[.fileStorage(.shared("userPermissions")), default: [:]]
   }
 }
 
