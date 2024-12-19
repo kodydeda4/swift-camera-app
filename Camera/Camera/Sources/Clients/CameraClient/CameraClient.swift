@@ -144,8 +144,7 @@ fileprivate final class Camera: NSObject {
     
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput)
-    else {
+    guard self.session.canAddInput(newDeviceInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
     self.session.addInput(newDeviceInput)
@@ -172,8 +171,7 @@ fileprivate final class Camera: NSObject {
     // session configure
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput)
-    else {
+    guard self.session.canAddInput(newDeviceInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
     self.session.addInput(newDeviceInput)
@@ -182,16 +180,13 @@ fileprivate final class Camera: NSObject {
     
     // device configure
     try self.device.lockForConfiguration()
-    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera
-      ? 1
-      : videoZoomFactor
+    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera ? 1 : videoZoomFactor
     self.device.unlockForConfiguration()
   }
   
   /// Start recording video to a url.
   func startRecording(to url: URL) throws {
-    guard let connection = self.movieFileOutput.connection(with: .video)
-    else {
+    guard let connection = self.movieFileOutput.connection(with: .video) else {
       throw CameraClient.Failure()
     }
     

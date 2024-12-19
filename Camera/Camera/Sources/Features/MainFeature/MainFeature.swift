@@ -71,6 +71,7 @@ final class MainModel {
       return
     }
 
+    // @DEDA when you return, start the session again.
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         try? await self.cameraClient.connect(self.camera.captureVideoPreviewLayer)
