@@ -11,3 +11,18 @@ extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Def
   }
 }
 
+// MARK: - SwiftUI Previews
+
+extension UserPermissionsState {
+  static var denied: UserPermissionsState = [
+    .camera: .denied,
+    .microphone: .denied,
+    .photos: .denied,
+  ]
+  static var fullPermissions: UserPermissionsState = [
+    .camera: .authorized,
+    .microphone: .authorized,
+    .photos: .authorized,
+  ]
+}
+

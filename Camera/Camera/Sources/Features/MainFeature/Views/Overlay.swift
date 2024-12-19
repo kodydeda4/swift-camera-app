@@ -1,4 +1,5 @@
 import SwiftUI
+import Sharing
 
 private struct Style {
   static let buttonSize: CGFloat = 24
@@ -62,19 +63,29 @@ fileprivate extension MainView {
   private var zoomButtons: some View {
     HStack {
       ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-        Button {
-          self.model.zoomButtonTapped(value)
-        } label: {
-          Text("\(value.formattedDescription)x")
-            .foregroundColor(self.model.camera.zoom == value ? .white : .accentColor)
-            .padding()
-            .background(
-              self.model.camera.zoom == value
-                ? Color.accentColor
-                : Color.white.opacity(0.25)
-            )
-        }
+        zoomButton(videoZoomFactor: value)
       }
+    }
+    .padding(8)
+    .background {
+      Color.white.opacity(0.5)
+    }
+    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+  }
+  
+  private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
+    let isSelected = self.model.camera.zoom == value
+    
+    return Button {
+      self.model.zoomButtonTapped(value)
+    } label: {
+      Text("\(value.formattedDescription)x")
+        .font(.caption)
+        .frame(width: 32, height: 32)
+        .foregroundColor(isSelected ? .white : .black)
+//        .padding()
+        .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
+        .clipShape(Circle())
     }
   }
   
@@ -146,6 +157,14 @@ extension CGFloat {
 
 // MARK: - SwiftUI Previews
 
-#Preview {
+#Preview("Camera") {
+  @Shared(.userPermissions) var userPermissions = .fullPermissions
+  
+  MainView(model: MainModel())
+}
+
+#Preview("Permissions Required") {
+  @Shared(.userPermissions) var userPermissions = .denied
+  
   MainView(model: MainModel())
 }

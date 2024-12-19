@@ -18,6 +18,7 @@ import SwiftUINavigation
  - [x] AppIcon
  - [x] Front facing camera
  - [x] CameraClient
+ - [x] SwiftUI Preview Compiler Directive
  - [ ] Different zooms
  - [ ] Fix app backgrounding
  - [ ] Logs
@@ -41,7 +42,6 @@ import SwiftUINavigation
  - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress
- - [ ] SwiftUI Preview Compiler Directive
  - [ ] DesignSystem
 
  -------------------------------------------------------------------------------------------- */
