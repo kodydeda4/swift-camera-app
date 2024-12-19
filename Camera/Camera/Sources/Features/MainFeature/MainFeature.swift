@@ -5,6 +5,12 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// @DEDA extract the mainfeature from the camera feature.
+// Create a tabview that you can switch between, kinda like snapchat.
+// The camera roll will you show you all the videos you recorded.
+// The main view will just be the recording screen.
+// You can navigate to user permissions from either page.
+
 @MainActor
 @Observable
 final class MainModel {
@@ -23,6 +29,7 @@ final class MainModel {
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
+//    case cameraRoll(CameraRollModel)
   }
   
   var hasFullPermissions: Bool {
