@@ -11,8 +11,11 @@ final class MainModel {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
+  // Shared
   @ObservationIgnored @Shared(.userPermissions) private var userPermissions
   @ObservationIgnored @Shared(.camera) var camera
+  
+  // Dependencies
   @ObservationIgnored @Dependency(\.camera) private var cameraClient
   @ObservationIgnored @Dependency(\.photoLibrary) private var photoLibrary
   @ObservationIgnored @Dependency(\.uuid) private var uuid
