@@ -13,7 +13,7 @@ final class MainModel {
   
   // Shared
   @ObservationIgnored @SharedReader(.camera) var camera
-  @ObservationIgnored @Shared(.userPermissions) var userPermissions
+  @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
 
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var cameraClient
@@ -85,12 +85,10 @@ private extension MainModel {
   func handle(_ event: CameraClient.DelegateEvent) {
     switch event {
       
-    case let .fileOutput(_, outputFileURL, _, _):
-      Task.detached {
-        try await self.photoLibrary().performChanges({
-          PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-        })
-      }
+    case let .captureFileOutputRecording(.fileOutput(_, outputFileURL, _, _)):
+      self.photoLibrary().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+      })
     }
   }
   

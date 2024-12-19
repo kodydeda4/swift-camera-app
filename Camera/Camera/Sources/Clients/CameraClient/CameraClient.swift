@@ -27,12 +27,16 @@ struct CameraClient: Sendable {
   }
   
   enum DelegateEvent {
-    case fileOutput(
-      _ output: AVCaptureFileOutput,
-      didFinishRecordingTo: URL,
-      from: [AVCaptureConnection],
-      error: Error?
-    )
+    case captureFileOutputRecording(CaptureFileOutputRecording)
+    
+    enum CaptureFileOutputRecording {
+      case fileOutput(
+        _ output: AVCaptureFileOutput,
+        didFinishRecordingTo: URL,
+        from: [AVCaptureConnection],
+        error: Error?
+      )
+    }
   }
 }
 
@@ -261,12 +265,12 @@ extension Camera: AVCaptureFileOutputRecordingDelegate {
     error: Error?
   ) {
     Task {
-      await events.send(.fileOutput(
+      await events.send(.captureFileOutputRecording(.fileOutput(
         output,
         didFinishRecordingTo: outputFileURL,
         from: connections,
         error: error
-      ))
+      )))
     }
   }
 }
