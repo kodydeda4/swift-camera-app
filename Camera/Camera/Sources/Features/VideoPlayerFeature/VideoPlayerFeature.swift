@@ -20,7 +20,7 @@ final class VideoPlayerModel {
   init(video: LibraryModel.Video) {
     self.video = video
   }
- 
+
   func task() async {
     if let avURLAsset = await self.photoLibrary.fetchAVURLAsset(self.video.asset) {
       self.player = AVPlayer(url: avURLAsset.url)
@@ -30,11 +30,11 @@ final class VideoPlayerModel {
   func cancelButtonTapped() {
     self.dismiss()
   }
-  
+
   func onVideoPlayerAppear() {
     self.player?.play()
   }
-  
+
   func deleteButtonTapped() {
     Task {
       try await self.photoLibrary.delete([self.video.asset])

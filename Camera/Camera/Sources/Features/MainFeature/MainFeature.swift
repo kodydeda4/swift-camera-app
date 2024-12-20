@@ -11,7 +11,7 @@ final class MainModel {
   private(set) var cameraModel = CameraModel()
   private(set) var libraryModel = LibraryModel()
   private(set) var settingsModel = SettingsModel()
-  
+
   var tab = Tab.camera
   let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
