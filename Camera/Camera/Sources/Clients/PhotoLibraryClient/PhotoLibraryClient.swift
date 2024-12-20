@@ -18,14 +18,14 @@ struct PhotoLibraryClient: Sendable {
   var requestAVAsset: @Sendable (
     FetchRequest.AVAsset
   ) async -> RequestAVAssetResponse? = { _ in .none }
-
+  
   var createCollection: @Sendable (
     _ withTitle: String
   ) async throws -> PHAssetCollection?
-
+  
   var generateThumbnail: @Sendable (
     _ avAsset: AVAsset
-//    FetchRequest.Thumbnail
+    //    FetchRequest.Thumbnail
   ) async throws -> UIImage?
   
   var save: @Sendable (
@@ -74,7 +74,7 @@ extension DependencyValues {
 
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
-
+    
     fetchAssetCollection: { request in
       PHAssetCollection.fetchAssetCollections(
         with: request.type,
@@ -131,26 +131,18 @@ extension PhotoLibraryClient: DependencyKey {
       }
     },
     generateThumbnail: { avAsset in
-      try await withCheckedThrowingContinuation { continuation in
-        Task {
-          var assetGenerator: AVAssetImageGenerator {
-            let rv = AVAssetImageGenerator(asset: avAsset)
-            rv.appliesPreferredTrackTransform = true
-            return rv
-          }
-          
-          if let cgImage = try? await assetGenerator.image(at: .zero).image {
-            continuation.resume(returning: UIImage(cgImage: cgImage))
-          } else {
-            continuation.resume(throwing: AnyError("Couldn't create image"))
-          }
-        }
-      }
+      try await UIImage(
+        cgImage: {
+          let rv = AVAssetImageGenerator(asset: avAsset)
+          rv.appliesPreferredTrackTransform = true
+          return rv
+        }().image(at: .zero).image
+      )
     },
     save: { url, album in
       PHPhotoLibrary.shared().performChanges({
-        let assetChangeRequest = PHAssetChangeRequest
-          .creationRequestForAssetFromVideo(atFileURL: url)
+        let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        
         if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
           let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
           albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)

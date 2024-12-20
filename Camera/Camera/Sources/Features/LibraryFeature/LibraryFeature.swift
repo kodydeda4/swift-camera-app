@@ -13,11 +13,12 @@ final class LibraryModel {
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
   
+  @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @SharedReader(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
-  
+
   struct Video: Identifiable {
-    var id: PHAsset { phAsset }
+    var id: UUID
     let phAsset: PHAsset
     var avURLAsset: AVURLAsset?
     var thumbnail: UIImage?
@@ -44,10 +45,11 @@ final class LibraryModel {
         throw AnyError("collection was nil somehow.")
       }
       
+      self.videos = []
       let fetchResult = try await self.photoLibrary.fetchAssets(.videos(in: collection))
       
       fetchResult.enumerateObjects { asset, _, _ in
-        self.videos[id: asset] = .init(phAsset: asset)
+        self.videos.append(.init(id: self.uuid(), phAsset: asset))
       }
       
       await withTaskGroup(of: Void?.self) { taskGroup in
