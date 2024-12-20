@@ -23,10 +23,7 @@ struct PhotoLibraryClient: Sendable {
     _ withTitle: String
   ) async throws -> PHAssetCollection?
   
-  var generateThumbnail: @Sendable (
-    _ avAsset: AVAsset
-    //    FetchRequest.Thumbnail
-  ) async throws -> UIImage?
+  var generateImage: @Sendable (AVAsset) async throws -> GenerateImageResponse?
   
   var save: @Sendable (
     _ contentsOf: URL,
@@ -62,6 +59,8 @@ struct PhotoLibraryClient: Sendable {
     audioMix: AVAudioMix?,
     dictionary: [AnyHashable : Any]?
   )
+  
+  typealias GenerateImageResponse = (image: CGImage, actualTime: CMTime)
 }
 
 
@@ -130,19 +129,15 @@ extension PhotoLibraryClient: DependencyKey {
         })
       }
     },
-    generateThumbnail: { avAsset in
-      try await UIImage(
-        cgImage: {
-          let rv = AVAssetImageGenerator(asset: avAsset)
-          rv.appliesPreferredTrackTransform = true
-          return rv
-        }().image(at: .zero).image
-      )
+    generateImage: { avAsset in
+      let imageGenerator = AVAssetImageGenerator(asset: avAsset)
+      imageGenerator.appliesPreferredTrackTransform = true
+      return try await imageGenerator.image(at: .zero)
     },
     save: { url, album in
       PHPhotoLibrary.shared().performChanges({
-        let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        
+        let assetChangeRequest = PHAssetChangeRequest
+          .creationRequestForAssetFromVideo(atFileURL: url)
         if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
           let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
           albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)

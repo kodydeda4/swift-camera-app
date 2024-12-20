@@ -39,6 +39,7 @@ final class LibraryModel {
   }
   
   // @DEDA this should be reactive.
+  
   func task() async {
     _ = await Result {
       guard let collection else {
@@ -62,11 +63,9 @@ final class LibraryModel {
               self.videos[id: video.id]?.avURLAsset = avURLAsset
             }
 
-            if let avAsset {
-              let uiImage = try? await self.photoLibrary.generateThumbnail(avAsset)
-              
+            if let avAsset, let image = try? await self.photoLibrary.generateImage(avAsset)?.image {
               await MainActor.run {
-                self.videos[id: video.id]?.thumbnail = uiImage
+                self.videos[id: video.id]?.thumbnail = UIImage(cgImage: image)
               }
             }
           }
