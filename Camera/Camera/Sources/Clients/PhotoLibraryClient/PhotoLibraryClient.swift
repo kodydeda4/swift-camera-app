@@ -20,6 +20,10 @@ struct PhotoLibraryClient: Sendable {
     _ mediaType: PHAssetMediaType
   ) async throws -> [PHAsset]
   
+  var fetchAVURLAsset: @Sendable (
+    _ for: PHAsset
+  ) async -> AVURLAsset? = { _ in .none }
+  
   var fetchThumbnail: @Sendable (
     _ for: PHAsset
   ) async throws -> UIImage?
@@ -99,6 +103,13 @@ extension PhotoLibraryClient: DependencyKey {
       }
       
       return assets
+    },
+    fetchAVURLAsset: { asset in
+      await withCheckedContinuation { continuation in
+        PHImageManager.default().requestAVAsset(forVideo: asset, options: nil) { avAsset, _, _ in
+          continuation.resume(returning: (avAsset as? AVURLAsset))
+        }
+      }
     },
     fetchThumbnail: { asset in
       try await withCheckedThrowingContinuation { continuation in

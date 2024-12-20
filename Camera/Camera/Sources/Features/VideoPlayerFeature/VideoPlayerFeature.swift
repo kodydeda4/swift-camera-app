@@ -7,21 +7,32 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// @DEDA just load the mf before you nav here brh.
+
 @MainActor
 @Observable
 final class VideoPlayerModel {
   let video: LibraryModel.Video
-  var dismiss: () -> Void
-    = unimplemented("VideoPlayerModel.dismiss")
-  
+  var player: AVPlayer?
+  var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
   init(video: LibraryModel.Video) {
     self.video = video
   }
+ 
+  func task() async {
+    if let avURLAsset = await self.photoLibrary.fetchAVURLAsset(self.video.asset) {
+      self.player = AVPlayer(url: avURLAsset.url)
+    }
+  }
 
   func cancelButtonTapped() {
     self.dismiss()
+  }
+  
+  func onVideoPlayerAppear() {
+    self.player?.play()
   }
   
   func deleteButtonTapped() {
@@ -36,42 +47,20 @@ final class VideoPlayerModel {
 
 struct VideoPlayerView: View {
   @Bindable var model: VideoPlayerModel
-  @State private var player: AVPlayer? = nil
 
   var body: some View {
     Group {
-      if let player = player {
+      if let player = self.model.player {
         VideoPlayer(player: player)
-          .onAppear {
-            player.play()
-          }
+          .onAppear { self.model.onVideoPlayerAppear() }
       } else {
         Text("Loading video...")
       }
     }
-    .onAppear {
-      fetchVideoURL(for: self.model.video.asset) { url in
-        if let url = url {
-          self.player = AVPlayer(url: url)
-        } else {
-          print("Failed to fetch video URL")
-        }
-      }
-    }
+    .task { await self.model.task() }
     .toolbar {
       Button("Delete") {
         self.model.deleteButtonTapped()
-      }
-    }
-  }
-
-  // Helper function to fetch the video URL
-  private func fetchVideoURL(for asset: PHAsset, completion: @escaping (URL?) -> Void) {
-    PHImageManager.default().requestAVAsset(forVideo: asset, options: nil) { avAsset, _, _ in
-      if let urlAsset = avAsset as? AVURLAsset {
-        completion(urlAsset.url)
-      } else {
-        completion(nil)
       }
     }
   }
