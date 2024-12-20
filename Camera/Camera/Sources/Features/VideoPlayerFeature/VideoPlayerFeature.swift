@@ -13,6 +13,8 @@ final class VideoPlayerModel {
   let video: LibraryModel.Video
   var dismiss: () -> Void
     = unimplemented("VideoPlayerModel.dismiss")
+  
+  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
   init(video: LibraryModel.Video) {
     self.video = video
@@ -20,6 +22,13 @@ final class VideoPlayerModel {
 
   func cancelButtonTapped() {
     self.dismiss()
+  }
+  
+  func deleteButtonTapped() {
+    Task {
+      try await self.photoLibrary.delete(self.video.asset)
+      self.dismiss()
+    }
   }
 }
 
@@ -47,6 +56,11 @@ struct VideoPlayerView: View {
         } else {
           print("Failed to fetch video URL")
         }
+      }
+    }
+    .toolbar {
+      Button("Delete") {
+        self.model.deleteButtonTapped()
       }
     }
   }

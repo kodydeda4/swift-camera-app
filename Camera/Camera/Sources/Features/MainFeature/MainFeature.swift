@@ -8,13 +8,12 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  var tab = Tab.camera
-  let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
-
   private(set) var cameraModel = CameraModel()
   private(set) var libraryModel = LibraryModel()
   private(set) var settingsModel = SettingsModel()
-
+  
+  var tab = Tab.camera
+  let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 

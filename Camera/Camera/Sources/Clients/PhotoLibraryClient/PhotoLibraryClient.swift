@@ -28,6 +28,10 @@ struct PhotoLibraryClient: Sendable {
     _ contentsOf: URL,
     _ toAssetCollection: PHAssetCollection
   ) async throws -> Void
+  
+  var delete: @Sendable (
+    _ asset: PHAsset
+  ) async throws -> Void
 }
 
 extension DependencyValues {
@@ -41,7 +45,7 @@ extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
     createCollection: { title in
       try await withCheckedThrowingContinuation { continuation in
-
+        
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
@@ -134,6 +138,19 @@ extension PhotoLibraryClient: DependencyKey {
           albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
         }
       })
+    },
+    delete: { asset in
+      try await withCheckedThrowingContinuation { continuation in
+        PHPhotoLibrary.shared().performChanges({
+          PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+        }) { success, error in
+          if let error = error {
+            continuation.resume(throwing: error)
+          } else if success {
+            continuation.resume()
+          }
+        }
+      }
     }
   )
 }
