@@ -7,7 +7,7 @@ import UIKit
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
   
-  var fetchAssetCollection: @Sendable (
+  var fetchAssetCollections: @Sendable (
     FetchRequest.AssetCollection
   ) async throws -> PHFetchResult<PHAssetCollection>
   
@@ -69,7 +69,7 @@ extension DependencyValues {
 
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
-    fetchAssetCollection: { request in
+    fetchAssetCollections: { request in
       PHAssetCollection.fetchAssetCollections(
         with: request.type,
         subtype: request.subtype,
@@ -123,7 +123,7 @@ extension PhotoLibraryClient: DependencyKey {
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
-          assetCollectionPlaceholder = PHAssetCollectionChangeRequest
+        assetCollectionPlaceholder = PHAssetCollectionChangeRequest
             .creationRequestForAssetCollection(withTitle: title)
             .placeholderForCreatedAssetCollection
           
