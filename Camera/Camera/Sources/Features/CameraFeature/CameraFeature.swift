@@ -9,7 +9,6 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-//  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
