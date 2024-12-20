@@ -11,7 +11,9 @@ extension CameraView {
     VStack {
       self.top
       Spacer()
-      self.bottom
+      if self.model.hasFullPermissions {
+        self.bottom
+      }
     }
     .frame(maxWidth: .infinity)
     .padding()
