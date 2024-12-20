@@ -9,14 +9,15 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
+//  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
   // Shared
   @ObservationIgnored @Shared(.camera) var camera
+  @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
-  
+
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var cameraClient
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
@@ -102,13 +103,10 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let collection = try? await self.photoLibrary
-          .fetchCollection(self.phAssetCollectionTitle)
-        {
-          try await self.photoLibrary.save(outputFileURL, collection)
+        if let assetCollection {
+          try await self.photoLibrary.save(outputFileURL, assetCollection)
         } else {
-          let collection = try await self.photoLibrary.createCollection(self.phAssetCollectionTitle)
-          try await self.photoLibrary.save(outputFileURL, collection)
+          print("@DEDA yo asset collection wuz nil.")
         }
       }
     }

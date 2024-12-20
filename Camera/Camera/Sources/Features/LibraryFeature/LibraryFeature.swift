@@ -10,11 +10,11 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class LibraryModel {
-  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
 
+  @ObservationIgnored @Shared(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
   struct Video: Identifiable {
@@ -44,11 +44,12 @@ final class LibraryModel {
     self.inFlight = true
 
     do {
-      let collection = try await self.photoLibrary.fetchCollection(self.phAssetCollectionTitle)
-      let videos = try await self.photoLibrary.fetchAssets(
-        collection.unsafelyUnwrapped,
-        PHAssetMediaType.video
-      )
+      guard let collection else {
+        throw AnyError("collection was nil somehow.")
+      }
+      
+      let videos = try await self.photoLibrary.fetchAssets(collection, .video)
+      
       self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
 
       await withTaskGroup(of: UIImage?.self) { taskGroup in

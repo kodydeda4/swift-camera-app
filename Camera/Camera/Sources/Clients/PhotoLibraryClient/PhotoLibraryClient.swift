@@ -9,7 +9,7 @@ struct PhotoLibraryClient: Sendable {
   
   var createCollection: @Sendable (
     _ withTitle: String
-  ) async throws -> PHAssetCollection
+  ) async throws -> PHAssetCollection?
   
   var fetchCollection: @Sendable (
     _ withTitle: String
@@ -40,36 +40,27 @@ extension DependencyValues {
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
     createCollection: { title in
-      try await Future<PHAssetCollection, AnyError> { promise in
+      try await withCheckedThrowingContinuation { continuation in
+
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
-          let createAlbumRequest = PHAssetCollectionChangeRequest
-            .creationRequestForAssetCollection(withTitle: title)
-          
-          assetCollectionPlaceholder = createAlbumRequest.placeholderForCreatedAssetCollection
+          assetCollectionPlaceholder = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title).placeholderForCreatedAssetCollection
           
         }, completionHandler: { success, error in
-          guard success else {
-            promise(.failure(AnyError("unableToGetCollection")))
-            return
-          }
           
-          let collectionFetchResult = PHAssetCollection
-            .fetchAssetCollections(
+          if let error {
+            continuation.resume(throwing: error)
+          } else if success, let collection = PHAssetCollection.fetchAssetCollections(
               withLocalIdentifiers: [assetCollectionPlaceholder.localIdentifier],
               options: nil
-            )
-          
-          guard let assetCollection = collectionFetchResult.firstObject else {
-            promise(.failure(AnyError("unableToGetCollection")))
-            return
+          ).firstObject {
+            continuation.resume(returning: collection)
+          } else {
+            continuation.resume(throwing: AnyError("@DEDA WTF?"))
           }
-          
-          promise(.success(assetCollection))
         })
       }
-      .value
     },
     fetchCollection: { name in
       let prFetchOptions = PHFetchOptions()
@@ -104,7 +95,7 @@ extension PhotoLibraryClient: DependencyKey {
       return assets
     },
     fetchThumbnail: { asset in
-      await withCheckedContinuation { continuation in
+      try await withCheckedThrowingContinuation { continuation in
         let imageManager = PHImageManager.default()
         let videoRequestOptions = PHVideoRequestOptions()
         videoRequestOptions.deliveryMode = .highQualityFormat
@@ -117,8 +108,7 @@ extension PhotoLibraryClient: DependencyKey {
           
           do {
             guard let avAsset else {
-              print("couldn't locate asset")
-              continuation.resume(returning: nil)
+              continuation.resume(throwing: AnyError("Couldn't locate asset"))
               return
             }
             let assetGenerator = AVAssetImageGenerator(asset: avAsset)
@@ -128,7 +118,7 @@ extension PhotoLibraryClient: DependencyKey {
               actualTime: nil
             )))
           } catch {
-            continuation.resume(returning: nil)
+            continuation.resume(throwing: AnyError("Couldn't create image"))
           }
         }
       }
