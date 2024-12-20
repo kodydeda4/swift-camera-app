@@ -7,23 +7,20 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-// @DEDA another way to do this would be to navigate to the video player,
-// And put a blurred image of the thumbnail while it loads in the player.
-
 @MainActor
 @Observable
 final class LibraryModel {
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
-  var inFlightVideo: Video?
   
   @ObservationIgnored @Shared(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
   
   struct Video: Identifiable {
     let id = UUID()
-    let asset: PHAsset
+    let phAsset: PHAsset
+    var avURLAsset: AVURLAsset?
     var thumbnail: UIImage?
   }
   
@@ -33,36 +30,17 @@ final class LibraryModel {
   }
   
   func buttonTapped(video: Video) {
-    self.inFlightVideo = video
-    
-    Task.detached {
-      let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.asset)
-      
-      await MainActor.run {
-        self.inFlightVideo = .none
-        
-        if let avURLAsset {
-          self.destination = .videoPlayer(VideoPlayerModel(
-            asset: video.asset,
-            url: avURLAsset.url
-          ))
-        }
-      }
+    if let avURLAsset = video.avURLAsset {
+      self.destination = .videoPlayer(VideoPlayerModel(
+        phAsset: video.phAsset,
+        avURLAsset: avURLAsset
+      ))
     }
   }
   
+  // @DEDA this should be reactive.
   func task() async {
-    await self.fetchVideos()
-  }
-  
-  func refresh() async {
-    await self.fetchVideos()
-  }
-  
-  private func fetchVideos() async {
-    self.inFlight = true
-    
-    do {
+    _ = await Result {
       guard let collection else {
         throw AnyError("collection was nil somehow.")
       }
@@ -70,24 +48,23 @@ final class LibraryModel {
       self.videos = IdentifiedArray(
         uniqueElements: try await self.photoLibrary
           .fetchAssets(collection, .video)
-          .map { Video(asset: $0) }
+          .map { Video(phAsset: $0) }
       )
       
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let uiImage = try? await self.photoLibrary.fetchThumbnail(video.asset)
+            let uiImage = try? await self.photoLibrary.fetchThumbnail(video.phAsset)
+            let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.phAsset)
             
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage
+              self.videos[id: video.id]?.avURLAsset = avURLAsset
             }
           }
         }
       }
-    } catch {
-      print(error.localizedDescription)
     }
-    inFlight = false
   }
   
   private func bind() {
@@ -148,13 +125,6 @@ struct LibraryView: View {
           .scaledToFit()
           .cornerRadius(8)
           .padding(.horizontal)
-      }
-    }
-    .overlay {
-      Group {
-        if video.id == self.model.inFlightVideo?.id {
-          ProgressView()
-        }
       }
     }
   }

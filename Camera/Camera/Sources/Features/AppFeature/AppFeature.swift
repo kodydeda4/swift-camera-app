@@ -23,7 +23,9 @@ import SwiftUINavigation
  - [x] SwiftUI Preview Compiler Directive
  - [x] Save to an app-specific-photo-album
  - [x] fetch and display videos from app-specific-photo-album.
- - [ ] CRUD the videos
+ - [x] CRUD the videos
+ - [x] Share videos
+ - [ ] Slow motion settings?
  - [ ] Different zooms
  - [ ] Fix app backgrounding
  - [ ] Logs
@@ -35,7 +37,6 @@ import SwiftUINavigation
 
  Idk Features
  - [ ] Handle app backgrounding
- - [ ] Share videos from roll
  - [ ] Record video vs take picture
  - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll

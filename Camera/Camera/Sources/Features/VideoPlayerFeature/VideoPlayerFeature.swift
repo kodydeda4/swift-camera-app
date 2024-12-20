@@ -12,8 +12,8 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class VideoPlayerModel {
-  let asset: PHAsset
-  let url: URL
+  let phAsset: PHAsset
+  let avURLAsset: AVURLAsset
   let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
@@ -24,10 +24,10 @@ final class VideoPlayerModel {
     case share(URL)
   }
 
-  init(asset: PHAsset, url: URL) {
-    self.asset = asset
-    self.url = url
-    self.player = AVPlayer(url: url)
+  init(phAsset: PHAsset, avURLAsset: AVURLAsset) {
+    self.phAsset = phAsset
+    self.avURLAsset = avURLAsset
+    self.player = AVPlayer(url: avURLAsset.url)
   }
   
   func task() async {
@@ -40,13 +40,13 @@ final class VideoPlayerModel {
   
   func deleteButtonTapped() {
     Task {
-      try await self.photoLibrary.delete([self.asset])
+      try await self.photoLibrary.delete([self.phAsset])
       self.dismiss()
     }
   }
   
   func shareButtonTapped() {
-    self.destination = .share(self.url)
+    self.destination = .share(self.avURLAsset.url)
   }
   
   private func bind() {
