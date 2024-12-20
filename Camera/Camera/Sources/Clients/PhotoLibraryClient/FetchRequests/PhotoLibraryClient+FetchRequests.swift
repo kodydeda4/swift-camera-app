@@ -1,5 +1,5 @@
-import Photos
 import Foundation
+import Photos
 
 extension PhotoLibraryClient.FetchRequest.AssetCollection {
   init(title: String) {

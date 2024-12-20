@@ -18,7 +18,7 @@ final class VideoPlayerModel {
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
-  
+
   @CasePathable
   enum Destination {
     case share(URL)
@@ -29,32 +29,32 @@ final class VideoPlayerModel {
     self.avURLAsset = avURLAsset
     self.player = AVPlayer(url: avURLAsset.url)
   }
-  
+
   func task() async {
     self.player.play()
   }
-  
+
   func cancelButtonTapped() {
     self.dismiss()
   }
-  
+
   func deleteButtonTapped() {
     Task {
       try await self.photoLibrary.deleteAssets([self.phAsset])
       self.dismiss()
     }
   }
-  
+
   func shareButtonTapped() {
     self.destination = .share(self.avURLAsset.url)
   }
-  
+
   private func bind() {
     switch destination {
-      
+
     case .share:
       break
-      
+
     case .none:
       break
     }
@@ -65,7 +65,7 @@ final class VideoPlayerModel {
 
 struct VideoPlayerView: View {
   @Bindable var model: VideoPlayerModel
-  
+
   var body: some View {
     ZStack {
       VideoPlayer(player: self.model.player)

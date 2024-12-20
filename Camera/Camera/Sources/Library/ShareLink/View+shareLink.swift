@@ -1,8 +1,8 @@
+import Foundation
+import LinkPresentation
 import Swift
 import SwiftUI
 import UIKit
-import LinkPresentation
-import Foundation
 
 extension View {
   public func shareLink(
