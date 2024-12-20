@@ -34,7 +34,7 @@ struct PhotoLibraryClient: Sendable {
   ) async throws -> Void
   
   var delete: @Sendable (
-    _ asset: PHAsset
+    _ asset: [PHAsset]
   ) async throws -> Void
 }
 
@@ -128,14 +128,17 @@ extension PhotoLibraryClient: DependencyKey {
               continuation.resume(throwing: AnyError("Couldn't locate asset"))
               return
             }
+            
             let assetGenerator = AVAssetImageGenerator(asset: avAsset)
             assetGenerator.appliesPreferredTrackTransform = true
-            continuation.resume(returning: UIImage(cgImage: try assetGenerator.copyCGImage(
-              at: .zero,
-              actualTime: nil
-            )))
-          } catch {
-            continuation.resume(throwing: AnyError("Couldn't create image"))
+            
+            Task {
+              if let cgImage = try? await assetGenerator.image(at: .zero).image {
+                continuation.resume(returning: UIImage(cgImage: cgImage))
+              } else {
+                continuation.resume(throwing: AnyError("Couldn't create image"))
+              }
+            }
           }
         }
       }
@@ -150,12 +153,12 @@ extension PhotoLibraryClient: DependencyKey {
         }
       })
     },
-    delete: { asset in
+    delete: { assets in
       try await withCheckedThrowingContinuation { continuation in
         PHPhotoLibrary.shared().performChanges({
-          PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+          PHAssetChangeRequest.deleteAssets(assets as NSArray)
         }) { success, error in
-          if let error = error {
+          if let error {
             continuation.resume(throwing: error)
           } else if success {
             continuation.resume()
