@@ -54,7 +54,7 @@ final class LibraryModel {
         for video in self.videos {
           taskGroup.addTask {
             let uiImage = try? await self.photoLibrary.fetchThumbnail(video.phAsset)
-            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset))?.0
+            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset))?.asset
             let avURLAsset = (avAsset as? AVURLAsset)
             
             await MainActor.run {

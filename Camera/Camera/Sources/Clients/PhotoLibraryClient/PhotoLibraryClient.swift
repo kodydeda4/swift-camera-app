@@ -52,7 +52,11 @@ struct PhotoLibraryClient: Sendable {
     }
   }
   
-  typealias RequestAVAssetResponse = (AVAsset?, AVAudioMix?, [AnyHashable : Any]?)
+  typealias RequestAVAssetResponse = (
+    asset: AVAsset?,
+    audioMix: AVAudioMix?,
+    dictionary: [AnyHashable : Any]?
+  )
 }
 
 
@@ -85,7 +89,13 @@ extension PhotoLibraryClient: DependencyKey {
           forVideo: request.asset,
           options: request.options,
           resultHandler: { asset, audioMix, dictionary in
-            continuation.resume(returning: (asset, audioMix, dictionary))
+            continuation.resume(
+              returning: (
+                asset: asset,
+                audioMix: audioMix,
+                dictionary: dictionary
+              )
+            )
           }
         )
       }
