@@ -108,10 +108,10 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let album = try? await self.photoLibrary.fetch(.appPhotoAlbum) {
+        if let album = try? await self.photoLibrary.fetchCollection(PhotosAlbum.app.rawValue) {
           try await self.photoLibrary.save(outputFileURL, album)
         } else {
-          let album = try await self.photoLibrary.create(.appPhotoAlbum)
+          let album = try await self.photoLibrary.createCollection(PhotosAlbum.app.rawValue)
           try await self.photoLibrary.save(outputFileURL, album)
         }
       }
