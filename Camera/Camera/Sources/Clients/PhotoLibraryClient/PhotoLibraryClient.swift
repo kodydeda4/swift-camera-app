@@ -115,7 +115,9 @@ extension PhotoLibraryClient: DependencyKey {
       }
     },
     generateImage: { asset in
-      try await AVAssetImageGenerator(asset: asset).image(at: .zero)
+      let generator = AVAssetImageGenerator(asset: asset)
+      generator.appliesPreferredTrackTransform = true
+      return try await generator.image(at: .zero)
     },
     createCollection: { title in
       try await withCheckedThrowingContinuation { continuation in
