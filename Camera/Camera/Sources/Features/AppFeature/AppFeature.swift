@@ -55,12 +55,10 @@ import CasePaths
 @Observable
 @MainActor
 final class AppModel {
-  let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var destination: Destination? { didSet { self.bind() } }
   
   @ObservationIgnored @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
-  @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.userPermissions) var userPermissionsClient
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
@@ -74,7 +72,6 @@ final class AppModel {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         await self.syncUserPermissions()
-        await self.syncPhotoLibrary()
         
         await MainActor.run {
           self.destination = self.isOnboardingComplete
@@ -92,26 +89,6 @@ final class AppModel {
         $0[feature] = self.userPermissionsClient.status(feature)
       }
     }
-  }
-  
-  // @DEDA not sure about this logic yet bro.
-  /// Load the existing photo library collection for the app if it exists, or try to create a new one.
-  private func syncPhotoLibrary() async {
-    let result = await Result<PHAssetCollection, Error> {
-      if let existing = try await photoLibrary.fetchCollection(self.assetCollectionTitle) {
-        return existing
-      } else if let new = try? await photoLibrary.createCollection(self.assetCollectionTitle) {
-        return new
-      } else {
-        throw AnyError("SyncPhotoLibrary, failed to fetch or create collection.")
-      }
-    }
-    
-    if case let .success(value) = result {
-      self.$assetCollection.withLock { $0 = value }
-    }
-    
-    print("SyncPhotoLibrary", result)
   }
 
   private func bind() {
