@@ -27,7 +27,7 @@ final class UserPermissionsModel: Identifiable {
   }
   
   var hasFullPermissions: Bool {
-    self.userPermissions == .fullPermissions
+    self.userPermissions == .authorized
   }
 
   func cancelButtonTapped() {

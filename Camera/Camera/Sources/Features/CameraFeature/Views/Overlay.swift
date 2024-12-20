@@ -127,7 +127,7 @@ extension CGFloat {
 // MARK: - SwiftUI Previews
 
 #Preview("Camera") {
-  @Shared(.userPermissions) var userPermissions = .fullPermissions
+  @Shared(.userPermissions) var userPermissions = .authorized
   
   CameraView(model: CameraModel())
 }

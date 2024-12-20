@@ -29,9 +29,7 @@ final class CameraModel {
   }
   
   var hasFullPermissions: Bool {
-    self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
+    self.userPermissions == .authorized
   }
   
   var isSwitchCameraButtonDisabled: Bool {
