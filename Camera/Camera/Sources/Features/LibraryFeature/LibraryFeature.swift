@@ -13,6 +13,7 @@ final class LibraryModel {
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
+  var inFlightVideo: Video?
 
   @ObservationIgnored @Shared(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
@@ -27,14 +28,22 @@ final class LibraryModel {
   enum Destination {
     case videoPlayer(VideoPlayerModel)
   }
-
+  
   func buttonTapped(video: Video) {
-    Task {
-      if let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.asset) {
-        self.destination = .videoPlayer(VideoPlayerModel(
-          asset: video.asset,
-          url: avURLAsset.url
-        ))
+    self.inFlightVideo = video
+    
+    Task.detached {
+      let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.asset)
+      
+      await MainActor.run {
+        self.inFlightVideo = .none
+        
+        if let avURLAsset {
+          self.destination = .videoPlayer(VideoPlayerModel(
+            asset: video.asset,
+            url: avURLAsset.url
+          ))
+        }
       }
     }
   }
