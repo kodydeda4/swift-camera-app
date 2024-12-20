@@ -21,29 +21,14 @@ extension CameraView {
 
 fileprivate extension CameraView {
   private var top: some View {
-    HStack {
-      VStack(alignment: .leading) {
-        Text("Camera")
-          .font(.title)
-          .fontWeight(.bold)
-        
-        Text(self.model.buildNumber.description)
-      }
-      .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
+    VStack(alignment: .leading) {
+      Text("Camera")
+        .font(.title)
+        .fontWeight(.bold)
       
-      Spacer()
-      
-      Button(action: self.model.permissionsButtonTapped) {
-        Image(systemName: "gear")
-          .resizable()
-          .scaledToFit()
-          .frame(width: Style.buttonSize, height: Style.buttonSize)
-          .padding(8)
-          .background(.regularMaterial)
-          .foregroundColor(.accentColor)
-          .clipShape(Circle())
-      }
+      Text(self.model.buildNumber.description)
     }
+    .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
   }
   
   private var bottom: some View {
