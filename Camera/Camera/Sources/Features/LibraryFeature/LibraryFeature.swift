@@ -53,13 +53,19 @@ final class LibraryModel {
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let uiImage = try? await self.photoLibrary.fetchThumbnail(video.phAsset)
             let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset))?.asset
             let avURLAsset = (avAsset as? AVURLAsset)
             
             await MainActor.run {
-              self.videos[id: video.id]?.thumbnail = uiImage
               self.videos[id: video.id]?.avURLAsset = avURLAsset
+            }
+
+            if let avAsset {
+              let uiImage = try? await self.photoLibrary.generateThumbnail(avAsset)
+              
+              await MainActor.run {
+                self.videos[id: video.id]?.thumbnail = uiImage
+              }
             }
           }
         }

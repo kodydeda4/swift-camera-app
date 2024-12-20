@@ -23,8 +23,9 @@ struct PhotoLibraryClient: Sendable {
     _ withTitle: String
   ) async throws -> PHAssetCollection?
 
-  var fetchThumbnail: @Sendable (
-    _ for: PHAsset
+  var generateThumbnail: @Sendable (
+    _ avAsset: AVAsset
+//    FetchRequest.Thumbnail
   ) async throws -> UIImage?
   
   var save: @Sendable (
@@ -49,6 +50,10 @@ struct PhotoLibraryClient: Sendable {
     struct AVAsset {
       let asset: PHAsset
       var options: PHVideoRequestOptions? = .none
+    }
+    struct Thumbnail {
+      let asset: PHAsset
+      let options: PHVideoRequestOptions
     }
   }
   
@@ -125,34 +130,19 @@ extension PhotoLibraryClient: DependencyKey {
         })
       }
     },
-    fetchThumbnail: { asset in
+    generateThumbnail: { avAsset in
       try await withCheckedThrowingContinuation { continuation in
-        let imageManager = PHImageManager.default()
-        let videoRequestOptions = PHVideoRequestOptions()
-        videoRequestOptions.deliveryMode = .highQualityFormat
-        videoRequestOptions.isNetworkAccessAllowed = true
-        
-        imageManager.requestAVAsset(
-          forVideo: asset,
-          options: videoRequestOptions
-        ) { avAsset, _, _ in
+        Task {
+          var assetGenerator: AVAssetImageGenerator {
+            let rv = AVAssetImageGenerator(asset: avAsset)
+            rv.appliesPreferredTrackTransform = true
+            return rv
+          }
           
-          do {
-            guard let avAsset else {
-              continuation.resume(throwing: AnyError("Couldn't locate asset"))
-              return
-            }
-            
-            let assetGenerator = AVAssetImageGenerator(asset: avAsset)
-            assetGenerator.appliesPreferredTrackTransform = true
-            
-            Task {
-              if let cgImage = try? await assetGenerator.image(at: .zero).image {
-                continuation.resume(returning: UIImage(cgImage: cgImage))
-              } else {
-                continuation.resume(throwing: AnyError("Couldn't create image"))
-              }
-            }
+          if let cgImage = try? await assetGenerator.image(at: .zero).image {
+            continuation.resume(returning: UIImage(cgImage: cgImage))
+          } else {
+            continuation.resume(throwing: AnyError("Couldn't create image"))
           }
         }
       }
@@ -182,5 +172,3 @@ extension PhotoLibraryClient: DependencyKey {
     }
   )
 }
-
-

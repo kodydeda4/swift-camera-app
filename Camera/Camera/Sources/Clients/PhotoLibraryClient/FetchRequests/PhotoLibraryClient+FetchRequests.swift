@@ -28,6 +28,14 @@ extension PhotoLibraryClient.FetchRequest.Assets {
   }
 }
 
+extension PhotoLibraryClient.FetchRequest.Thumbnail {
+  static func highQuality(asset: PHAsset) -> Self {
+    Self(asset: asset, options: .highQuality())
+  }
+}
+
+
+
 // MARK: Private
 
 fileprivate extension PHFetchOptions {
@@ -36,6 +44,15 @@ fileprivate extension PHFetchOptions {
   ) -> PHFetchOptions {
     let rv = Self()
     mutations(rv)
+    return rv
+  }
+}
+
+fileprivate extension PHVideoRequestOptions {
+  static func highQuality() -> PHVideoRequestOptions {
+    let rv = PHVideoRequestOptions()
+    rv.deliveryMode = .highQualityFormat
+    rv.isNetworkAccessAllowed = true
     return rv
   }
 }
