@@ -42,14 +42,22 @@ struct SettingsView: View {
           Button {
             self.model.navigateToPermissions()
           } label: {
-            Text("Permissions")
+            HStack {
+              Label("Permissions", systemImage: "lock")
+              Spacer()
+              Image(systemName: "chevron.forward")
+                .foregroundColor(.secondary)
+            }
           }
         }
+        
         Section {
-          Text("\(model.buildNumber.description)")
+          Text("Camera \(self.model.buildNumber.description)")
+            .foregroundColor(.secondary)
         }
       }
       .navigationTitle("Settings")
+      .listStyle(.plain)
       .navigationDestination(item: $model.destination.userPermissions) { model in
         UserPermissionsSheet(model: model)
       }
