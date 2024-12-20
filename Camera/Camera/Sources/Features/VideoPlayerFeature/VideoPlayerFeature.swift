@@ -12,32 +12,29 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class VideoPlayerModel {
-  let video: LibraryModel.Video
-  var player: AVPlayer?
+  let asset: PHAsset
+  let url: URL
+  let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
-
-  init(video: LibraryModel.Video) {
-    self.video = video
+  
+  init(asset: PHAsset, url: URL) {
+    self.asset = asset
+    self.url = url
+    self.player = AVPlayer(url: url)
   }
-
+  
   func task() async {
-    if let avURLAsset = await self.photoLibrary.fetchAVURLAsset(self.video.asset) {
-      self.player = AVPlayer(url: avURLAsset.url)
-    }
+    self.player.play()
   }
-
+  
   func cancelButtonTapped() {
     self.dismiss()
   }
-
-  func onVideoPlayerAppear() {
-    self.player?.play()
-  }
-
+  
   func deleteButtonTapped() {
     Task {
-      try await self.photoLibrary.delete([self.video.asset])
+      try await self.photoLibrary.delete([self.asset])
       self.dismiss()
     }
   }
@@ -47,15 +44,10 @@ final class VideoPlayerModel {
 
 struct VideoPlayerView: View {
   @Bindable var model: VideoPlayerModel
-
+  
   var body: some View {
-    Group {
-      if let player = self.model.player {
-        VideoPlayer(player: player)
-          .onAppear { self.model.onVideoPlayerAppear() }
-      } else {
-        Text("Loading video...")
-      }
+    ZStack {
+      VideoPlayer(player: self.model.player)
     }
     .task { await self.model.task() }
     .toolbar {

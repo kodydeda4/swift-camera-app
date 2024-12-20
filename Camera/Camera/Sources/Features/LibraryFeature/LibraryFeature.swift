@@ -29,7 +29,14 @@ final class LibraryModel {
   }
 
   func buttonTapped(video: Video) {
-    self.destination = .videoPlayer(VideoPlayerModel(video: video))
+    Task {
+      if let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.asset) {
+        self.destination = .videoPlayer(VideoPlayerModel(
+          asset: video.asset,
+          url: avURLAsset.url
+        ))
+      }
+    }
   }
 
   func task() async {
@@ -48,11 +55,13 @@ final class LibraryModel {
         throw AnyError("collection was nil somehow.")
       }
 
-      let videos = try await self.photoLibrary.fetchAssets(collection, .video)
+      self.videos = IdentifiedArray(
+        uniqueElements: try await self.photoLibrary
+          .fetchAssets(collection, .video)
+          .map { Video(asset: $0) }
+      )
 
-      self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
-
-      await withTaskGroup(of: UIImage?.self) { taskGroup in
+      await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
             let uiImage = try? await self.photoLibrary.fetchThumbnail(video.asset)
@@ -60,8 +69,6 @@ final class LibraryModel {
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage
             }
-
-            return uiImage
           }
         }
       }
