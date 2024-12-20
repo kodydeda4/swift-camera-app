@@ -1,9 +1,9 @@
+import CasePaths
 import Dependencies
-import Sharing
 import Photos
+import Sharing
 import SwiftUI
 import SwiftUINavigation
-import CasePaths
 
 /* --------------------------------------------------------------------------------------------
  
@@ -75,8 +75,8 @@ final class AppModel {
         
         await MainActor.run {
           self.destination = self.isOnboardingComplete
-          ? .main(MainModel())
-          : .onboarding(OnboardingModel())
+            ? .main(MainModel())
+            : .onboarding(OnboardingModel())
         }
       }
     }

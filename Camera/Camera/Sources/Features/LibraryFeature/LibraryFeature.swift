@@ -47,9 +47,9 @@ final class LibraryModel {
       guard let collection else {
         throw AnyError("collection was nil somehow.")
       }
-      
+
       let videos = try await self.photoLibrary.fetchAssets(collection, .video)
-      
+
       self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
 
       await withTaskGroup(of: UIImage?.self) { taskGroup in

@@ -14,7 +14,7 @@ final class MainModel {
   private(set) var cameraModel = CameraModel()
   private(set) var libraryModel = LibraryModel()
   private(set) var settingsModel = SettingsModel()
-  
+
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
@@ -23,17 +23,18 @@ final class MainModel {
     case camera
     case settings
   }
-  
+
   func task() async {
     await self.syncPhotoLibrary()
   }
-  
+
   // @DEDA not sure about this logic yet bro.
+  // i think it breaks if you don't give full access.
   /// Load the existing photo library collection for the app if it exists, or try to create a new one.
   private func syncPhotoLibrary() async {
-    
+
     let result = await Result<PHAssetCollection, Error> {
-      if let existing = try await photoLibrary.fetchCollection(self.assetCollectionTitle) {
+      if let existing = try? await photoLibrary.fetchCollection(self.assetCollectionTitle) {
         return existing
       } else if let new = try? await photoLibrary.createCollection(self.assetCollectionTitle) {
         return new
@@ -41,11 +42,11 @@ final class MainModel {
         throw AnyError("SyncPhotoLibrary, failed to fetch or create collection.")
       }
     }
-    
+
     if case let .success(value) = result {
       self.$assetCollection.withLock { $0 = value }
     }
-    
+
     print("SyncPhotoLibrary", result)
   }
 }

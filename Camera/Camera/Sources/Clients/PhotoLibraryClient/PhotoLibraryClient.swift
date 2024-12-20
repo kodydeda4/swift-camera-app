@@ -45,15 +45,17 @@ extension PhotoLibraryClient: DependencyKey {
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
-          assetCollectionPlaceholder = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title).placeholderForCreatedAssetCollection
+          assetCollectionPlaceholder = PHAssetCollectionChangeRequest
+            .creationRequestForAssetCollection(withTitle: title)
+            .placeholderForCreatedAssetCollection
           
         }, completionHandler: { success, error in
           
           if let error {
             continuation.resume(throwing: error)
           } else if success, let collection = PHAssetCollection.fetchAssetCollections(
-              withLocalIdentifiers: [assetCollectionPlaceholder.localIdentifier],
-              options: nil
+            withLocalIdentifiers: [assetCollectionPlaceholder.localIdentifier],
+            options: nil
           ).firstObject {
             continuation.resume(returning: collection)
           } else {
