@@ -11,14 +11,13 @@ struct PhotoLibraryClient: Sendable {
     _ withTitle: String
   ) async throws -> PHAssetCollection?
   
-  var fetchCollection: @Sendable (
-    _ withTitle: String
-  ) async throws -> PHAssetCollection?
+  var fetchAssetCollection: @Sendable (
+    FetchRequest.AssetCollection
+  ) async throws -> PHFetchResult<PHAssetCollection>
   
   var fetchAssets: @Sendable (
-    _ in: PHAssetCollection,
-    _ mediaType: PHAssetMediaType
-  ) async throws -> [PHAsset]
+    FetchRequest.Assets
+  ) async throws -> PHFetchResult<PHAsset>
   
   var fetchAVURLAsset: @Sendable (
     _ for: PHAsset
@@ -36,7 +35,20 @@ struct PhotoLibraryClient: Sendable {
   var delete: @Sendable (
     _ asset: [PHAsset]
   ) async throws -> Void
+  
+  struct FetchRequest {
+    struct AssetCollection {
+      let type: PHAssetCollectionType
+      let subtype: PHAssetCollectionSubtype
+      let options: PHFetchOptions?
+    }
+    struct Assets {
+      let collection: PHAssetCollection
+      let options: PHFetchOptions
+    }
+  }
 }
+
 
 extension DependencyValues {
   var photoLibrary: PhotoLibraryClient {
@@ -72,37 +84,15 @@ extension PhotoLibraryClient: DependencyKey {
         })
       }
     },
-    fetchCollection: { name in
-      let prFetchOptions = PHFetchOptions()
-      prFetchOptions.predicate = NSPredicate(format: "title = %@", name)
-      
-      let result = PHAssetCollection.fetchAssetCollections(
-        with: .album,
-        subtype: .any,
-        options: prFetchOptions
+    fetchAssetCollection: { request in
+      PHAssetCollection.fetchAssetCollections(
+        with: request.type,
+        subtype: request.subtype,
+        options: request.options
       )
-      
-      guard let first = result.firstObject else {
-        throw AnyError("Couldn't find it.")
-      }
-      return first
     },
-    fetchAssets: { collection, mediaType in
-      
-      let assetsFetchOptions = PHFetchOptions()
-      assetsFetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-      assetsFetchOptions.predicate = NSPredicate(
-        format: "mediaType == %d",
-        mediaType.rawValue
-      )
-      
-      let request = PHAsset.fetchAssets(in: collection, options: assetsFetchOptions)
-      var assets: [PHAsset] = []
-      request.enumerateObjects { asset, _, _ in
-        assets.append(asset)
-      }
-      
-      return assets
+    fetchAssets: { request in
+      PHAsset.fetchAssets(in: request.collection, options: request.options)
     },
     fetchAVURLAsset: { asset in
       await withCheckedContinuation { continuation in
@@ -168,4 +158,5 @@ extension PhotoLibraryClient: DependencyKey {
     }
   )
 }
+
 

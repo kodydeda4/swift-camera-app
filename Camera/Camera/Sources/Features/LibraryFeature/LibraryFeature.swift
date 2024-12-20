@@ -44,11 +44,11 @@ final class LibraryModel {
         throw AnyError("collection was nil somehow.")
       }
       
-      self.videos = IdentifiedArray(
-        uniqueElements: try await self.photoLibrary
-          .fetchAssets(collection, .video)
-          .map { Video(phAsset: $0) }
-      )
+      let fetchResult = try await self.photoLibrary.fetchAssets(.videos(in: collection))
+      
+      fetchResult.enumerateObjects { asset, _, _ in
+        self.videos.append(.init(phAsset: asset))
+      }
       
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
