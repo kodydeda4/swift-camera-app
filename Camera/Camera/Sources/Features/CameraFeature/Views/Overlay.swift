@@ -29,6 +29,7 @@ fileprivate extension CameraView {
       Text(self.model.buildNumber.description)
     }
     .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
+    .frame(maxWidth: .infinity, alignment: .leading)
   }
   
   private var bottom: some View {
