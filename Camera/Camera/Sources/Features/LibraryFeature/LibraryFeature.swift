@@ -10,11 +10,10 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class LibraryModel {
-  var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
   
-  @ObservationIgnored @Shared(.assetCollection) var collection
+  @ObservationIgnored @SharedReader(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
   
   struct Video: Identifiable {
@@ -85,26 +84,19 @@ final class LibraryModel {
 
 struct LibraryView: View {
   @Bindable var model: LibraryModel
-  private let columns = [GridItem(.flexible()), GridItem(.flexible())]
   
   var body: some View {
     NavigationStack {
-      Group {
-        if model.inFlight {
-          ProgressView("Loading Videos...")
-        } else if model.videos.isEmpty {
-          Text("No videos found in your library.")
-            .padding()
-        } else {
-          ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-              ForEach(model.videos) { video in
-                self.videoView(video: video)
-              }
-            }
-            .padding(.horizontal)
+      ScrollView {
+        LazyVGrid(
+          columns: .init(repeating: GridItem(.flexible()), count: 2),
+          spacing: 16
+        ) {
+          ForEach(model.videos) { video in
+            self.videoView(video: video)
           }
         }
+        .padding(.horizontal)
       }
       .navigationTitle("Library")
       .task { await self.model.task() }
@@ -125,11 +117,12 @@ struct LibraryView: View {
           .scaledToFit()
           .cornerRadius(8)
           .padding(.horizontal)
+      } else {
+        ProgressView()
       }
     }
   }
 }
-
 
 // MARK: - SwiftUI Previews
 
