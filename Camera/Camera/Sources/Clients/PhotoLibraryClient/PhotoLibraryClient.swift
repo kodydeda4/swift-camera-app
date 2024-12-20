@@ -7,32 +7,15 @@ import UIKit
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
   
-  var fetchAssetCollection: @Sendable (
-    FetchRequest.AssetCollection
-  ) async throws -> PHFetchResult<PHAssetCollection>
-  
-  var fetchAssets: @Sendable (
-    FetchRequest.Assets
-  ) async throws -> PHFetchResult<PHAsset>
-  
-  var requestAVAsset: @Sendable (
-    FetchRequest.AVAsset
-  ) async -> RequestAVAssetResponse? = { _ in .none }
-  
-  var createCollection: @Sendable (
-    _ withTitle: String
-  ) async throws -> PHAssetCollection?
-  
+  var fetchAssetCollection: @Sendable (FetchRequest.AssetCollection) async throws -> PHFetchResult<PHAssetCollection>
+  var fetchAssets: @Sendable (FetchRequest.Assets) async throws -> PHFetchResult<PHAsset>
+  var deleteAssets: @Sendable ([PHAsset]) async throws -> Void
+  var requestAVAsset: @Sendable (FetchRequest.AVAsset) async -> RequestAVAssetResponse? = { _ in .none }
   var generateImage: @Sendable (AVAsset) async throws -> GenerateImageResponse?
   
-  var save: @Sendable (
-    _ contentsOf: URL,
-    _ toAssetCollection: PHAssetCollection
-  ) async throws -> Void
-  
-  var delete: @Sendable (
-    _ asset: [PHAsset]
-  ) async throws -> Void
+  // wip
+  var createCollection: @Sendable (_ withTitle: String) async throws -> PHAssetCollection?
+  var save: @Sendable (_ contentsOf: URL, _ toAssetCollection: PHAssetCollection) async throws -> Void
   
   struct FetchRequest {
     struct AssetCollection {
@@ -73,7 +56,6 @@ extension DependencyValues {
 
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
-    
     fetchAssetCollection: { request in
       PHAssetCollection.fetchAssetCollections(
         with: request.type,
@@ -86,6 +68,21 @@ extension PhotoLibraryClient: DependencyKey {
         in: request.collection,
         options: request.options
       )
+    },
+    deleteAssets: { assets in
+      try await withCheckedThrowingContinuation { continuation in
+        PHPhotoLibrary.shared().performChanges({
+          PHAssetChangeRequest.deleteAssets(assets as NSArray)
+        }) { success, error in
+          if let error {
+            continuation.resume(throwing: error)
+          } else if success {
+            continuation.resume()
+          } else {
+            fatalError("Response was neither success nor error.")
+          }
+        }
+      }
     },
     requestAVAsset: { request in
       await withCheckedContinuation { continuation in
@@ -103,6 +100,9 @@ extension PhotoLibraryClient: DependencyKey {
           }
         )
       }
+    },
+    generateImage: { asset in
+      try await AVAssetImageGenerator(asset: asset).image(at: .zero)
     },
     createCollection: { title in
       try await withCheckedThrowingContinuation { continuation in
@@ -129,33 +129,15 @@ extension PhotoLibraryClient: DependencyKey {
         })
       }
     },
-    generateImage: { avAsset in
-      let imageGenerator = AVAssetImageGenerator(asset: avAsset)
-      imageGenerator.appliesPreferredTrackTransform = true
-      return try await imageGenerator.image(at: .zero)
-    },
     save: { url, album in
       PHPhotoLibrary.shared().performChanges({
-        let assetChangeRequest = PHAssetChangeRequest
-          .creationRequestForAssetFromVideo(atFileURL: url)
+        let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        
         if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
           let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
           albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
         }
       })
-    },
-    delete: { assets in
-      try await withCheckedThrowingContinuation { continuation in
-        PHPhotoLibrary.shared().performChanges({
-          PHAssetChangeRequest.deleteAssets(assets as NSArray)
-        }) { success, error in
-          if let error {
-            continuation.resume(throwing: error)
-          } else if success {
-            continuation.resume()
-          }
-        }
-      }
     }
   )
 }

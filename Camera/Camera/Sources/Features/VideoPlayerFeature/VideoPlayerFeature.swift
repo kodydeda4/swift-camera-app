@@ -40,7 +40,7 @@ final class VideoPlayerModel {
   
   func deleteButtonTapped() {
     Task {
-      try await self.photoLibrary.delete([self.phAsset])
+      try await self.photoLibrary.deleteAssets([self.phAsset])
       self.dismiss()
     }
   }
