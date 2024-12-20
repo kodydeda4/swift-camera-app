@@ -7,6 +7,9 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// @DEDA another way to do this would be to navigate to the video player,
+// And put a blurred image of the thumbnail while it loads in the player.
+
 @MainActor
 @Observable
 final class LibraryModel {
