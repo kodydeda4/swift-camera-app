@@ -10,7 +10,7 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class LibraryModel {
-  let collection = PHAssetCollectionTitle.app.rawValue
+  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
@@ -44,14 +44,17 @@ final class LibraryModel {
     self.inFlight = true
 
     do {
-      let collection = try await self.photoLibrary.fetchCollection(self.collection)
-      let videos = try await self.photoLibrary.fetchVideos(collection.unsafelyUnwrapped)
+      let collection = try await self.photoLibrary.fetchCollection(self.phAssetCollectionTitle)
+      let videos = try await self.photoLibrary.fetchAssets(
+        collection.unsafelyUnwrapped,
+        PHAssetMediaType.video
+      )
       self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
 
       await withTaskGroup(of: UIImage?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let uiImage = try? await self.photoLibrary.fetchThumbnailFor(video.asset)
+            let uiImage = try? await self.photoLibrary.fetchThumbnail(video.asset)
 
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage

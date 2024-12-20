@@ -15,12 +15,13 @@ struct PhotoLibraryClient: Sendable {
     _ withTitle: String
   ) async throws -> PHAssetCollection?
   
-  var fetchVideos: @Sendable (
-    _ in: PHAssetCollection
+  var fetchAssets: @Sendable (
+    _ in: PHAssetCollection,
+    _ mediaType: PHAssetMediaType
   ) async throws -> [PHAsset]
   
-  var fetchThumbnailFor: @Sendable (
-    _ asset: PHAsset
+  var fetchThumbnail: @Sendable (
+    _ for: PHAsset
   ) async throws -> UIImage?
   
   var save: @Sendable (
@@ -85,34 +86,30 @@ extension PhotoLibraryClient: DependencyKey {
       }
       return first
     },
-    fetchVideos: { collection in
+    fetchAssets: { collection, mediaType in
       
-      // Fetch videos from the album
       let assetsFetchOptions = PHFetchOptions()
       assetsFetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
       assetsFetchOptions.predicate = NSPredicate(
         format: "mediaType == %d",
-        PHAssetMediaType.video.rawValue
+        mediaType.rawValue
       )
       
-      let assets = PHAsset.fetchAssets(in: collection, options: assetsFetchOptions)
-      var videos: [PHAsset] = []
-      assets.enumerateObjects { asset, _, _ in
-        videos.append(asset)
+      let request = PHAsset.fetchAssets(in: collection, options: assetsFetchOptions)
+      var assets: [PHAsset] = []
+      request.enumerateObjects { asset, _, _ in
+        assets.append(asset)
       }
       
-      return videos
+      return assets
     },
-    fetchThumbnailFor: { asset in
+    fetchThumbnail: { asset in
       await withCheckedContinuation { continuation in
-        print("fetchThumbnailFor", asset)
-        
         let imageManager = PHImageManager.default()
         let videoRequestOptions = PHVideoRequestOptions()
         videoRequestOptions.deliveryMode = .highQualityFormat
         videoRequestOptions.isNetworkAccessAllowed = true
         
-        //@DEDA
         imageManager.requestAVAsset(
           forVideo: asset,
           options: videoRequestOptions

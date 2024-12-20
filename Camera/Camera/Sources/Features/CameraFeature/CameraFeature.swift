@@ -9,7 +9,7 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-  let collection = PHAssetCollectionTitle.app.rawValue
+  let phAssetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
@@ -102,10 +102,12 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let collection = try? await self.photoLibrary.fetchCollection(self.collection) {
+        if let collection = try? await self.photoLibrary
+          .fetchCollection(self.phAssetCollectionTitle)
+        {
           try await self.photoLibrary.save(outputFileURL, collection)
         } else {
-          let collection = try await self.photoLibrary.createCollection(self.collection)
+          let collection = try await self.photoLibrary.createCollection(self.phAssetCollectionTitle)
           try await self.photoLibrary.save(outputFileURL, collection)
         }
       }
