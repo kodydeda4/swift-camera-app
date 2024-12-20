@@ -12,8 +12,8 @@ import IdentifiedCollections
 final class LibraryModel {
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
-  var selectedVideo: Video?
-  
+  var destination: Destination? { didSet { self.bind() } }
+
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
 
   struct Video: Identifiable {
@@ -22,21 +22,30 @@ final class LibraryModel {
     var thumbnail: UIImage?
   }
   
-  func buttonTapped(asset: Video) {
-    self.selectedVideo = asset
+  @CasePathable
+  enum Destination {
+    case videoPlayer(VideoPlayerModel)
+  }
+
+  func buttonTapped(video: Video) {
+    self.destination = .videoPlayer(VideoPlayerModel(video: video))
   }
   
-  // MARK: - Load Video Thumbnails
-  
   func task() async {
+    await self.fetchVideos()
+  }
+  
+  func refresh() async {
+    await self.fetchVideos()
+  }
+  
+  private func fetchVideos() async {
     self.inFlight = true
     
     do {
       let collection = try await self.photoLibrary.fetchCollection(PhotosAlbum.app.rawValue)
       let videos = try await self.photoLibrary.fetchVideos(collection)
-      self.videos = .init(uniqueElements: videos.map {
-        Video(asset: $0)
-      })
+      self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
       
       await withTaskGroup(of: UIImage?.self) { taskGroup in
         for video in self.videos {
@@ -57,8 +66,17 @@ final class LibraryModel {
     inFlight = false
   }
   
-  func refresh() async {
-    await self.task()
+  private func bind() {
+    switch destination {
+
+    case let .videoPlayer(model):
+      model.dismiss = { [weak self] in
+        self?.destination = .none
+      }
+
+    case .none:
+      break
+    }
   }
 }
 
@@ -80,12 +98,16 @@ struct LibraryView: View {
           ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
               ForEach(model.videos) { video in
-                if let uiImage = video.thumbnail {
-                  Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(8)
-                    .padding(.horizontal)
+                Button {
+                  self.model.buttonTapped(video: video)
+                } label: {
+                  if let uiImage = video.thumbnail {
+                    Image(uiImage: uiImage)
+                      .resizable()
+                      .scaledToFit()
+                      .cornerRadius(8)
+                      .padding(.horizontal)
+                  }
                 }
               }
             }
@@ -96,6 +118,9 @@ struct LibraryView: View {
       .navigationTitle("Library")
       .task { await self.model.task() }
       .refreshable { await self.model.task() }
+      .navigationDestination(item: $model.destination.videoPlayer) { model in
+        VideoPlayerView(model: model)
+      }
     }
   }
 }
