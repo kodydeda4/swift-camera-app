@@ -16,8 +16,14 @@ final class VideoPlayerModel {
   let url: URL
   let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
+  var destination: Destination? { didSet { self.bind() } }
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
   
+  @CasePathable
+  enum Destination {
+    case share(URL)
+  }
+
   init(asset: PHAsset, url: URL) {
     self.asset = asset
     self.url = url
@@ -38,6 +44,21 @@ final class VideoPlayerModel {
       self.dismiss()
     }
   }
+  
+  func shareButtonTapped() {
+    self.destination = .share(self.url)
+  }
+  
+  private func bind() {
+    switch destination {
+      
+    case .share:
+      break
+      
+    case .none:
+      break
+    }
+  }
 }
 
 // MARK: - SwiftUI
@@ -50,9 +71,15 @@ struct VideoPlayerView: View {
       VideoPlayer(player: self.model.player)
     }
     .task { await self.model.task() }
+    .shareLink(item: self.$model.destination.share)
     .toolbar {
-      Button("Delete") {
-        self.model.deleteButtonTapped()
+      HStack {
+        Button("Share") {
+          self.model.shareButtonTapped()
+        }
+        Button("Delete") {
+          self.model.deleteButtonTapped()
+        }
       }
     }
   }
