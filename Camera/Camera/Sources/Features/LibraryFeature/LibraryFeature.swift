@@ -1,15 +1,16 @@
 import AVFoundation
 import Dependencies
+import IdentifiedCollections
+import Photos
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import Photos
-import IdentifiedCollections
 
 @MainActor
 @Observable
 final class LibraryModel {
+  let collection = PHAssetCollectionTitle.app.rawValue
   var inFlight: Bool = true
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
@@ -21,7 +22,7 @@ final class LibraryModel {
     let asset: PHAsset
     var thumbnail: UIImage?
   }
-  
+
   @CasePathable
   enum Destination {
     case videoPlayer(VideoPlayerModel)
@@ -30,32 +31,32 @@ final class LibraryModel {
   func buttonTapped(video: Video) {
     self.destination = .videoPlayer(VideoPlayerModel(video: video))
   }
-  
+
   func task() async {
     await self.fetchVideos()
   }
-  
+
   func refresh() async {
     await self.fetchVideos()
   }
-  
+
   private func fetchVideos() async {
     self.inFlight = true
-    
+
     do {
-      let collection = try await self.photoLibrary.fetchCollection(PhotosAlbum.app.rawValue)
-      let videos = try await self.photoLibrary.fetchVideos(collection)
+      let collection = try await self.photoLibrary.fetchCollection(self.collection)
+      let videos = try await self.photoLibrary.fetchVideos(collection.unsafelyUnwrapped)
       self.videos = IdentifiedArray(uniqueElements: videos.map { Video(asset: $0) })
-      
+
       await withTaskGroup(of: UIImage?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
             let uiImage = try? await self.photoLibrary.fetchThumbnailFor(video.asset)
-            
+
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage
             }
-            
+
             return uiImage
           }
         }
@@ -65,7 +66,7 @@ final class LibraryModel {
     }
     inFlight = false
   }
-  
+
   private func bind() {
     switch destination {
 
@@ -85,7 +86,7 @@ final class LibraryModel {
 struct LibraryView: View {
   @Bindable var model: LibraryModel
   private let columns = [GridItem(.flexible()), GridItem(.flexible())]
-  
+
   var body: some View {
     NavigationStack {
       Group {

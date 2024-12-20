@@ -12,7 +12,7 @@ final class MainModel {
   private(set) var cameraModel = CameraModel()
   private(set) var libraryModel = LibraryModel()
   private(set) var settingsModel = SettingsModel()
-  
+
   enum Tab: Equatable {
     case library
     case camera
@@ -24,17 +24,17 @@ final class MainModel {
 
 struct MainView: View {
   @Bindable var model: MainModel
-  
+
   var body: some View {
     TabView(selection: self.$model.tab) {
       LibraryView(model: self.model.libraryModel)
         .tabItem { Label("Library", systemImage: "square.grid.2x2") }
         .tag(MainModel.Tab.library)
-      
+
       CameraView(model: self.model.cameraModel)
         .tabItem { Label("Camera", systemImage: "camera") }
         .tag(MainModel.Tab.camera)
-      
+
       SettingsView(model: self.model.settingsModel)
         .tabItem { Label("Settings", systemImage: "gear") }
         .tag(MainModel.Tab.settings)
@@ -54,6 +54,6 @@ struct MainView: View {
     .photos: .authorized,
   ]
   @Shared(.userPermissions) var userPermissions = value
-  
+
   MainView(model: MainModel())
 }

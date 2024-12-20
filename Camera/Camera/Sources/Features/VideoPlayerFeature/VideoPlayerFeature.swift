@@ -1,23 +1,23 @@
 import AVFoundation
+import AVKit
 import Dependencies
+import Photos
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import Photos
-import AVKit
 
 @MainActor
 @Observable
 final class VideoPlayerModel {
   let video: LibraryModel.Video
   var dismiss: () -> Void
-  = unimplemented("VideoPlayerModel.dismiss")
-  
+    = unimplemented("VideoPlayerModel.dismiss")
+
   init(video: LibraryModel.Video) {
     self.video = video
   }
-  
+
   func cancelButtonTapped() {
     self.dismiss()
   }
@@ -28,7 +28,7 @@ final class VideoPlayerModel {
 struct VideoPlayerView: View {
   @Bindable var model: VideoPlayerModel
   @State private var player: AVPlayer? = nil
-  
+
   var body: some View {
     Group {
       if let player = player {
@@ -50,7 +50,7 @@ struct VideoPlayerView: View {
       }
     }
   }
-  
+
   // Helper function to fetch the video URL
   private func fetchVideoURL(for asset: PHAsset, completion: @escaping (URL?) -> Void) {
     PHImageManager.default().requestAVAsset(forVideo: asset, options: nil) { avAsset, _, _ in

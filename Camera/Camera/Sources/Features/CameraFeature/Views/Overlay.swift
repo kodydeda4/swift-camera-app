@@ -1,5 +1,5 @@
-import SwiftUI
 import Sharing
+import SwiftUI
 
 private struct Style {
   static let buttonSize: CGFloat = 24

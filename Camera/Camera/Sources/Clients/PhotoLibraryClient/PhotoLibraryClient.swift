@@ -1,16 +1,32 @@
+import Combine
 import Dependencies
 import DependenciesMacros
 import Photos
-import Combine
 import UIKit
 
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
-  var createCollection: @Sendable (String) async throws -> PHAssetCollection
-  var fetchCollection: @Sendable (String) async throws -> PHAssetCollection
-  var fetchVideos: @Sendable (PHAssetCollection) async throws -> [PHAsset]
-  var fetchThumbnailFor: @Sendable (PHAsset) async throws -> UIImage?
-  var save: @Sendable (URL, PHAssetCollection) async throws -> Void
+  
+  var createCollection: @Sendable (
+    _ withTitle: String
+  ) async throws -> PHAssetCollection
+  
+  var fetchCollection: @Sendable (
+    _ withTitle: String
+  ) async throws -> PHAssetCollection?
+  
+  var fetchVideos: @Sendable (
+    _ in: PHAssetCollection
+  ) async throws -> [PHAsset]
+  
+  var fetchThumbnailFor: @Sendable (
+    _ asset: PHAsset
+  ) async throws -> UIImage?
+  
+  var save: @Sendable (
+    _ contentsOf: URL,
+    _ toAssetCollection: PHAssetCollection
+  ) async throws -> Void
 }
 
 extension DependencyValues {
@@ -20,19 +36,15 @@ extension DependencyValues {
   }
 }
 
-enum PhotosAlbum: String {
-  case app = "KodysCameraApp"
-}
-
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
-    createCollection: { name in
+    createCollection: { title in
       try await Future<PHAssetCollection, AnyError> { promise in
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
           let createAlbumRequest = PHAssetCollectionChangeRequest
-            .creationRequestForAssetCollection(withTitle: PhotosAlbum.app.rawValue)
+            .creationRequestForAssetCollection(withTitle: title)
           
           assetCollectionPlaceholder = createAlbumRequest.placeholderForCreatedAssetCollection
           
@@ -78,7 +90,10 @@ extension PhotoLibraryClient: DependencyKey {
       // Fetch videos from the album
       let assetsFetchOptions = PHFetchOptions()
       assetsFetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-      assetsFetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
+      assetsFetchOptions.predicate = NSPredicate(
+        format: "mediaType == %d",
+        PHAssetMediaType.video.rawValue
+      )
       
       let assets = PHAsset.fetchAssets(in: collection, options: assetsFetchOptions)
       var videos: [PHAsset] = []
@@ -111,7 +126,10 @@ extension PhotoLibraryClient: DependencyKey {
             }
             let assetGenerator = AVAssetImageGenerator(asset: avAsset)
             assetGenerator.appliesPreferredTrackTransform = true
-            continuation.resume(returning: UIImage(cgImage: try assetGenerator.copyCGImage(at: .zero, actualTime: nil)))
+            continuation.resume(returning: UIImage(cgImage: try assetGenerator.copyCGImage(
+              at: .zero,
+              actualTime: nil
+            )))
           } catch {
             continuation.resume(returning: nil)
           }
@@ -120,7 +138,8 @@ extension PhotoLibraryClient: DependencyKey {
     },
     save: { url, album in
       PHPhotoLibrary.shared().performChanges({
-        let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        let assetChangeRequest = PHAssetChangeRequest
+          .creationRequestForAssetFromVideo(atFileURL: url)
         if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
           let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
           albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)

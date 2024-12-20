@@ -1,21 +1,15 @@
 import AVFoundation
+import Combine
 import Dependencies
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import Combine
-
-// @DEDA extract the mainfeature from the camera feature.
-// Create a tabview that you can switch between, kinda like snapchat.
-// The camera roll will you show you all the videos you recorded.
-// The main view will just be the recording screen.
-// You can navigate to user permissions from either page.
-// You could use GRDB to save details about a video and display them in a grid or smnthn.
 
 @MainActor
 @Observable
 final class CameraModel {
+  let collection = PHAssetCollectionTitle.app.rawValue
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   
@@ -35,8 +29,8 @@ final class CameraModel {
   
   var hasFullPermissions: Bool {
     self.userPermissions[.camera] == .authorized &&
-    self.userPermissions[.microphone] == .authorized &&
-    self.userPermissions[.photos] == .authorized
+      self.userPermissions[.microphone] == .authorized &&
+      self.userPermissions[.photos] == .authorized
   }
   
   var isSwitchCameraButtonDisabled: Bool {
@@ -46,8 +40,8 @@ final class CameraModel {
   func recordingButtonTapped() {
     _ = Result {
       try !camera.isRecording
-      ? cameraClient.startRecording(self.movieFileOutput)
-      : cameraClient.stopRecording()
+        ? cameraClient.startRecording(self.movieFileOutput)
+        : cameraClient.stopRecording()
       
       self.$camera.isRecording.withLock { $0.toggle() }
     }
@@ -108,11 +102,11 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let album = try? await self.photoLibrary.fetchCollection(PhotosAlbum.app.rawValue) {
-          try await self.photoLibrary.save(outputFileURL, album)
+        if let collection = try? await self.photoLibrary.fetchCollection(self.collection) {
+          try await self.photoLibrary.save(outputFileURL, collection)
         } else {
-          let album = try await self.photoLibrary.createCollection(PhotosAlbum.app.rawValue)
-          try await self.photoLibrary.save(outputFileURL, album)
+          let collection = try await self.photoLibrary.createCollection(self.collection)
+          try await self.photoLibrary.save(outputFileURL, collection)
         }
       }
     }
