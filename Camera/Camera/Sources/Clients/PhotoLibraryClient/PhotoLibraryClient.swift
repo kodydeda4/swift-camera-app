@@ -7,32 +7,26 @@ import UIKit
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
   
-  var fetchAssetCollections: @Sendable (
-    FetchRequest.AssetCollection
-  ) async throws -> PHFetchResult<PHAssetCollection>
+  var fetchAssetCollections:
+    @Sendable (FetchRequest.AssetCollection) async throws -> PHFetchResult<PHAssetCollection>
   
-  var fetchAssets: @Sendable (
-    FetchRequest.Assets
-  ) async throws -> PHFetchResult<PHAsset>
+  var fetchAssets:
+    @Sendable (FetchRequest.Assets) async throws -> PHFetchResult<PHAsset>
   
-  var deleteAssets: @Sendable (
-    [PHAsset]
-  ) async throws -> Void
+  var deleteAssets:
+    @Sendable ([PHAsset]) async throws -> Void
   
-  var requestAVAsset: @Sendable (
-    FetchRequest.AVAsset
-  ) async -> RequestAVAssetResponse? = { _ in .none }
+  var requestAVAsset:
+    @Sendable (FetchRequest.AVAsset) async -> RequestAVAssetResponse? = { _ in .none }
   
-  var generateImage: @Sendable (AVAsset) async throws -> GenerateImageResponse?
+  var generateImage:
+    @Sendable (AVAsset) async throws -> GenerateImageResponse?
   
-  var createCollection: @Sendable (
-    _ title: String
-  ) async throws -> PHAssetCollection?
+  var createCollection:
+    @Sendable (_ title: String) async throws -> PHAssetCollection?
   
-  var save: @Sendable (
-    _ contentsOf: URL,
-    _ toAssetCollection: PHAssetCollection
-  ) async throws -> Void
+  var save:
+    @Sendable (_ contentsOf: URL, _ toAssetCollection: PHAssetCollection) async throws -> Void
   
   struct FetchRequest {
     struct AssetCollection {
@@ -125,7 +119,7 @@ extension PhotoLibraryClient: DependencyKey {
         var assetCollectionPlaceholder: PHObjectPlaceholder!
         
         PHPhotoLibrary.shared().performChanges({
-        assetCollectionPlaceholder = PHAssetCollectionChangeRequest
+          assetCollectionPlaceholder = PHAssetCollectionChangeRequest
             .creationRequestForAssetCollection(withTitle: title)
             .placeholderForCreatedAssetCollection
           
