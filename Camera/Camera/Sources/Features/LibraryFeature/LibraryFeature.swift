@@ -14,16 +14,16 @@ final class LibraryModel {
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
   var inFlightVideo: Video?
-
+  
   @ObservationIgnored @Shared(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
-
+  
   struct Video: Identifiable {
     let id = UUID()
     let asset: PHAsset
     var thumbnail: UIImage?
   }
-
+  
   @CasePathable
   enum Destination {
     case videoPlayer(VideoPlayerModel)
@@ -47,34 +47,34 @@ final class LibraryModel {
       }
     }
   }
-
+  
   func task() async {
     await self.fetchVideos()
   }
-
+  
   func refresh() async {
     await self.fetchVideos()
   }
-
+  
   private func fetchVideos() async {
     self.inFlight = true
-
+    
     do {
       guard let collection else {
         throw AnyError("collection was nil somehow.")
       }
-
+      
       self.videos = IdentifiedArray(
         uniqueElements: try await self.photoLibrary
           .fetchAssets(collection, .video)
           .map { Video(asset: $0) }
       )
-
+      
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
             let uiImage = try? await self.photoLibrary.fetchThumbnail(video.asset)
-
+            
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage
             }
@@ -86,15 +86,15 @@ final class LibraryModel {
     }
     inFlight = false
   }
-
+  
   private func bind() {
     switch destination {
-
+      
     case let .videoPlayer(model):
       model.dismiss = { [weak self] in
         self?.destination = .none
       }
-
+      
     case .none:
       break
     }
@@ -106,7 +106,7 @@ final class LibraryModel {
 struct LibraryView: View {
   @Bindable var model: LibraryModel
   private let columns = [GridItem(.flexible()), GridItem(.flexible())]
-
+  
   var body: some View {
     NavigationStack {
       Group {
@@ -119,17 +119,7 @@ struct LibraryView: View {
           ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
               ForEach(model.videos) { video in
-                Button {
-                  self.model.buttonTapped(video: video)
-                } label: {
-                  if let uiImage = video.thumbnail {
-                    Image(uiImage: uiImage)
-                      .resizable()
-                      .scaledToFit()
-                      .cornerRadius(8)
-                      .padding(.horizontal)
-                  }
-                }
+                self.videoView(video: video)
               }
             }
             .padding(.horizontal)
@@ -141,6 +131,27 @@ struct LibraryView: View {
       .refreshable { await self.model.task() }
       .navigationDestination(item: $model.destination.videoPlayer) { model in
         VideoPlayerView(model: model)
+      }
+    }
+  }
+  
+  @MainActor private func videoView(video: LibraryModel.Video) -> some View {
+    Button {
+      self.model.buttonTapped(video: video)
+    } label: {
+      if let uiImage = video.thumbnail {
+        Image(uiImage: uiImage)
+          .resizable()
+          .scaledToFit()
+          .cornerRadius(8)
+          .padding(.horizontal)
+      }
+    }
+    .overlay {
+      Group {
+        if video.id == self.model.inFlightVideo?.id {
+          ProgressView()
+        }
       }
     }
   }
