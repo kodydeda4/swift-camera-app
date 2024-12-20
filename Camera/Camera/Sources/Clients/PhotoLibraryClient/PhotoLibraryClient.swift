@@ -31,10 +31,6 @@ struct PhotoLibraryClient: Sendable {
       let asset: PHAsset
       var options: PHVideoRequestOptions? = .none
     }
-    struct Thumbnail {
-      let asset: PHAsset
-      let options: PHVideoRequestOptions
-    }
   }
   
   typealias RequestAVAssetResponse = (
