@@ -35,7 +35,7 @@ fileprivate extension PHFetchOptions {
     with mutations: (PHFetchOptions) -> Void
   ) -> PHFetchOptions {
     let rv = Self()
-    mutations(Self())
+    mutations(rv)
     return rv
   }
 }

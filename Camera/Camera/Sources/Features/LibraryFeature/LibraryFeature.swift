@@ -17,7 +17,7 @@ final class LibraryModel {
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
   
   struct Video: Identifiable {
-    let id = UUID()
+    var id: PHAsset { phAsset }
     let phAsset: PHAsset
     var avURLAsset: AVURLAsset?
     var thumbnail: UIImage?
@@ -47,14 +47,15 @@ final class LibraryModel {
       let fetchResult = try await self.photoLibrary.fetchAssets(.videos(in: collection))
       
       fetchResult.enumerateObjects { asset, _, _ in
-        self.videos.append(.init(phAsset: asset))
+        self.videos[id: asset] = .init(phAsset: asset)
       }
       
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
             let uiImage = try? await self.photoLibrary.fetchThumbnail(video.phAsset)
-            let avURLAsset = await self.photoLibrary.fetchAVURLAsset(video.phAsset)
+            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset))?.0
+            let avURLAsset = (avAsset as? AVURLAsset)
             
             await MainActor.run {
               self.videos[id: video.id]?.thumbnail = uiImage

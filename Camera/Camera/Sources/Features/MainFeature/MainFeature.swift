@@ -31,12 +31,12 @@ final class MainModel {
   // i think it breaks if you don't give full access.
   /// Load the existing photo library collection for the app if it exists, or try to create a new one.
   private func syncPhotoLibrary() async {
-    
     let result = await Result<PHAssetCollection, Error> {
       if let existing = try? await photoLibrary.fetchAssetCollection(
-        .init(title: self.assetCollectionTitle)
-      ).firstObject {
-        return existing
+        .init(title: "KodysCameraApp")
+      ), let first = existing.firstObject {
+        print(existing)
+        return first
       } else if let new = try? await photoLibrary.createCollection(
         self.assetCollectionTitle
       ) {

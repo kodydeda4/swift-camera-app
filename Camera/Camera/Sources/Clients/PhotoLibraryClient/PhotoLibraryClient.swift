@@ -7,10 +7,6 @@ import UIKit
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
   
-  var createCollection: @Sendable (
-    _ withTitle: String
-  ) async throws -> PHAssetCollection?
-  
   var fetchAssetCollection: @Sendable (
     FetchRequest.AssetCollection
   ) async throws -> PHFetchResult<PHAssetCollection>
@@ -19,10 +15,14 @@ struct PhotoLibraryClient: Sendable {
     FetchRequest.Assets
   ) async throws -> PHFetchResult<PHAsset>
   
-  var fetchAVURLAsset: @Sendable (
-    _ for: PHAsset
-  ) async -> AVURLAsset? = { _ in .none }
-  
+  var requestAVAsset: @Sendable (
+    FetchRequest.AVAsset
+  ) async -> RequestAVAssetResponse? = { _ in .none }
+
+  var createCollection: @Sendable (
+    _ withTitle: String
+  ) async throws -> PHAssetCollection?
+
   var fetchThumbnail: @Sendable (
     _ for: PHAsset
   ) async throws -> UIImage?
@@ -46,7 +46,13 @@ struct PhotoLibraryClient: Sendable {
       let collection: PHAssetCollection
       let options: PHFetchOptions
     }
+    struct AVAsset {
+      let asset: PHAsset
+      var options: PHVideoRequestOptions? = .none
+    }
   }
+  
+  typealias RequestAVAssetResponse = (AVAsset?, AVAudioMix?, [AnyHashable : Any]?)
 }
 
 
@@ -59,6 +65,31 @@ extension DependencyValues {
 
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
+
+    fetchAssetCollection: { request in
+      PHAssetCollection.fetchAssetCollections(
+        with: request.type,
+        subtype: request.subtype,
+        options: request.options
+      )
+    },
+    fetchAssets: { request in
+      PHAsset.fetchAssets(
+        in: request.collection,
+        options: request.options
+      )
+    },
+    requestAVAsset: { request in
+      await withCheckedContinuation { continuation in
+        PHImageManager.default().requestAVAsset(
+          forVideo: request.asset,
+          options: request.options,
+          resultHandler: { asset, audioMix, dictionary in
+            continuation.resume(returning: (asset, audioMix, dictionary))
+          }
+        )
+      }
+    },
     createCollection: { title in
       try await withCheckedThrowingContinuation { continuation in
         
@@ -82,23 +113,6 @@ extension PhotoLibraryClient: DependencyKey {
             continuation.resume(throwing: AnyError("@DEDA WTF?"))
           }
         })
-      }
-    },
-    fetchAssetCollection: { request in
-      PHAssetCollection.fetchAssetCollections(
-        with: request.type,
-        subtype: request.subtype,
-        options: request.options
-      )
-    },
-    fetchAssets: { request in
-      PHAsset.fetchAssets(in: request.collection, options: request.options)
-    },
-    fetchAVURLAsset: { asset in
-      await withCheckedContinuation { continuation in
-        PHImageManager.default().requestAVAsset(forVideo: asset, options: nil) { avAsset, _, _ in
-          continuation.resume(returning: (avAsset as? AVURLAsset))
-        }
       }
     },
     fetchThumbnail: { asset in
