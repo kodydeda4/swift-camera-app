@@ -25,15 +25,13 @@ final class MainModel {
   }
   
   func task() async {
-    await self.syncPhotoLibrary()
+    await self.syncAssetCollection(Result {
+      try await self.fetchOrCreateAssetCollection(withTitle: self.assetCollectionTitle)
+    })
   }
   
-  private func syncPhotoLibrary() async {
-    let result = await Result {
-      try await self.fetchOrCreateAssetCollection(withTitle: self.assetCollectionTitle)
-    }
-    
-    switch result {
+  private func syncAssetCollection(_ response: Result<PHAssetCollection, Error>) {
+    switch response {
       
     case let .success(value):
       self.$assetCollection.withLock { $0 = value }
