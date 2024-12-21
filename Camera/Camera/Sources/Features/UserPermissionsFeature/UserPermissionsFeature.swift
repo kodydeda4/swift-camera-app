@@ -55,18 +55,18 @@ final class UserPermissionsModel: Identifiable {
             
           case .camera:
             await camera.requestAccess(.video)
-            ? .authorized
-            : .denied
+              ? .authorized
+              : .denied
             
           case .microphone:
             await audio.requestRecordPermission()
-            ? .authorized
-            : .denied
+              ? .authorized
+              : .denied
             
           case .photos:
             await photos.requestAuthorization(.addOnly) == .authorized
-            ? .authorized
-            : .denied
+              ? .authorized
+              : .denied
           }
         }()
         

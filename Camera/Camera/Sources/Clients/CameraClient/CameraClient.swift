@@ -9,7 +9,8 @@ import SwiftUINavigation
 @DependencyClient
 struct CameraClient: Sendable {
   var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
-  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in .notDetermined }
+  var authorizationStatus: @Sendable (AVMediaType)
+  -> AVAuthorizationStatus = { _ in .notDetermined }
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
@@ -175,8 +176,8 @@ fileprivate final class Camera: NSObject {
     // device configure
     try self.device.lockForConfiguration()
     self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera
-    ? 1
-    : videoZoomFactor
+      ? 1
+      : videoZoomFactor
     self.device.unlockForConfiguration()
   }
   
