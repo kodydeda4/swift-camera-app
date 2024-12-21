@@ -29,37 +29,46 @@ final class MainModel {
   }
   
   private func syncPhotoLibrary() async {
-    // @DEDA Definetly room for improvement.
-    let result = await Result<String, Error> {
-      
-      // Fetch collections with title.
-      var assetCollections = try await self.photos.fetchAssetCollections(
-        .albums(withTitle: self.assetCollectionTitle)
-      )
-      
-      // If you found it, update and return.
-      if let first = assetCollections.firstObject {
-        self.$assetCollection.withLock { $0 = first }
-        return "Success."
-      }
-      
-      // Else, try to create to the album, refetch, and update.
-      try await self.photos.performChanges(
-        .createAssetCollection(withTitle: self.assetCollectionTitle)
-      )
-      assetCollections = try await self.photos.fetchAssetCollections(
-        .albums(withTitle: self.assetCollectionTitle)
-      )
-      if let first = assetCollections.firstObject {
-        self.$assetCollection.withLock { $0 = first }
-        return "Success"
-      }
-      
-      // If that didn't work, throw an error.
-      throw AnyError("Couldn't fetch asset collection.")
+    let result = await Result {
+      try await self.fetchOrCreateAssetCollection(withTitle: self.assetCollectionTitle)
     }
     
-    print("MainModel.syncPhotoLibrary", result)
+    switch result {
+      
+    case let .success(value):
+      self.$assetCollection.withLock { $0 = value }
+      
+    case let .failure(error):
+      print(error.localizedDescription)
+    }
+  }
+  
+  private func fetchOrCreateAssetCollection(withTitle title: String) async throws -> PHAssetCollection {
+    
+    // Fetch collections with title.
+    var assetCollections = try await self.photos.fetchAssetCollections(
+      .albums(withTitle: title)
+    )
+    
+    // If you found it, update and return.
+    if let first = assetCollections.firstObject {
+      return first
+    }
+    
+    // Else, try to create to the album, refetch, and update.
+    try await self.photos.performChanges(
+      .createAssetCollection(withTitle: self.assetCollectionTitle)
+    )
+    assetCollections = try await self.photos.fetchAssetCollections(
+      .albums(withTitle: title)
+    )
+    
+    if let first = assetCollections.firstObject {
+      return first
+    }
+    
+    // If that didn't work, throw an error.
+    throw AnyError("Couldn't fetch asset collection.")
   }
 }
 
