@@ -17,13 +17,11 @@ struct CameraClient: Sendable {
   var zoom: @Sendable (CGFloat) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
-  struct Failure: Error, Equatable {
-    let rawValue: String
-    init(_ rawValue: String = "") { self.rawValue = rawValue }
-    
-    static var cannotAddInput = Failure("Cannot add input")
-    static var cannotAddOutput = Failure("Cannot add input")
-    static var cannotMakeDeviceInput = Failure("Cannot make device input")
+  enum Failure: Error, Equatable {
+    case custom(String)
+    case cannotAddInput
+    case cannotAddOutput
+    case cannotMakeDeviceInput
   }
   
   enum DelegateEvent {
@@ -185,7 +183,7 @@ fileprivate final class Camera: NSObject {
   /// Start recording video to a url.
   func startRecording(to url: URL) throws {
     guard let connection = self.movieFileOutput.connection(with: .video) else {
-      throw CameraClient.Failure()
+      throw CameraClient.Failure.custom("self.movieFileOutput.connection(with: .video) was nil")
     }
     
     // Configure connection for HEVC capture.
