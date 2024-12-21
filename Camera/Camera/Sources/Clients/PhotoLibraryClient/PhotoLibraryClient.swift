@@ -9,7 +9,8 @@ import UIKit
 /// You can create static requests for things like CRUD operations or fetch requests.
 /// This also allows you to have function labels for the requests.
 ///
-/// - Example: `photosLibrary.performChanges(.createAssetCollection(withTitle: "App"))`
+/// - Example: `try await photosLibrary.performChanges(.createAssetCollection(withTitle: "App"))`
+/// - Example: `try await photoLibrary.fetchAssets(.videos(in: collection))
 
 @DependencyClient
 struct PhotoLibraryClient: Sendable {
