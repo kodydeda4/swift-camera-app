@@ -51,16 +51,28 @@ final class UserPermissionsModel: Identifiable {
     case .none,
          .undetermined:
       Task {
-        let newValue = await {
+        let status: UserPermissions.Status = await {
           switch feature {
-          case .camera: await camera.requestAccess(.video)
-          case .microphone: await audio.requestRecordPermission()
-          case .photos: await photos.requestAuthorization(.addOnly) == .authorized
+            
+          case .camera:
+            await camera.requestAccess(.video)
+            ? .authorized
+            : .denied
+            
+          case .microphone:
+            await audio.requestRecordPermission()
+            ? .authorized
+            : .denied
+            
+          case .photos:
+            await photos.requestAuthorization(.addOnly) == .authorized
+            ? .authorized
+            : .denied
           }
         }()
-
+        
         self.$userPermissions.withLock {
-          $0[feature] = newValue ? .authorized : .denied
+          $0[feature] = status
         }
       }
     }

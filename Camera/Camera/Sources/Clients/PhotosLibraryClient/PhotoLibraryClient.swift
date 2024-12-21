@@ -14,27 +14,27 @@ import UIKit
 
 @DependencyClient
 struct PhotosLibraryClient: Sendable {
-  
+
   var authorizationStatus: @Sendable (
     _ for: PHAccessLevel
   ) -> PHAuthorizationStatus = { _ in .notDetermined }
-  
+
   var requestAuthorization: @Sendable (
     _ for: PHAccessLevel
   ) async -> PHAuthorizationStatus = { _ in .notDetermined }
-  
+
   var performChanges: @Sendable (
     Request.PhotoLibraryChange
   ) async throws -> Void
-  
+
   var fetchAssetCollections: @Sendable (
     Request.AssetCollections
   ) async throws -> PHFetchResult<PHAssetCollection>
-  
+
   var fetchAssets: @Sendable (
     Request.Assets
   ) async throws -> PHFetchResult<PHAsset>
-  
+
   var requestAVAsset: @Sendable (
     _ asset: PHAsset,
     _ options: PHVideoRequestOptions?
@@ -141,20 +141,20 @@ extension PhotosLibraryClient.Request.PhotoLibraryChange {
   ) -> Self {
     Self {
       let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-      
+
       if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
         let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection)
         albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
       }
     }
   }
-  
+
   static func delete(assets: [PHAsset]) -> Self {
     Self {
       PHAssetChangeRequest.deleteAssets(assets as NSArray)
     }
   }
-  
+
   static func createAssetCollection(withTitle title: String) -> Self {
     Self {
       PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)

@@ -1,19 +1,19 @@
 import Sharing
 
 struct UserPermissions {
-  
+
   enum Feature: Codable, CaseIterable {
     case camera
     case microphone
     case photos
   }
-  
+
   enum Status: Codable {
     case undetermined
     case authorized
     case denied
   }
-  
+
   typealias State = Dictionary<Feature, Status>
 }
 
