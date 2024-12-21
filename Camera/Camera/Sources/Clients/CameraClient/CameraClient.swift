@@ -9,9 +9,7 @@ import SwiftUINavigation
 @DependencyClient
 struct CameraClient: Sendable {
   var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
-  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in
-    .notDetermined
-  }
+  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in .notDetermined }
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
@@ -22,7 +20,7 @@ struct CameraClient: Sendable {
   struct Failure: Error, Equatable {
     let rawValue: String
     init(_ rawValue: String = "") { self.rawValue = rawValue }
-
+    
     static var cannotAddInput = Failure("Cannot add input")
     static var cannotAddOutput = Failure("Cannot add input")
     static var cannotMakeDeviceInput = Failure("Cannot make device input")
@@ -59,35 +57,25 @@ extension CameraClient: DependencyKey {
     
     return Self(
       requestAccess: { mediaType in
-        await AVCaptureDevice.requestAccess(for: .video)
+        await AVCaptureDevice.requestAccess(for: mediaType)
       },
       authorizationStatus: { mediaType in
         AVCaptureDevice.authorizationStatus(for: mediaType)
       },
       connect: { preview in
-        let result = Result { try camera.connect(preview) }
-        print("connect", result)
-        return try result.get()
+        try camera.connect(preview)
       },
       startRecording: { url in
-        let result = Result { try camera.startRecording(to: url) }
-        print("startRecording", result)
-        return try result.get()
+        try camera.startRecording(to: url)
       },
       stopRecording: {
-        let result = Result { camera.stopRecording() }
-        print("stopRecording", result)
-        return try result.get()
+        camera.stopRecording()
       },
       switchCamera: {
-        let result = Result { try camera.switchCamera() }
-        print("switchCamera", result)
-        return try result.get()
+        try camera.switchCamera()
       },
       zoom: { newValue in
-        let result = Result { try camera.zoom(newValue) }
-        print("zoom", result)
-        return try result.get()
+        try camera.zoom(newValue)
       },
       events: {
         camera.events
@@ -100,12 +88,12 @@ extension CameraClient: DependencyKey {
 
 fileprivate final class Camera: NSObject {
   let events = AsyncChannel<CameraClient.DelegateEvent>()
-
+  
   private var session: AVCaptureSession!
   private var device: AVCaptureDevice!
   private var deviceInput: AVCaptureDeviceInput!
   private var movieFileOutput: AVCaptureMovieFileOutput!
-
+  
   /// Sets up the capture session with necessary inputs and outputs,
   /// connects to the video preview layer, and starts running the capture session in the background.
   ///
@@ -136,7 +124,7 @@ fileprivate final class Camera: NSObject {
     
     videoPreviewLayer.session = self.session
   }
-
+  
   /// Switch between front & back camera.
   func switchCamera() throws {
     let discoverySession = AVCaptureDevice.DiscoverySession(
@@ -177,7 +165,7 @@ fileprivate final class Camera: NSObject {
     guard let newDevice, let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice) else {
       throw CameraClient.Failure.cannotMakeDeviceInput
     }
-
+    
     // session configure
     self.session.beginConfiguration()
     self.session.removeInput(deviceInput)
@@ -191,8 +179,8 @@ fileprivate final class Camera: NSObject {
     // device configure
     try self.device.lockForConfiguration()
     self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera
-      ? 1
-      : videoZoomFactor
+    ? 1
+    : videoZoomFactor
     self.device.unlockForConfiguration()
   }
   

@@ -48,8 +48,7 @@ final class UserPermissionsModel: Identifiable {
         await self.application.open(URL(string: UIApplication.openSettingsURLString)!)
       }
       
-    case .none,
-         .undetermined:
+    default:
       Task {
         let status: UserPermissions.Status = await {
           switch feature {
