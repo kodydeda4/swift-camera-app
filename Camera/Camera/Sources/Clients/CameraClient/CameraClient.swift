@@ -10,7 +10,7 @@ import SwiftUINavigation
 struct CameraClient: Sendable {
   var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
   var authorizationStatus: @Sendable (AVMediaType)
-  -> AVAuthorizationStatus = { _ in .notDetermined }
+    -> AVAuthorizationStatus = { _ in .notDetermined }
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void

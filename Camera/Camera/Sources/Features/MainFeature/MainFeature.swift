@@ -37,7 +37,9 @@ final class MainModel {
       )
       
       // Create album if necessary & refetch
+      // swiftformat:off
       if assetCollections.count == 0 {
+        // swiftformat:on
         try await self.photos.performChanges(
           .createAssetCollection(withTitle: self.assetCollectionTitle)
         )
