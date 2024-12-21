@@ -2,7 +2,6 @@ import AVFoundation
 import Dependencies
 import IdentifiedCollections
 import Photos
-import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation

@@ -2,12 +2,10 @@ import AVFoundation
 import AVKit
 import Dependencies
 import Photos
-import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-// @DEDA just load the mf before you nav here brh.
 
 @MainActor
 @Observable
