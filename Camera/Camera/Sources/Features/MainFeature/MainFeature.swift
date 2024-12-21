@@ -29,7 +29,7 @@ final class MainModel {
   }
   
   private func syncPhotoLibrary() async {
-    let result = await Result {
+    let result = await Result<String, Error> {
       
       // Fetch collections with title.
       var assetCollections = try await self.photos.fetchAssetCollections(
@@ -39,7 +39,7 @@ final class MainModel {
       // If you found it, update and return.
       if let first = assetCollections.firstObject {
         self.$assetCollection.withLock { $0 = first }
-        return
+        return "Success."
       }
       
       // Else, try to create to the album, refetch, and update.
@@ -51,12 +51,13 @@ final class MainModel {
       )
       if let first = assetCollections.firstObject {
         self.$assetCollection.withLock { $0 = first }
-        return
+        return "Success"
       }
       
       // If that didn't work, throw an error.
       throw AnyError("Couldn't fetch asset collection.")
     }
+    
     print("MainModel.syncPhotoLibrary", result)
   }
 }
