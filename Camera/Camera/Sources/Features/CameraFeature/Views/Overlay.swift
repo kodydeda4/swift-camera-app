@@ -38,7 +38,7 @@ fileprivate extension CameraView {
     VStack {
       switch self.model.camera.position {
         
-      case .front:
+      case .back:
         self.zoomButtons.padding(.bottom)
         
       default:
