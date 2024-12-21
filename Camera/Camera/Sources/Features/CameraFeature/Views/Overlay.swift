@@ -36,7 +36,15 @@ fileprivate extension CameraView {
   
   private var bottom: some View {
     VStack {
-      self.zoomButtons.padding(.bottom)
+      switch self.model.camera.position {
+        
+      case .front:
+        self.zoomButtons.padding(.bottom)
+        
+      default:
+        EmptyView()
+        //...
+      }
       
       HStack {
         self.recordingButton
@@ -69,7 +77,7 @@ fileprivate extension CameraView {
         .font(.caption)
         .frame(width: 32, height: 32)
         .foregroundColor(isSelected ? .white : .black)
-//        .padding()
+        //        .padding()
         .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
         .clipShape(Circle())
     }

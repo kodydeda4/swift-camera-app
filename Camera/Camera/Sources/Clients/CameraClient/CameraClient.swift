@@ -14,7 +14,7 @@ struct CameraClient: Sendable {
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
-  var switchCamera: @Sendable () throws -> Void
+  var switchCamera: @Sendable () throws -> AVCaptureDevice.Position
   var zoom: @Sendable (CGFloat) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
@@ -123,11 +123,15 @@ fileprivate final class Camera: NSObject {
   }
   
   /// Switch between front & back camera.
-  func switchCamera() throws {
+  func switchCamera() throws -> AVCaptureDevice.Position {
+    let newPosition: AVCaptureDevice.Position = deviceInput.device.position == .back
+      ? .front
+      : .back
+
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [.builtInWideAngleCamera],
       mediaType: .video,
-      position: deviceInput.device.position == .back ? .front : .back
+      position: newPosition
     )
     
     guard
@@ -145,11 +149,11 @@ fileprivate final class Camera: NSObject {
     self.session.addInput(newDeviceInput)
     self.deviceInput = newDeviceInput
     self.session.commitConfiguration()
+    return newPosition
   }
   
   /// Adjust the zoom - may require switching cameras.
   func zoom(_ videoZoomFactor: CGFloat) throws {
-    
     var newDevice: AVCaptureDevice? {
       AVCaptureDevice.DiscoverySession(
         deviceTypes: [videoZoomFactor < 1 ? .builtInUltraWideCamera : .builtInWideAngleCamera],

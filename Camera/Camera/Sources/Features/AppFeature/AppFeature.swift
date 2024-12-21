@@ -25,8 +25,8 @@ import SwiftUINavigation
  - [x] fetch and display videos from app-specific-photo-album.
  - [x] CRUD the videos
  - [x] Share videos
+ - [x] Different zooms
  - [ ] Slow motion settings?
- - [ ] Different zooms
  - [ ] Fix app backgrounding
  - [ ] Log4Swift
  - [ ] Unit Tests

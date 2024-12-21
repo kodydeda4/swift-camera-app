@@ -58,7 +58,8 @@ final class CameraModel {
   
   func switchCameraButtonTapped() {
     _ = Result {
-      try self.cameraClient.switchCamera()
+      let position = try self.cameraClient.switchCamera()
+      self.$camera.position.withLock { $0 = position }
     }
   }
   
