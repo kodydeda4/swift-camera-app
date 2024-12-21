@@ -28,7 +28,7 @@ import SwiftUINavigation
  - [ ] Slow motion settings?
  - [ ] Different zooms
  - [ ] Fix app backgrounding
- - [ ] Logs
+ - [ ] Log4Swift
  - [ ] Unit Tests
  - [ ] swift 6
  - [ ] SPM
