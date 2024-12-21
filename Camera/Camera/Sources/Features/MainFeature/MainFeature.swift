@@ -13,7 +13,7 @@ final class MainModel {
   private(set) var settingsModel = SettingsModel()
   
   var tab = Tab.camera
-  let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
+  let assetCollectionTitle = String.assetCollectionTitle
   
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photos) var photos
@@ -26,7 +26,7 @@ final class MainModel {
   
   func task() async {
     await self.syncAssetCollection(Result {
-      try await self.fetchOrCreateAssetCollection(withTitle: self.assetCollectionTitle)
+      try await self.fetchOrCreateAssetCollection(with: self.assetCollectionTitle)
     })
   }
   
@@ -41,7 +41,9 @@ final class MainModel {
     }
   }
   
-  private func fetchOrCreateAssetCollection(withTitle title: String) async throws -> PHAssetCollection {
+  private func fetchOrCreateAssetCollection(
+    with title: String
+  ) async throws -> PHAssetCollection {
     
     // Fetch collections with title.
     var albums = try await self.photos.fetchAssetCollections(

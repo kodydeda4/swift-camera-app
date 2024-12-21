@@ -18,10 +18,11 @@ final class VideoPlayerModel {
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
   @ObservationIgnored @Dependency(\.photos) var photos
+  @ObservationIgnored @Dependency(\.uuid) var uuid
 
   @CasePathable
   enum Destination {
-    case share(URL)
+    case activity(ActivityModel)
   }
 
   init(phAsset: PHAsset, avURLAsset: AVURLAsset) {
@@ -46,14 +47,23 @@ final class VideoPlayerModel {
   }
 
   func shareButtonTapped() {
-    self.destination = .share(self.avURLAsset.url)
+    self.destination = .activity(
+      ActivityModel(
+        id: self.uuid(),
+        activityItems: [
+          ActivityItem(url: self.avURLAsset.url)
+        ]
+      )
+    )
   }
 
   private func bind() {
     switch destination {
 
-    case .share:
-      break
+    case let .activity(model):
+      model.completionWithItemsHandler = { [weak self] _, _, _, _ in
+        self?.destination = .none
+      }
 
     case .none:
       break
@@ -71,7 +81,10 @@ struct VideoPlayerView: View {
       VideoPlayer(player: self.model.player)
     }
     .task { await self.model.task() }
-    .shareLink(item: self.$model.destination.share)
+//    .shareSheet(item: self.$model.destination.share)
+    .sheet(item: self.$model.destination.activity) { model in
+      ActivityView(model: model)
+    }
     .toolbar {
       HStack {
         Button("Share") {
