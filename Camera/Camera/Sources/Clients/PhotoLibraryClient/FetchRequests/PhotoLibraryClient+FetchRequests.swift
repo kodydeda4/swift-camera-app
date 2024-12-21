@@ -2,8 +2,8 @@ import Foundation
 import Photos
 
 extension PhotoLibraryClient.FetchRequest.AssetCollection {
-  init(title: String) {
-    self = Self(
+  static func albums(title: String) -> Self {
+    Self(
       type: .album,
       subtype: .any,
       options: .make {

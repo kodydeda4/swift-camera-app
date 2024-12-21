@@ -22,6 +22,9 @@ struct PhotoLibraryClient: Sendable {
   var generateImage:
     @Sendable (AVAsset) async throws -> GenerateImageResponse?
   
+  var createCollection2:
+    @Sendable (String) async throws -> PHAssetCollection?
+  
   var createCollection:
     @Sendable (_ title: String) async throws -> PHAssetCollection?
   
@@ -40,7 +43,7 @@ struct PhotoLibraryClient: Sendable {
     }
     struct AVAsset {
       let asset: PHAsset
-      var options: PHVideoRequestOptions? = .none
+      let options: PHVideoRequestOptions?
     }
   }
   
@@ -112,6 +115,31 @@ extension PhotoLibraryClient: DependencyKey {
       let generator = AVAssetImageGenerator(asset: asset)
       generator.appliesPreferredTrackTransform = true
       return try await generator.image(at: .zero)
+    },
+    createCollection2: { title in
+      try await withCheckedThrowingContinuation { continuation in
+        
+        var assetCollectionPlaceholder: PHObjectPlaceholder!
+        
+        PHPhotoLibrary.shared().performChanges({
+          assetCollectionPlaceholder = PHAssetCollectionChangeRequest
+            .creationRequestForAssetCollection(withTitle: title)
+            .placeholderForCreatedAssetCollection
+          
+        }, completionHandler: { success, error in
+          
+          if let error {
+            continuation.resume(throwing: error)
+          } else if success, let collection = PHAssetCollection.fetchAssetCollections(
+            withLocalIdentifiers: [assetCollectionPlaceholder.localIdentifier],
+            options: nil
+          ).firstObject {
+            continuation.resume(returning: collection)
+          } else {
+            continuation.resume(throwing: AnyError("@DEDA WTF?"))
+          }
+        })
+      }
     },
     createCollection: { title in
       try await withCheckedThrowingContinuation { continuation in

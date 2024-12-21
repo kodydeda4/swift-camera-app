@@ -32,9 +32,11 @@ final class MainModel {
   /// Load the existing photo library collection for the app if it exists, or try to create a new one.
   private func syncPhotoLibrary() async {
     let result = await Result<PHAssetCollection, Error> {
-      if let existing = try? await photoLibrary.fetchAssetCollections(
-        .init(title: self.assetCollectionTitle)
-      ), let first = existing.firstObject {
+      if
+        let existing = try? await photoLibrary.fetchAssetCollections(
+          .albums(title: self.assetCollectionTitle)
+        ),
+        let first = existing.firstObject {
         print(existing)
         return first
       } else if let new = try? await photoLibrary.createCollection(

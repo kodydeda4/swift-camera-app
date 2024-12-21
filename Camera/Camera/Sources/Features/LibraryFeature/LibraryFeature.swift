@@ -56,7 +56,7 @@ final class LibraryModel {
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset))?.asset
+            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset, options: .none))?.asset
             let avURLAsset = (avAsset as? AVURLAsset)
             
             await MainActor.run {
