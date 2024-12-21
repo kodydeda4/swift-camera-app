@@ -31,29 +31,31 @@ final class MainModel {
   private func syncPhotoLibrary() async {
     let result = await Result {
       
-      // Fetch collections
+      // Fetch collections with title.
       var assetCollections = try await self.photos.fetchAssetCollections(
         .albums(withTitle: self.assetCollectionTitle)
       )
       
-      // Create album if necessary & refetch
-      // swiftformat:off
-      if assetCollections.count == 0 {
-        // swiftformat:on
-        try await self.photos.performChanges(
-          .createAssetCollection(withTitle: self.assetCollectionTitle)
-        )
-        assetCollections = try await self.photos.fetchAssetCollections(
-          .albums(withTitle: self.assetCollectionTitle)
-        )
-      }
-
-      // Update state
-      guard let first = assetCollections.firstObject else {
-        throw AnyError("Couldn't fetch asset collection.")
+      // If you found it, update and return.
+      if let first = assetCollections.firstObject {
+        self.$assetCollection.withLock { $0 = first }
+        return
       }
       
-      self.$assetCollection.withLock { $0 = first }
+      // Else, try to create to the album, refetch, and update.
+      try await self.photos.performChanges(
+        .createAssetCollection(withTitle: self.assetCollectionTitle)
+      )
+      assetCollections = try await self.photos.fetchAssetCollections(
+        .albums(withTitle: self.assetCollectionTitle)
+      )
+      if let first = assetCollections.firstObject {
+        self.$assetCollection.withLock { $0 = first }
+        return
+      }
+      
+      // If that didn't work, throw an error.
+      throw AnyError("Couldn't fetch asset collection.")
     }
     print("MainModel.syncPhotoLibrary", result)
   }
