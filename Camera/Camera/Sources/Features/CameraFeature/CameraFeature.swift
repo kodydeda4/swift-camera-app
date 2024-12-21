@@ -101,7 +101,9 @@ private extension CameraModel {
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
         if let assetCollection {
-          try await self.photoLibrary.save(outputFileURL, assetCollection)
+          try await self.photoLibrary.performChanges(
+            .save(contentsOf: outputFileURL, to: assetCollection)
+          )
         } else {
           print("@DEDA yo asset collection wuz nil.")
         }

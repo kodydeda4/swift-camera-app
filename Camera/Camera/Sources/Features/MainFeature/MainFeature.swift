@@ -27,24 +27,33 @@ final class MainModel {
     await self.syncPhotoLibrary()
   }
   
-  // @DEDA not sure about this logic yet bro.
-  // i think it breaks if you don't give full access.
-  /// Load the existing photo library collection for the app if it exists, or try to create a new one.
+  // @DEDA cmon man.
   private func syncPhotoLibrary() async {
     let result = await Result<PHAssetCollection, Error> {
-      if
-        let existing = try? await photoLibrary.fetchAssetCollections(
-          .albums(title: self.assetCollectionTitle)
-        ),
-        let first = existing.firstObject {
-        print(existing)
+      
+      var assetCollections = try await photoLibrary.fetchAssetCollections(
+        .albums(title: self.assetCollectionTitle)
+      )
+      
+      if assetCollections.count == 0 {
+        try await photoLibrary.performChanges(
+          .createAssetCollection(withTitle: self.assetCollectionTitle)
+        )
+      }
+      
+      assetCollections = try await photoLibrary.fetchAssetCollections(
+        .albums(title: self.assetCollectionTitle)
+      )
+      
+      if let first = assetCollections.firstObject {
         return first
-      } else if let new = try? await photoLibrary.createCollection(
-        self.assetCollectionTitle
-      ) {
-        return new
       } else {
-        throw AnyError("SyncPhotoLibrary, failed to fetch or create collection.")
+        throw AnyError(
+          """
+          Tried to create photo album with title: \(self.assetCollectionTitle),
+          but fetchCollections(withTitle:) returned an empty result.
+          """
+        )
       }
     }
     
