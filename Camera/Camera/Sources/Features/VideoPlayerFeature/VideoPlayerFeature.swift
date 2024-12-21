@@ -6,7 +6,6 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-
 @MainActor
 @Observable
 final class VideoPlayerModel {
@@ -79,7 +78,6 @@ struct VideoPlayerView: View {
       VideoPlayer(player: self.model.player)
     }
     .task { await self.model.task() }
-//    .shareSheet(item: self.$model.destination.share)
     .sheet(item: self.$model.destination.activity) { model in
       ActivityView(model: model)
     }
@@ -98,8 +96,9 @@ struct VideoPlayerView: View {
 
 
 // MARK: - SwiftUI Previews
-
-// @DEDA plz fix
+//
 //#Preview {
-//  VideoPlayerView(model: VideoPlayerModel())
+//  VideoPlayerView(model: VideoPlayerModel(
+//    
+//  ))
 //}
