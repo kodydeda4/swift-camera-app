@@ -4,7 +4,7 @@ import Sharing
 struct CameraState: Equatable {
   var zoom = 1.0
   var isRecording = false
-  var position = AVCaptureDevice.Position.front
+  var position = AVCaptureDevice.Position.back
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 }
 
