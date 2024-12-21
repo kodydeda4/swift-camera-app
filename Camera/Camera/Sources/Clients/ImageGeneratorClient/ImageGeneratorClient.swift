@@ -5,9 +5,9 @@ import SwiftUI
 
 @DependencyClient
 struct ImageGeneratorClient: Sendable {
-  var image: @Sendable (AVAsset) async throws -> GenerateImageResponse?
+  var image: @Sendable (AVAsset) async throws -> Response?
 
-  typealias GenerateImageResponse = (
+  typealias Response = (
     image: CGImage,
     actualTime: CMTime
   )
