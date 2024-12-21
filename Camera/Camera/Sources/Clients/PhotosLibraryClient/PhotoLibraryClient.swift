@@ -163,7 +163,7 @@ extension PhotosLibraryClient.Request.PhotoLibraryChange {
 }
 
 extension PhotosLibraryClient.Request.AssetCollections {
-  static func albums(title: String) -> Self {
+  static func albums(withTitle title: String) -> Self {
     Self(type: .album, subtype: .any, options: .make {
       $0.predicate = NSPredicate(format: "title = %@", title)
     })

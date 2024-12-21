@@ -14,6 +14,7 @@ final class MainModel {
   
   var tab = Tab.camera
   let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
+  
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photos) var photos
   
@@ -27,41 +28,32 @@ final class MainModel {
     await self.syncPhotoLibrary()
   }
   
-  // @DEDA cmon man.
   private func syncPhotoLibrary() async {
-    let result = await Result<PHAssetCollection, Error> {
+    let result = await Result {
       
-      var assetCollections = try await photos.fetchAssetCollections(
-        .albums(title: self.assetCollectionTitle)
+      // Fetch collections
+      var assetCollections = try await self.photos.fetchAssetCollections(
+        .albums(withTitle: self.assetCollectionTitle)
       )
       
+      // Create album if necessary & refetch
       if assetCollections.count == 0 {
-        try await photos.performChanges(
+        try await self.photos.performChanges(
           .createAssetCollection(withTitle: self.assetCollectionTitle)
         )
-      }
-      
-      assetCollections = try await photos.fetchAssetCollections(
-        .albums(title: self.assetCollectionTitle)
-      )
-      
-      if let first = assetCollections.firstObject {
-        return first
-      } else {
-        throw AnyError(
-          """
-          Tried to create photo album with title: \(self.assetCollectionTitle),
-          but fetchCollections(withTitle:) returned an empty result.
-          """
+        assetCollections = try await self.photos.fetchAssetCollections(
+          .albums(withTitle: self.assetCollectionTitle)
         )
       }
+
+      // Update state
+      guard let first = assetCollections.firstObject else {
+        throw AnyError("Couldn't fetch asset collection.")
+      }
+      
+      self.$assetCollection.withLock { $0 = first }
     }
-    
-    if case let .success(value) = result {
-      self.$assetCollection.withLock { $0 = value }
-    }
-    
-    print("SyncPhotoLibrary", result)
+    print("MainModel.syncPhotoLibrary", result)
   }
 }
 
