@@ -65,6 +65,8 @@ extension PhotoLibraryClient {
   }
 }
 
+// MARK: - Implementation
+
 extension PhotoLibraryClient: DependencyKey {
   static var liveValue = Self(
     performChanges: { request in
@@ -115,7 +117,7 @@ extension PhotoLibraryClient: DependencyKey {
   )
 }
 
-// MARK: - Static Requests
+// MARK: - Requests
 
 extension PhotoLibraryClient.Request.PhotoLibraryChange {
   static func save(
@@ -147,28 +149,21 @@ extension PhotoLibraryClient.Request.PhotoLibraryChange {
 
 extension PhotoLibraryClient.Request.AssetCollections {
   static func albums(title: String) -> Self {
-    Self(
-      type: .album,
-      subtype: .any,
-      options: .make {
-        $0.predicate = NSPredicate(format: "title = %@", title)
-      }
-    )
+    Self(type: .album, subtype: .any, options: .make {
+      $0.predicate = NSPredicate(format: "title = %@", title)
+    })
   }
 }
 
 extension PhotoLibraryClient.Request.Assets {
   static func videos(in collection: PHAssetCollection) -> Self {
-    Self(
-      collection: collection,
-      options: .make {
-        $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        $0.predicate = NSPredicate(
-          format: "mediaType == %d",
-          PHAssetMediaType.video.rawValue
-        )
-      }
-    )
+    Self(collection: collection, options: .make {
+      $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+      $0.predicate = NSPredicate(
+        format: "mediaType == %d",
+        PHAssetMediaType.video.rawValue
+      )
+    })
   }
 }
 
