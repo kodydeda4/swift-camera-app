@@ -62,8 +62,8 @@ extension CameraClient: DependencyKey {
       authorizationStatus: { mediaType in
         AVCaptureDevice.authorizationStatus(for: mediaType)
       },
-      connect: { preview in
-        try camera.connect(preview)
+      connect: { videoPreviewLayer in
+        try camera.connect(videoPreviewLayer)
       },
       startRecording: { url in
         try camera.startRecording(to: url)
@@ -74,8 +74,8 @@ extension CameraClient: DependencyKey {
       switchCamera: {
         try camera.switchCamera()
       },
-      zoom: { newValue in
-        try camera.zoom(newValue)
+      zoom: { zoomFactor in
+        try camera.zoom(zoomFactor)
       },
       events: {
         camera.events
