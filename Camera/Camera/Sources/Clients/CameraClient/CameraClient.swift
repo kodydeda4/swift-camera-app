@@ -8,6 +8,8 @@ import SwiftUINavigation
 
 @DependencyClient
 struct CameraClient: Sendable {
+  var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
+  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in .notDetermined }
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
@@ -54,6 +56,12 @@ extension CameraClient: DependencyKey {
     let camera = Camera()
     
     return Self(
+      requestAccess: { mediaType in
+        await AVCaptureDevice.requestAccess(for: .video)
+      },
+      authorizationStatus: { mediaType in
+        AVCaptureDevice.authorizationStatus(for: mediaType)
+      },
       connect: { preview in
         let result = Result { try camera.connect(preview) }
         print("connect", result)

@@ -19,7 +19,7 @@ final class CameraModel {
 
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var cameraClient
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   
   @CasePathable
@@ -101,7 +101,7 @@ private extension CameraModel {
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
         if let assetCollection {
-          try await self.photoLibrary.performChanges(
+          try await self.photos.performChanges(
             .save(contentsOf: outputFileURL, to: assetCollection)
           )
         } else {
@@ -143,10 +143,7 @@ struct CameraView: View {
 // MARK: - SwiftUI Previews
 
 #Preview("Happy path") {
-  let value: Dictionary<
-    UserPermissionsClient.Feature,
-    UserPermissionsClient.Status
-  > = [
+  let value: UserPermissions.State = [
     .camera: .authorized,
     .microphone: .authorized,
     .photos: .authorized,

@@ -10,23 +10,31 @@ import UIKit
 /// This also allows you to have function labels for the requests.
 ///
 /// - Example: `try await photosLibrary.performChanges(.createAssetCollection(withTitle: "App"))`
-/// - Example: `try await photoLibrary.fetchAssets(.videos(in: collection))
+/// - Example: `try await photos.fetchAssets(.videos(in: collection))
 
 @DependencyClient
-struct PhotoLibraryClient: Sendable {
-
+struct PhotosLibraryClient: Sendable {
+  
+  var authorizationStatus: @Sendable (
+    _ for: PHAccessLevel
+  ) -> PHAuthorizationStatus = { _ in .notDetermined }
+  
+  var requestAuthorization: @Sendable (
+    _ for: PHAccessLevel
+  ) async -> PHAuthorizationStatus = { _ in .notDetermined }
+  
   var performChanges: @Sendable (
     Request.PhotoLibraryChange
   ) async throws -> Void
-
+  
   var fetchAssetCollections: @Sendable (
     Request.AssetCollections
   ) async throws -> PHFetchResult<PHAssetCollection>
-
+  
   var fetchAssets: @Sendable (
     Request.Assets
   ) async throws -> PHFetchResult<PHAsset>
-
+  
   var requestAVAsset: @Sendable (
     _ asset: PHAsset,
     _ options: PHVideoRequestOptions?
@@ -34,15 +42,15 @@ struct PhotoLibraryClient: Sendable {
 }
 
 extension DependencyValues {
-  var photoLibrary: PhotoLibraryClient {
-    get { self[PhotoLibraryClient.self] }
-    set { self[PhotoLibraryClient.self] = newValue }
+  var photos: PhotosLibraryClient {
+    get { self[PhotosLibraryClient.self] }
+    set { self[PhotosLibraryClient.self] = newValue }
   }
 }
 
 // MARK: - Types
 
-extension PhotoLibraryClient {
+extension PhotosLibraryClient {
   struct Request {
     struct PhotoLibraryChange {
       let rawValue: () -> Void
@@ -68,8 +76,14 @@ extension PhotoLibraryClient {
 
 // MARK: - Implementation
 
-extension PhotoLibraryClient: DependencyKey {
+extension PhotosLibraryClient: DependencyKey {
   static var liveValue = Self(
+    authorizationStatus: { level in
+      PHPhotoLibrary.authorizationStatus(for: level)
+    },
+    requestAuthorization: { level in
+      await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+    },
     performChanges: { request in
       try await withCheckedThrowingContinuation { continuation in
         PHPhotoLibrary.shared().performChanges({
@@ -120,27 +134,27 @@ extension PhotoLibraryClient: DependencyKey {
 
 // MARK: - Requests
 
-extension PhotoLibraryClient.Request.PhotoLibraryChange {
+extension PhotosLibraryClient.Request.PhotoLibraryChange {
   static func save(
     contentsOf url: URL,
     to assetCollection: PHAssetCollection
   ) -> Self {
     Self {
       let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-
+      
       if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
         let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection)
         albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
       }
     }
   }
-
+  
   static func delete(assets: [PHAsset]) -> Self {
     Self {
       PHAssetChangeRequest.deleteAssets(assets as NSArray)
     }
   }
-
+  
   static func createAssetCollection(withTitle title: String) -> Self {
     Self {
       PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)
@@ -148,7 +162,7 @@ extension PhotoLibraryClient.Request.PhotoLibraryChange {
   }
 }
 
-extension PhotoLibraryClient.Request.AssetCollections {
+extension PhotosLibraryClient.Request.AssetCollections {
   static func albums(title: String) -> Self {
     Self(type: .album, subtype: .any, options: .make {
       $0.predicate = NSPredicate(format: "title = %@", title)
@@ -156,7 +170,7 @@ extension PhotoLibraryClient.Request.AssetCollections {
   }
 }
 
-extension PhotoLibraryClient.Request.Assets {
+extension PhotosLibraryClient.Request.Assets {
   static func videos(in collection: PHAssetCollection) -> Self {
     Self(collection: collection, options: .make {
       $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]

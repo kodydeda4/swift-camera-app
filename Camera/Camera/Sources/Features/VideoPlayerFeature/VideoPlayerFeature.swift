@@ -17,7 +17,7 @@ final class VideoPlayerModel {
   let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.photos) var photos
 
   @CasePathable
   enum Destination {
@@ -40,7 +40,7 @@ final class VideoPlayerModel {
 
   func deleteButtonTapped() {
     Task {
-      try await self.photoLibrary.performChanges(.delete(assets: [self.phAsset]))
+      try await self.photos.performChanges(.delete(assets: [self.phAsset]))
       self.dismiss()
     }
   }

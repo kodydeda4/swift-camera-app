@@ -15,13 +15,12 @@ final class UserPermissionsModel: Identifiable {
   var onContinueButtonTapped: () -> Void
     = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
-  // Shared
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
-  
-  // Dependency
-  @ObservationIgnored @Dependency(\.userPermissions) var userPermissionsClient
+  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.camera) var camera
+  @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.application) var application
-  
+
   var isContinueButtonDisabled: Bool {
     !hasFullPermissions
   }
@@ -38,7 +37,7 @@ final class UserPermissionsModel: Identifiable {
     self.onContinueButtonTapped()
   }
   
-  func request(_ feature: UserPermissionsClient.Feature) {
+  func request(_ feature: UserPermissions.Feature) {
     switch userPermissions[feature] {
       
     case .authorized:
@@ -52,7 +51,14 @@ final class UserPermissionsModel: Identifiable {
     case .none,
          .undetermined:
       Task {
-        let newValue = await self.userPermissionsClient.request(feature)
+        let newValue = await {
+          switch feature {
+          case .camera: await camera.requestAccess(.video)
+          case .microphone: await audio.requestRecordPermission()
+          case .photos: await photos.requestAuthorization(.addOnly) == .authorized
+          }
+        }()
+
         self.$userPermissions.withLock {
           $0[feature] = newValue ? .authorized : .denied
         }

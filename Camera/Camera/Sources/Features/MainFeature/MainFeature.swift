@@ -15,7 +15,7 @@ final class MainModel {
   var tab = Tab.camera
   let assetCollectionTitle = PHAssetCollectionTitle.app.rawValue
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.photos) var photos
   
   enum Tab: Equatable {
     case library
@@ -31,17 +31,17 @@ final class MainModel {
   private func syncPhotoLibrary() async {
     let result = await Result<PHAssetCollection, Error> {
       
-      var assetCollections = try await photoLibrary.fetchAssetCollections(
+      var assetCollections = try await photos.fetchAssetCollections(
         .albums(title: self.assetCollectionTitle)
       )
       
       if assetCollections.count == 0 {
-        try await photoLibrary.performChanges(
+        try await photos.performChanges(
           .createAssetCollection(withTitle: self.assetCollectionTitle)
         )
       }
       
-      assetCollections = try await photoLibrary.fetchAssetCollections(
+      assetCollections = try await photos.fetchAssetCollections(
         .albums(title: self.assetCollectionTitle)
       )
       
@@ -91,10 +91,7 @@ struct MainView: View {
 // MARK: - SwiftUI Previews
 
 #Preview("Happy path") {
-  let value: Dictionary<
-    UserPermissionsClient.Feature,
-    UserPermissionsClient.Status
-  > = [
+  let value: UserPermissions.State = [
     .camera: .authorized,
     .microphone: .authorized,
     .photos: .authorized,

@@ -60,8 +60,9 @@ final class AppModel {
   
   @ObservationIgnored @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
-  @ObservationIgnored @Dependency(\.userPermissions) var userPermissionsClient
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.camera) var camera
+  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.photos) var photos
 
   @CasePathable
   enum Destination {
@@ -85,9 +86,32 @@ final class AppModel {
   
   /// Update user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
-    UserPermissionsClient.Feature.allCases.forEach { feature in
+    UserPermissions.Feature.allCases.forEach { feature in
       self.$userPermissions.withLock {
-        $0[feature] = self.userPermissionsClient.status(feature)
+        $0[feature] = {
+          switch feature {
+          case .camera:
+            switch self.camera.authorizationStatus(.video) {
+            case .notDetermined: return .undetermined
+            case .authorized: return .authorized
+            default: return .denied
+            }
+            
+          case .microphone:
+            switch self.audio.recordPermission() {
+            case .undetermined: return .undetermined
+            case .granted: return .authorized
+            default: return .denied
+            }
+
+          case .photos:
+            switch self.photos.authorizationStatus(.addOnly) {
+            case .notDetermined: return .undetermined
+            case .authorized: return .authorized
+            default: return .denied
+            }
+          }
+        }()
       }
     }
   }

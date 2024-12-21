@@ -1,11 +1,23 @@
 import Sharing
 
-typealias UserPermissionsState = Dictionary<
-  UserPermissionsClient.Feature,
-  UserPermissionsClient.Status
->
+struct UserPermissions {
+  
+  enum Feature: Codable, CaseIterable {
+    case camera
+    case microphone
+    case photos
+  }
+  
+  enum Status: Codable {
+    case undetermined
+    case authorized
+    case denied
+  }
+  
+  typealias State = Dictionary<Feature, Status>
+}
 
-extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Default {
+extension SharedReaderKey where Self == FileStorageKey<UserPermissions.State>.Default {
   static var userPermissions: Self {
     Self[.fileStorage(.shared("userPermissions")), default: [:]]
   }
@@ -13,13 +25,13 @@ extension SharedReaderKey where Self == FileStorageKey<UserPermissionsState>.Def
 
 // MARK: - SwiftUI Previews
 
-extension UserPermissionsState {
-  static var authorized: UserPermissionsState = [
+extension UserPermissions.State {
+  static var authorized: Self = [
     .camera: .authorized,
     .microphone: .authorized,
     .photos: .authorized,
   ]
-  static var denied: UserPermissionsState = [
+  static var denied: Self = [
     .camera: .denied,
     .microphone: .denied,
     .photos: .denied,

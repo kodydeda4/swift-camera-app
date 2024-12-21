@@ -68,10 +68,7 @@ struct SettingsView: View {
 // MARK: - SwiftUI Previews
 
 #Preview("Happy path") {
-  let value: Dictionary<
-    UserPermissionsClient.Feature,
-    UserPermissionsClient.Status
-  > = [
+  let value: UserPermissions.State = [
     .camera: .authorized,
     .microphone: .authorized,
     .photos: .authorized,

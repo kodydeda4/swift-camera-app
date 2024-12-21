@@ -1,21 +1,29 @@
+import AVFoundation
 import Dependencies
 import DependenciesMacros
 import SwiftUI
 
 @DependencyClient
-struct ApplicationClient: Sendable {
-  var open: @Sendable (URL) async -> Void
+struct ImageGeneratorClient: Sendable {
+  var image: @Sendable (AVAsset) async throws -> GenerateImageResponse?
+
+  typealias GenerateImageResponse = (
+    image: CGImage,
+    actualTime: CMTime
+  )
 }
 
 extension DependencyValues {
-  var application: ApplicationClient {
-    get { self[ApplicationClient.self] }
-    set { self[ApplicationClient.self] = newValue }
+  var imageGenerator: ImageGeneratorClient {
+    get { self[ImageGeneratorClient.self] }
+    set { self[ImageGeneratorClient.self] = newValue }
   }
 }
 
-extension ApplicationClient: DependencyKey {
-  static var liveValue = Self {
-    UIApplication.shared.open($0, options: [:], completionHandler: nil)
+extension ImageGeneratorClient: DependencyKey {
+  static var liveValue = Self { asset in
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    return try await generator.image(at: .zero)
   }
 }

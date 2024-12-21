@@ -15,7 +15,7 @@ final class LibraryModel {
   
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @SharedReader(.assetCollection) var collection
-  @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
 
   struct Video: Identifiable {
@@ -48,7 +48,7 @@ final class LibraryModel {
       }
       
       self.videos = []
-      let fetchResult = try await self.photoLibrary.fetchAssets(.videos(in: collection))
+      let fetchResult = try await self.photos.fetchAssets(.videos(in: collection))
       
       fetchResult.enumerateObjects { asset, _, _ in
         self.videos.append(.init(id: self.uuid(), phAsset: asset))
@@ -57,7 +57,7 @@ final class LibraryModel {
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let avAsset = await self.photoLibrary.requestAVAsset(
+            let avAsset = await self.photos.requestAVAsset(
               video.phAsset, .none
             )?.asset
             
