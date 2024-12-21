@@ -16,6 +16,7 @@ final class LibraryModel {
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @SharedReader(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photoLibrary) var photoLibrary
+  @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
 
   struct Video: Identifiable {
     var id: UUID
@@ -56,14 +57,17 @@ final class LibraryModel {
       await withTaskGroup(of: Void?.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
-            let avAsset = await self.photoLibrary.requestAVAsset(.init(asset: video.phAsset, options: .none))?.asset
+            let avAsset = await self.photoLibrary.requestAVAsset(
+              video.phAsset, .none
+            )?.asset
+            
             let avURLAsset = (avAsset as? AVURLAsset)
             
             await MainActor.run {
               self.videos[id: video.id]?.avURLAsset = avURLAsset
             }
 
-            if let avAsset, let image = try? await self.photoLibrary.generateImage(avAsset)?.image {
+            if let avAsset, let image = try? await self.imageGenerator.image(avAsset)?.image {
               await MainActor.run {
                 self.videos[id: video.id]?.thumbnail = UIImage(cgImage: image)
               }

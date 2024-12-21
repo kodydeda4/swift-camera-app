@@ -35,7 +35,7 @@ final class MainModel {
         .albums(title: self.assetCollectionTitle)
       )
       
-      if assetCollections.count == 0 {
+      if assetCollections.isEmpty {
         try await photoLibrary.performChanges(
           .createAssetCollection(withTitle: self.assetCollectionTitle)
         )
