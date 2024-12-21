@@ -44,12 +44,12 @@ final class MainModel {
   private func fetchOrCreateAssetCollection(withTitle title: String) async throws -> PHAssetCollection {
     
     // Fetch collections with title.
-    var assetCollections = try await self.photos.fetchAssetCollections(
-      .albums(withTitle: title)
+    var albums = try await self.photos.fetchAssetCollections(
+      .albums(with: title)
     )
     
     // If you found it, update and return.
-    if let first = assetCollections.firstObject {
+    if let first = albums.firstObject {
       return first
     }
     
@@ -57,11 +57,12 @@ final class MainModel {
     try await self.photos.performChanges(
       .createAssetCollection(withTitle: self.assetCollectionTitle)
     )
-    assetCollections = try await self.photos.fetchAssetCollections(
-      .albums(withTitle: title)
+    
+    albums = try await self.photos.fetchAssetCollections(
+      .albums(with: title)
     )
     
-    if let first = assetCollections.firstObject {
+    if let first = albums.firstObject {
       return first
     }
     
