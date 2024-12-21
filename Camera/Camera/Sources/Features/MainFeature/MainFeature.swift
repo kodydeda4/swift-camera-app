@@ -29,6 +29,7 @@ final class MainModel {
   }
   
   private func syncPhotoLibrary() async {
+    // @DEDA Definetly room for improvement.
     let result = await Result<String, Error> {
       
       // Fetch collections with title.
