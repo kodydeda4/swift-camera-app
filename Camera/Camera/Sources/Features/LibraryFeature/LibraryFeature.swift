@@ -16,10 +16,10 @@ final class LibraryModel: Identifiable {
     = unimplemented("Library.dismiss")
 
   @ObservationIgnored @Dependency(\.uuid) var uuid
-  @ObservationIgnored @SharedReader(.assetCollection) var collection
+  @ObservationIgnored @SharedReader(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
-
+  
   struct Video: Identifiable {
     var id: UUID
     let phAsset: PHAsset
@@ -53,18 +53,18 @@ final class LibraryModel: Identifiable {
   
   func task() async {
     _ = await Result {
-      guard let collection else {
+      guard let assetCollection else {
         throw AnyError("collection was nil somehow.")
       }
       
       self.videos = []
-      let fetchResult = try await self.photos.fetchAssets(.videos(in: collection))
+      let fetchResult = try await self.photos.fetchAssets(.videos(in: assetCollection))
       
       fetchResult.enumerateObjects { asset, _, _ in
         self.videos.append(.init(id: self.uuid(), phAsset: asset))
       }
       
-      await withTaskGroup(of: Void?.self) { taskGroup in
+      await withTaskGroup(of: Void.self) { taskGroup in
         for video in self.videos {
           taskGroup.addTask {
             let avAsset = await self.photos.requestAVAsset(

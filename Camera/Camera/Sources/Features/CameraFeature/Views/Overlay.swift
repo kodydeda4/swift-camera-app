@@ -43,11 +43,22 @@ fileprivate extension CameraView {
     Button {
       self.model.navigateCameraRoll()
     } label: {
-      Rectangle()
-        .frame(width: 64, height: 64)
+      Group {
+        if let uiImage = self.model.latestVideoThumbnail {
+          Image(uiImage: uiImage)
+            .resizable()
+            .scaledToFit()
+            .cornerRadius(8)
+            .padding(.horizontal)
+        } else {
+          Color.blue
+            .frame(width: 64, height: 64)
+        }
+      }
+      .frame(width: 64, height: 64)
     }
   }
-
+  
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.camera.isRecording ? "circle.fill" : "circle")
@@ -106,8 +117,8 @@ fileprivate struct CameraRecordingButton: View {
         RoundedRectangle(
           cornerRadius: self.model.camera.isRecording ? 8 : self.innerCircleWidth / 2
         )
-          .foregroundColor(.red)
-          .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
+        .foregroundColor(.red)
+        .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
         
       }
       .animation(.linear(duration: 0.2), value: self.model.camera.isRecording)
