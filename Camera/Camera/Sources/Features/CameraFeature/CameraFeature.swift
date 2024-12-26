@@ -78,6 +78,7 @@ final class CameraModel {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         // @DEDA you have to wait for MainModel to finish syncing the asset collection before you can continue. You will nuke MainModel soon.
+        // also, this is supposed to be responsive.. after you finish recording.
         try? await Task.sleep(for: .seconds(1))
         guard let assetCollection = await self.assetCollection else {
           print("Asset collection was nil.")
