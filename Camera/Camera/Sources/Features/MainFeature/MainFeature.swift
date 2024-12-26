@@ -9,20 +9,10 @@ import SwiftUINavigation
 @Observable
 final class MainModel {
   private(set) var cameraModel = CameraModel()
-  private(set) var libraryModel = LibraryModel()
-  private(set) var settingsModel = SettingsModel()
-  
-  var tab = Tab.camera
   let assetCollectionTitle = String.assetCollectionTitle
   
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Dependency(\.photos) var photos
-  
-  enum Tab: Equatable {
-    case library
-    case camera
-    case settings
-  }
   
   func task() async {
     await self.syncAssetCollection(Result {
@@ -79,20 +69,8 @@ struct MainView: View {
   @Bindable var model: MainModel
   
   var body: some View {
-    TabView(selection: self.$model.tab) {
-      LibraryView(model: self.model.libraryModel)
-        .tabItem { Label("Library", systemImage: "square.grid.2x2") }
-        .tag(MainModel.Tab.library)
-      
-      CameraView(model: self.model.cameraModel)
-        .tabItem { Label("Camera", systemImage: "camera") }
-        .tag(MainModel.Tab.camera)
-      
-      SettingsView(model: self.model.settingsModel)
-        .tabItem { Label("Settings", systemImage: "gear") }
-        .tag(MainModel.Tab.settings)
-    }
-    .task { await self.model.task() }
+    CameraView(model: self.model.cameraModel)
+      .task { await self.model.task() }
   }
 }
 

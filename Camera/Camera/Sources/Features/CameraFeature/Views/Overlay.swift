@@ -30,10 +30,11 @@ fileprivate extension CameraView {
     VStack {
       HStack {
         self.cameraRollButton
-        Spacer()
+          .frame(maxWidth: .infinity)
         CameraRecordingButton(model: model)
-        Spacer()
+          .frame(maxWidth: .infinity)
         self.switchCameraButton
+          .frame(maxWidth: .infinity)
       }
     }
   }
@@ -86,15 +87,6 @@ fileprivate extension CameraView {
   }
 }
 
-extension CGFloat {
-  var formattedDescription: String {
-    let formatter = NumberFormatter()
-    formatter.maximumFractionDigits = 1
-    formatter.minimumFractionDigits = 0
-    formatter.roundingMode = .halfUp
-    return formatter.string(for: self)!
-  }
-}
 
 fileprivate struct CameraRecordingButton: View {
   @Bindable var model: CameraModel

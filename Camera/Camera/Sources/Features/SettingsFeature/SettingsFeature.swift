@@ -124,7 +124,16 @@ struct SettingsView: View {
         .clipShape(Circle())
     }
   }
+}
 
+fileprivate extension CGFloat {
+  var formattedDescription: String {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
+    formatter.minimumFractionDigits = 0
+    formatter.roundingMode = .halfUp
+    return formatter.string(for: self)!
+  }
 }
 
 // MARK: - SwiftUI Previews
