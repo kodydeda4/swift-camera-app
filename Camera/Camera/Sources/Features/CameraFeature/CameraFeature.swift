@@ -16,7 +16,7 @@ final class CameraModel {
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
-
+  
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var cameraClient
   @ObservationIgnored @Dependency(\.photos) var photos
@@ -40,8 +40,8 @@ final class CameraModel {
   func recordingButtonTapped() {
     _ = Result {
       try !camera.isRecording
-        ? cameraClient.startRecording(self.movieFileOutput)
-        : cameraClient.stopRecording()
+      ? cameraClient.startRecording(self.movieFileOutput)
+      : cameraClient.stopRecording()
       
       self.$camera.isRecording.withLock { $0.toggle() }
     }
@@ -65,7 +65,7 @@ final class CameraModel {
   func navigateSettings() {
     self.destination = .settings(SettingsModel())
   }
-
+  
   func switchCameraButtonTapped() {
     _ = Result {
       let position = try self.cameraClient.switchCamera()
@@ -142,27 +142,31 @@ struct CameraView: View {
   
   var body: some View {
     NavigationStack {
-      Group {
-        if self.model.hasFullPermissions {
-          self.cameraPreview.onTapGesture(count: 2) {
-            self.model.switchCamera()
-          }
-        } else {
-          self.permissionsRequired
+      self.content
+        .task { await self.model.task() }
+        .navigationBarBackButtonHidden()
+        .overlay(content: self.overlay)
+        .toolbar(content: self.toolbar)
+        .sheet(item: $model.destination.userPermissions) { model in
+          UserPermissionsSheet(model: model)
         }
-      }
-      .task { await self.model.task() }
-      .navigationBarBackButtonHidden()
-      .overlay(content: self.overlay)
-      .toolbar(content: self.toolbar)
-      .sheet(item: $model.destination.userPermissions) { model in
-        UserPermissionsSheet(model: model)
-      }
-      .sheet(item: $model.destination.settings) { model in
-        SettingsView(model: model)
-      }
-      .fullScreenCover(item: $model.destination.library) { model in
-        LibraryView(model: model)
+        .sheet(item: $model.destination.settings) { model in
+          SettingsView(model: model)
+        }
+        .fullScreenCover(item: $model.destination.library) { model in
+          LibraryView(model: model)
+        }
+    }
+  }
+  
+  @MainActor private var content: some View {
+    Group {
+      if self.model.hasFullPermissions {
+        self.cameraPreview.onTapGesture(count: 2) {
+          self.model.switchCameraButtonTapped()
+        }
+      } else {
+        self.permissionsRequired
       }
     }
   }
