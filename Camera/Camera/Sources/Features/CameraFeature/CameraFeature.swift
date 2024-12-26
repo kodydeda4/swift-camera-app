@@ -151,33 +151,37 @@ struct CameraView: View {
           self.permissionsRequired
         }
       }
+      .task { await self.model.task() }
       .navigationBarBackButtonHidden()
       .overlay(content: self.overlay)
-      .task { await self.model.task() }
+      .toolbar(content: self.toolbar)
       .sheet(item: $model.destination.userPermissions) { model in
         UserPermissionsSheet(model: model)
-      }
-      .fullScreenCover(item: $model.destination.library) { model in
-        LibraryView(model: model)
       }
       .sheet(item: $model.destination.settings) { model in
         SettingsView(model: model)
       }
-      .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
-          Button(action: {}) {
-            Image(systemName: "bolt.fill")
-          }
+      .fullScreenCover(item: $model.destination.library) { model in
+        LibraryView(model: model)
+      }
+    }
+  }
+  
+  @MainActor private func toolbar() -> some ToolbarContent {
+    Group {
+      ToolbarItem(placement: .topBarLeading) {
+        Button(action: {}) {
+          Image(systemName: "bolt.fill")
         }
-        ToolbarItem(placement: .principal) {
-          Text("00:00")
-            .foregroundColor(.white)
-            .fontWeight(.semibold)
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-          Button(action: self.model.navigateSettings) {
-            Image(systemName: "ellipsis")
-          }
+      }
+      ToolbarItem(placement: .principal) {
+        Text("00:00")
+          .foregroundColor(.white)
+          .fontWeight(.semibold)
+      }
+      ToolbarItem(placement: .topBarTrailing) {
+        Button(action: self.model.navigateSettings) {
+          Image(systemName: "ellipsis")
         }
       }
     }
