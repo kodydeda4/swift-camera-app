@@ -104,8 +104,8 @@ private extension CameraModel {
     case let .library(model):
       model.dismiss = { [weak self] in self?.destination = .none }
       
-    case .settings:
-      break
+    case let .settings(model):
+      model.dismiss = { [weak self] in self?.destination = .none }
       
     case .none:
       break
@@ -142,24 +142,45 @@ struct CameraView: View {
   
   var body: some View {
     NavigationStack {
-      if self.model.hasFullPermissions {
-        self.cameraPreview
-      } else {
-        self.permissionsRequired
+      Group {
+        if self.model.hasFullPermissions {
+          self.cameraPreview.onTapGesture(count: 2) {
+            self.model.switchCamera()
+          }
+        } else {
+          self.permissionsRequired
+        }
+      }
+      .navigationBarBackButtonHidden()
+      .overlay(content: self.overlay)
+      .task { await self.model.task() }
+      .sheet(item: $model.destination.userPermissions) { model in
+        UserPermissionsSheet(model: model)
+      }
+      .fullScreenCover(item: $model.destination.library) { model in
+        LibraryView(model: model)
+      }
+      .sheet(item: $model.destination.settings) { model in
+        SettingsView(model: model)
+      }
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button(action: {}) {
+            Image(systemName: "bolt.fill")
+          }
+        }
+        ToolbarItem(placement: .principal) {
+          Text("00:00")
+            .foregroundColor(.white)
+            .fontWeight(.semibold)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+          Button(action: self.model.navigateSettings) {
+            Image(systemName: "ellipsis")
+          }
+        }
       }
     }
-    .navigationBarBackButtonHidden()
-    .overlay(content: self.overlay)
-    .task { await self.model.task() }
-    .sheet(item: $model.destination.userPermissions) { model in
-      UserPermissionsSheet(model: model)
-    }
-    .fullScreenCover(item: $model.destination.library) { model in
-      LibraryView(model: model)
-    }
-//    .sheet(item: $model.destination.settings) { model in
-//      SettingsSheet(model: model)
-//    }
   }
 }
 

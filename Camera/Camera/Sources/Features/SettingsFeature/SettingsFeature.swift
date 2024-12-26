@@ -5,10 +5,13 @@ import SwiftUINavigation
 
 @MainActor
 @Observable
-final class SettingsModel {
+final class SettingsModel: Identifiable {
+  let id = UUID()
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
-  
+  var dismiss: () -> Void
+    = unimplemented("Settings.dismiss")
+
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -16,6 +19,10 @@ final class SettingsModel {
   
   func navigateToPermissions() {
     self.destination = .userPermissions(UserPermissionsModel())
+  }
+  
+  func cancelButtonTapped() {
+    self.dismiss()
   }
   
   private func bind() {
@@ -57,6 +64,14 @@ struct SettingsView: View {
         }
       }
       .navigationTitle("Settings")
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button(action: self.model.cancelButtonTapped) {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundColor(.secondary)
+          }
+        }
+      }
       .listStyle(.plain)
       .navigationDestination(item: $model.destination.userPermissions) { model in
         UserPermissionsSheet(model: model)

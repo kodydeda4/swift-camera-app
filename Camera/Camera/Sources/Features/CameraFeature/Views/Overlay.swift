@@ -23,15 +23,7 @@ extension CameraView {
 
 fileprivate extension CameraView {
   private var top: some View {
-    VStack(alignment: .leading) {
-      Text("Camera")
-        .font(.title)
-        .fontWeight(.bold)
-      
-      Text(self.model.buildNumber.description)
-    }
-    .foregroundColor(self.model.hasFullPermissions ? .white : .primary)
-    .frame(maxWidth: .infinity, alignment: .leading)
+    EmptyView()//@DEDA remove 
   }
   
   private var bottom: some View {
@@ -79,7 +71,6 @@ fileprivate extension CameraView {
         .font(.caption)
         .frame(width: 32, height: 32)
         .foregroundColor(isSelected ? .white : .black)
-      //        .padding()
         .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
         .clipShape(Circle())
     }
@@ -90,6 +81,8 @@ fileprivate extension CameraView {
       self.model.navigateCameraRoll()
     } label: {
       Rectangle()
+        .frame(width: 64, height: 64)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
   }
 
