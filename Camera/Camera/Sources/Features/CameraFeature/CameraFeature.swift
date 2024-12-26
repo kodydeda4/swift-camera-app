@@ -51,12 +51,6 @@ final class CameraModel {
     self.destination = .userPermissions(UserPermissionsModel())
   }
   
-  func zoomButtonTapped(_ value: CGFloat) {
-    _ = Result {
-      try self.cameraClient.zoom(value)
-      self.$camera.zoom.withLock { $0 = value }
-    }
-  }
   
   func navigateCameraRoll() {
     self.destination = .library(LibraryModel())

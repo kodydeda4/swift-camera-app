@@ -11,10 +11,17 @@ final class SettingsModel: Identifiable {
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
     = unimplemented("Settings.dismiss")
+  
+  @ObservationIgnored @Shared(.camera) var camera
+  @ObservationIgnored @Dependency(\.camera) var cameraClient
 
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
+  }
+  
+  var isZoomButtonsDisabled: Bool {
+    self.camera.position == .front
   }
   
   func navigateToPermissions() {
@@ -25,6 +32,13 @@ final class SettingsModel: Identifiable {
     self.dismiss()
   }
   
+  func zoomButtonTapped(_ value: CGFloat) {
+    _ = Result {
+      try self.cameraClient.zoom(value)
+      self.$camera.zoom.withLock { $0 = value }
+    }
+  }
+
   private func bind() {
     switch destination {
       
@@ -57,6 +71,10 @@ struct SettingsView: View {
             }
           }
         }
+        Section {
+          self.zoomButtons
+            .disabled(self.model.isZoomButtonsDisabled)
+        }
         
         Section {
           Text("Camera \(self.model.buildNumber.description)")
@@ -78,6 +96,35 @@ struct SettingsView: View {
       }
     }
   }
+    
+  private var zoomButtons: some View {
+    HStack {
+      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
+        zoomButton(videoZoomFactor: value)
+      }
+    }
+    .padding(8)
+    .background {
+      Color.white.opacity(0.5)
+    }
+    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+  }
+  
+  private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
+    let isSelected = self.model.camera.zoom == value
+    
+    return Button {
+      self.model.zoomButtonTapped(value)
+    } label: {
+      Text("\(value.formattedDescription)x")
+        .font(.caption)
+        .frame(width: 32, height: 32)
+        .foregroundColor(isSelected ? .white : .black)
+        .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
+        .clipShape(Circle())
+    }
+  }
+
 }
 
 // MARK: - SwiftUI Previews

@@ -28,51 +28,13 @@ fileprivate extension CameraView {
   
   private var bottom: some View {
     VStack {
-      switch self.model.camera.position {
-        
-      case .back:
-        self.zoomButtons.padding(.bottom)
-        
-      default:
-        EmptyView()
-        //...
-      }
-      
       HStack {
         self.cameraRollButton
+        Spacer()
         CameraRecordingButton(model: model)
-//        self.recordingButton
         Spacer()
         self.switchCameraButton
       }
-    }
-  }
-  
-  private var zoomButtons: some View {
-    HStack {
-      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-        zoomButton(videoZoomFactor: value)
-      }
-    }
-    .padding(8)
-    .background {
-      Color.white.opacity(0.5)
-    }
-    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-  }
-  
-  private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
-    let isSelected = self.model.camera.zoom == value
-    
-    return Button {
-      self.model.zoomButtonTapped(value)
-    } label: {
-      Text("\(value.formattedDescription)x")
-        .font(.caption)
-        .frame(width: 32, height: 32)
-        .foregroundColor(isSelected ? .white : .black)
-        .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
-        .clipShape(Circle())
     }
   }
   
@@ -82,7 +44,6 @@ fileprivate extension CameraView {
     } label: {
       Rectangle()
         .frame(width: 64, height: 64)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
   }
 
