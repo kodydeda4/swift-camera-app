@@ -47,7 +47,8 @@ fileprivate extension CameraView {
       }
       
       HStack {
-        self.recordingButton
+        CameraRecordingButton(model: model)
+//        self.recordingButton
         Spacer()
         self.switchCameraButton
       }
@@ -77,7 +78,7 @@ fileprivate extension CameraView {
         .font(.caption)
         .frame(width: 32, height: 32)
         .foregroundColor(isSelected ? .white : .black)
-        //        .padding()
+      //        .padding()
         .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
         .clipShape(Circle())
     }
@@ -129,6 +130,39 @@ extension CGFloat {
     formatter.minimumFractionDigits = 0
     formatter.roundingMode = .halfUp
     return formatter.string(for: self)!
+  }
+}
+
+fileprivate struct CameraRecordingButton: View {
+  @Bindable var model: CameraModel
+  
+  var body: some View {
+    Button {
+      withAnimation {
+        self.model.recordingButtonTapped()
+      }
+    } label: {
+      ZStack {
+        Circle()
+          .stroke(lineWidth: 6)
+          .foregroundColor(.white)
+          .frame(width: 65, height: 65)
+        
+        RoundedRectangle(
+          cornerRadius: self.model.camera.isRecording ? 8 : self.innerCircleWidth / 2
+        )
+          .foregroundColor(.red)
+          .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
+        
+      }
+      .animation(.linear(duration: 0.2), value: self.model.camera.isRecording)
+      .padding(20)
+    }
+    .buttonStyle(.plain)
+  }
+  
+  private var innerCircleWidth: CGFloat {
+    self.model.camera.isRecording ? 32 : 55
   }
 }
 
