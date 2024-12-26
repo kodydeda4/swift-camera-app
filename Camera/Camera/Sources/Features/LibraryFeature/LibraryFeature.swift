@@ -8,10 +8,13 @@ import SwiftUINavigation
 
 @MainActor
 @Observable
-final class LibraryModel {
+final class LibraryModel: Identifiable {
+  public let id = UUID()
   var videos: IdentifiedArrayOf<Video> = []
   var destination: Destination? { didSet { self.bind() } }
-  
+  var dismiss: () -> Void
+    = unimplemented("Library.dismiss")
+
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @SharedReader(.assetCollection) var collection
   @ObservationIgnored @Dependency(\.photos) var photos
@@ -27,6 +30,14 @@ final class LibraryModel {
   @CasePathable
   enum Destination {
     case videoPlayer(VideoPlayerModel)
+  }
+  
+  func cancelButtonTapped() {
+    self.dismiss()
+  }
+  
+  func editButtonTapped() {
+    //...@DEDA unimplemented
   }
   
   func buttonTapped(video: Video) {
@@ -110,10 +121,30 @@ struct LibraryView: View {
         .padding(.horizontal)
       }
       .navigationTitle("Library")
+      .navigationBarTitleDisplayMode(.inline)
       .task { await self.model.task() }
       .refreshable { await self.model.task() }
       .navigationDestination(item: $model.destination.videoPlayer) { model in
         VideoPlayerView(model: model)
+      }
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button(action: self.model.editButtonTapped) {
+            Text("Edit")
+              .fontWeight(.semibold)
+              .foregroundColor(.accentColor)
+          }
+        }
+        ToolbarItem(placement: .principal) {
+          Text("Library")
+            .fontWeight(.semibold)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+          Button(action: self.model.cancelButtonTapped) {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundColor(.secondary)
+          }
+        }
       }
     }
   }

@@ -47,6 +47,7 @@ fileprivate extension CameraView {
       }
       
       HStack {
+        self.cameraRollButton
         CameraRecordingButton(model: model)
 //        self.recordingButton
         Spacer()
@@ -84,6 +85,14 @@ fileprivate extension CameraView {
     }
   }
   
+  private var cameraRollButton: some View {
+    Button {
+      self.model.navigateCameraRoll()
+    } label: {
+      Rectangle()
+    }
+  }
+
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
       Image(systemName: self.model.camera.isRecording ? "circle.fill" : "circle")

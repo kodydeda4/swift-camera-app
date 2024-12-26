@@ -25,6 +25,8 @@ final class CameraModel {
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
+    case library(LibraryModel)
+    case settings(SettingsModel)
   }
   
   var hasFullPermissions: Bool {
@@ -56,6 +58,14 @@ final class CameraModel {
     }
   }
   
+  func navigateCameraRoll() {
+    self.destination = .library(LibraryModel())
+  }
+  
+  func navigateSettings() {
+    self.destination = .settings(SettingsModel())
+  }
+
   func switchCameraButtonTapped() {
     _ = Result {
       let position = try self.cameraClient.switchCamera()
@@ -90,6 +100,12 @@ private extension CameraModel {
       
     case let .userPermissions(model):
       model.dismiss = { [weak self] in self?.destination = .none }
+      
+    case let .library(model):
+      model.dismiss = { [weak self] in self?.destination = .none }
+      
+    case .settings:
+      break
       
     case .none:
       break
@@ -138,6 +154,12 @@ struct CameraView: View {
     .sheet(item: $model.destination.userPermissions) { model in
       UserPermissionsSheet(model: model)
     }
+    .fullScreenCover(item: $model.destination.library) { model in
+      LibraryView(model: model)
+    }
+//    .sheet(item: $model.destination.settings) { model in
+//      SettingsSheet(model: model)
+//    }
   }
 }
 
