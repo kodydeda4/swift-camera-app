@@ -11,6 +11,7 @@ import SwiftUINavigation
 final class CameraModel {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
+  var navigationTitle = "00:00:00"
   var latestVideoThumbnail: UIImage?
   var recordingStartDate: Date?
   
@@ -24,6 +25,7 @@ final class CameraModel {
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
+  @ObservationIgnored @Dependency(\.continuousClock) var clock
 
   @CasePathable
   enum Destination {
@@ -32,16 +34,8 @@ final class CameraModel {
     case settings(SettingsModel)
   }
   
-  var navigationTitle: String {
-    print("recomputing navigation title: \(recordingStartDate)")
-    guard let recordingStartDate else {
-      return "00:00:00"
-    }
-    return self.formattedRecordingDuration(from: recordingStartDate)
-  }
-  
   // oop
-  private func formattedRecordingDuration(from startDate: Date) -> String {
+  private static func formattedRecordingDuration(since startDate: Date) -> String {
     let now = Date() // Current date and time
     let elapsedTime = now.timeIntervalSince(startDate) // Time difference in seconds
     
@@ -104,6 +98,16 @@ final class CameraModel {
 
     // @DEDA when you return, start the session again.
     await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        for await _ in await self.clock.timer(interval: .seconds(1)) {
+          await MainActor.run {
+            // update timer
+            self.navigationTitle = Self.formattedRecordingDuration(
+              since: self.recordingStartDate ?? .now
+            )
+          }
+        }
+      }
       taskGroup.addTask {
         // @DEDA you have to wait for MainModel to finish syncing the asset collection before you can continue. You will nuke MainModel soon.
         // also, this is supposed to be responsive.. after you finish recording.
