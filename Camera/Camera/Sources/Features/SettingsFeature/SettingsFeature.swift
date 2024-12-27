@@ -137,7 +137,7 @@ private struct ZoomSection: View {
         
         HStack {
           ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-            button(videoZoomFactor: value)
+            button(value)
           }
         }
         .padding(8)
@@ -145,14 +145,14 @@ private struct ZoomSection: View {
     }
   }
 
-  private func button(videoZoomFactor value: CGFloat) -> some View {
-    let isSelected = self.model.userSettings.videoZoomFactor == value
+  private func button(_ zoom: CGFloat) -> some View {
+    let isSelected = self.model.userSettings.videoZoomFactor == zoom
     
     return Button {
-      self.model.zoomButtonTapped(value)
+      self.model.zoomButtonTapped(zoom)
     } label: {
       VStack {
-        Text("\(value.formattedDescription)x")
+        Text("\(zoom.formattedDescription)x")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -164,7 +164,7 @@ private struct ZoomSection: View {
           )
           .clipShape(Circle())
         
-        Text("\("Subtitle")")
+        Text("\(zoom.formattedDescription)x")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
