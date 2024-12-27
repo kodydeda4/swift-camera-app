@@ -180,7 +180,7 @@ extension PhotosLibraryClient.Request.Assets {
       )
     })
   }
-  
+
   static func lastVideo(in collection: PHAssetCollection) -> Self {
     Self(collection: collection, options: .make {
       $0.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)

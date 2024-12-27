@@ -122,7 +122,8 @@ final class CameraModel {
           print("Asset collection was nil.")
           return
         }
-        guard let fetchResult = try? await self.photos.fetchAssets(.lastVideo(in: assetCollection)) else {
+        guard let fetchResult = try? await self.photos.fetchAssets(.lastVideo(in: assetCollection))
+        else {
           print("Fetch result failed.")
           return
         }
@@ -130,7 +131,11 @@ final class CameraModel {
           print("PHAsset was nil.")
           return
         }
-        guard let avAsset = (await self.photos.requestAVAsset(phAsset, .none)?.asset as? AVURLAsset) else {
+        guard let avAsset = (
+          await self.photos.requestAVAsset(phAsset, .none)?
+            .asset as? AVURLAsset
+        )
+        else {
           print("AVAsset was nil.")
           return
         }
@@ -254,9 +259,14 @@ struct CameraView: View {
       }
       ToolbarItem(placement: .topBarTrailing) {
         Button(action: self.model.toggleSettingsButtonTapped) {
-          Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark.circle.fill")
-            .foregroundColor(
-              !self.model.destination.is(\.settings) ? .accentColor : .white)
+          Image(
+            systemName: !self.model.destination.is(\.settings)
+              ? "ellipsis"
+              : "xmark.circle.fill"
+          )
+          .foregroundColor(
+            !self.model.destination.is(\.settings) ? .accentColor : .white
+          )
         }
         .fixedSize()
         .buttonStyle(.plain)

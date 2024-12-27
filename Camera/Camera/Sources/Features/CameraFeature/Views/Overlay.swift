@@ -30,7 +30,7 @@ extension CameraView {
 }
 
 fileprivate extension CameraView {
-  
+
   private var cameraRollButton: some View {
     Button {
       self.model.navigateCameraRoll()
@@ -50,7 +50,7 @@ fileprivate extension CameraView {
       .frame(width: 64, height: 64)
     }
   }
-  
+
   private var recordingButton: some View {
     Button {
       withAnimation {
@@ -62,7 +62,7 @@ fileprivate extension CameraView {
     .buttonStyle(.plain)
     .disabled(!self.model.hasFullPermissions)
   }
-  
+
   private var switchCameraButton: some View {
     Button(action: self.model.switchCameraButtonTapped) {
       Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
@@ -85,7 +85,7 @@ fileprivate extension CameraView {
 
 fileprivate struct CameraRecordingButtonLabel: View {
   let isRecording: Bool
-  
+
   private var innerCircleWidth: CGFloat {
     self.isRecording ? 32 : 55
   }
@@ -96,13 +96,13 @@ fileprivate struct CameraRecordingButtonLabel: View {
         .stroke(lineWidth: 6)
         .foregroundColor(.white)
         .frame(width: 65, height: 65)
-      
+
       RoundedRectangle(
         cornerRadius: self.isRecording ? 8 : self.innerCircleWidth / 2
       )
       .foregroundColor(.red)
       .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
-      
+
     }
     .animation(.linear(duration: 0.2), value: self.isRecording)
     .padding(20)
@@ -113,12 +113,12 @@ fileprivate struct CameraRecordingButtonLabel: View {
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
-  
+
   CameraView(model: CameraModel())
 }
 
 #Preview("Permissions Required") {
   @Shared(.userPermissions) var userPermissions = .denied
-  
+
   CameraView(model: CameraModel())
 }

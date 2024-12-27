@@ -3,15 +3,15 @@ import SwiftUI
 
 struct CaptureVideoPreviewLayerView: View {
   let captureVideoPreviewLayer: AVCaptureVideoPreviewLayer
-  
+
   var body: some View {
-#if targetEnvironment(simulator)
-    PreviewValue()
-#else
-    LiveValue(captureVideoPreviewLayer: captureVideoPreviewLayer)
-      .offset(y: 14) // match the native camera app.
-      .ignoresSafeArea()
-#endif
+    #if targetEnvironment(simulator)
+      PreviewValue()
+    #else
+      LiveValue(captureVideoPreviewLayer: captureVideoPreviewLayer)
+        .offset(y: 14) // match the native camera app.
+        .ignoresSafeArea()
+    #endif
   }
 }
 
@@ -20,7 +20,7 @@ struct CaptureVideoPreviewLayerView: View {
 /// UIKit view that actually displays the `AVCaptureVideoPreviewLayer` when the device is running.
 private struct LiveValue: UIViewControllerRepresentable {
   let captureVideoPreviewLayer: AVCaptureVideoPreviewLayer
-  
+
   func makeUIViewController(context: Context) -> UIViewController {
     let viewController = UIViewController()
     viewController.view.backgroundColor = .black
@@ -28,7 +28,7 @@ private struct LiveValue: UIViewControllerRepresentable {
     captureVideoPreviewLayer.frame = viewController.view.bounds
     return viewController
   }
-  
+
   func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     //...
   }

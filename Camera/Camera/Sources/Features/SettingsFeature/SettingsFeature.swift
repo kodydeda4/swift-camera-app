@@ -31,21 +31,32 @@ struct SettingsView: View {
   
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading) {
         
-        self.zoom
-          .disabled(self.model.isZoomButtonsDisabled)
-        
-        self.divider
+        Text("Settings")
+          .font(.title2)
+          .fontWeight(.heavy)
+          .foregroundColor(.white)
+          .padding(.vertical, 8)
+
+        self.divider(padding: 0)
+
+        VStack(alignment: .leading, spacing: 0) {
+          self.zoom.disabled(self.model.isZoomButtonsDisabled)
+          self.divider()
+        }
         
         Text("Camera \(self.model.buildNumber.description)")
           .foregroundColor(.white)
           .opacity(0.75)
           .padding(.top)
         
-        Spacer()
       }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .frame(
+        maxWidth: .infinity,
+        maxHeight: .infinity,
+        alignment: .top
+      )
       .padding()
       .background {
         LinearGradient(
@@ -60,12 +71,12 @@ struct SettingsView: View {
     }
   }
   
-  private var divider: some View {
+  private func divider(padding: CGFloat = 32) -> some View {
     Rectangle()
-       .frame(height: 1)
-       .foregroundColor(.white)
-       .opacity(0.15)
-       .padding(.leading, 32)
+      .frame(height: 1)
+      .foregroundColor(.white)
+      .opacity(0.15)
+      .padding(.leading, padding)
   }
   
   private var zoom: some View {
@@ -107,8 +118,8 @@ struct SettingsView: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
