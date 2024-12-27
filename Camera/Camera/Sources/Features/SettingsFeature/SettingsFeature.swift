@@ -60,7 +60,6 @@ struct SettingsView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       self.content
-      Spacer()
       self.cameraControlsBackground
     }
     .frame(
@@ -106,10 +105,19 @@ struct SettingsView: View {
         .frame(height: 0.5)
         .foregroundColor(Color(.darkGray))
       
-      LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
-        .frame(height: 150)
+      LinearGradient(
+        colors: [
+          Color.black.opacity(0.5),
+          Color.black
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+      )
+      .frame(height: 70)
+      
+      Color.black
+        .frame(height: 70)
     }
-//    .opacity(0.8)
   }
   
   private var divider: some View {
@@ -127,30 +135,28 @@ private struct Section<Content: View>: View {
   let content: () -> Content
     
   var body: some View {
+    HStack(alignment: .firstTextBaseline) {
+      self.header
+      Spacer()
+      HStack(content: self.content)
+        .padding(8)
+    }
+  }
+  
+  private var header: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline) {
-        VStack(alignment: .leading, spacing: 0) {
-          HStack(alignment: .firstTextBaseline) {
-            Image(systemName: systemImage)
-              .foregroundColor(.white)
-            Text(title)
-              .fontWeight(.heavy)
-              .foregroundColor(.white)
-          }
-          
-          Text(subtitle)
-            .fontWeight(.bold)
-            .foregroundColor(.white)
-            .opacity(0.65)
-        }
-        
-        Spacer()
-        
-        HStack {
-          content()
-        }
-        .padding(8)
+        Image(systemName: systemImage)
+          .foregroundColor(.white)
+        Text(title)
+          .fontWeight(.heavy)
+          .foregroundColor(.white)
       }
+      
+      Text(subtitle)
+        .fontWeight(.bold)
+        .foregroundColor(.white)
+        .opacity(0.65)
     }
   }
 }
