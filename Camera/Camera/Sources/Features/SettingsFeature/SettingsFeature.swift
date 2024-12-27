@@ -74,6 +74,8 @@ struct SettingsView: View {
       TimerSection(model: self.model)
       self.divider()
       RecordingSection(model: self.model)
+      self.divider()
+      FlashSection(model: self.model)
     }
   }
   
@@ -235,6 +237,61 @@ private struct RecordingSection: View {
   }
 
   private func button(quality value: String) -> some View {
+    let isSelected = Bool.random()
+    
+    return Button {
+      // @DEDA
+    } label: {
+      VStack {
+        Text("\(value)")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+        
+        Text("\("Subtitle")")
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
+}
+
+private struct FlashSection: View {
+  @Bindable var model: SettingsModel
+
+   var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .firstTextBaseline) {
+        HStack {
+          Image(systemName: "bolt.fill")
+            .foregroundColor(.white)
+          
+          Text("Flash")
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+        }
+        
+        Spacer()
+        
+        HStack {
+          ForEach(["On", "Off"], id: \.self) { value in
+            button(isEnabled: value)
+          }
+        }
+        .padding(8)
+      }
+    }
+  }
+
+  private func button(isEnabled value: String) -> some View {
     let isSelected = Bool.random()
     
     return Button {
