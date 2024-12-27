@@ -43,6 +43,8 @@ final class CountdownModel: Identifiable {
   }
 }
 
+// MARK: - SwiftUI
+
 struct CountdownView: View {
   @Bindable var model: CountdownModel
   
@@ -53,6 +55,8 @@ struct CountdownView: View {
       .task { await self.model.task() }
   }
 }
+
+// MARK: - SwiftUI Previews
 
 //@DEDA fix this preview
 #Preview("Settings") {
