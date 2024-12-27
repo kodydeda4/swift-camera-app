@@ -19,6 +19,7 @@ final class CameraModel {
   // Shared
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
+  @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
   
   // Dependencies
@@ -94,7 +95,9 @@ final class CameraModel {
   func switchCameraButtonTapped() {
     _ = Result {
       let position = try self.cameraClient.switchCamera()
-      self.$camera.position.withLock { $0 = position }
+      self.$userSettings.cameraPosition.withLock {
+        $0 = UserSettings.CameraPosition(position)
+      }
       self.destination = .none
     }
   }

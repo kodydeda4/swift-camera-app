@@ -2,8 +2,12 @@ import Dependencies
 import Sharing
 import SwiftUI
 import SwiftUINavigation
+import AVFoundation
 
-//@DEDA you should create a userSettings type that is stored in the app...
+// @DEDA
+// Settings need to be resent to camera view on appear.
+// when you connect to the video preview layer, you can
+// send all of your state from userSettings.
 
 @MainActor
 @Observable
@@ -11,17 +15,32 @@ final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
   
-  @ObservationIgnored @Shared(.camera) var camera
+  @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @Dependency(\.camera) var cameraClient
   
   var isZoomButtonsDisabled: Bool {
-    self.camera.position == .front
+    self.userSettings.cameraPosition == .front
   }
   
+  func flashButtonTapped(value: Bool) {
+    //@DEDA trigger flash to update.
+    self.$userSettings.isFlashEnabled.withLock { $0 = value }
+  }
+  
+  func timerButtonTapped(value: CGFloat) {
+    //@DEDA handle somewhere else
+    self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
+  }
+  
+  func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
+    //@DEDA handle somewhere else
+    self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
+  }
+
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
       try self.cameraClient.zoom(value)
-      self.$camera.zoom.withLock { $0 = value }
+      self.$userSettings.videoZoomFactor.withLock { $0 = value }
     }
   }
 }
@@ -127,7 +146,7 @@ private struct ZoomSection: View {
   }
 
   private func button(videoZoomFactor value: CGFloat) -> some View {
-    let isSelected = self.model.camera.zoom == value
+    let isSelected = self.model.userSettings.videoZoomFactor == value
     
     return Button {
       self.model.zoomButtonTapped(value)
@@ -182,10 +201,10 @@ private struct TimerSection: View {
   }
 
   private func button(seconds value: CGFloat) -> some View {
-    let isSelected = Bool.random()
+    let isSelected = self.model.userSettings.videoCaptureCountdownTimerDuration == value
 
     return Button {
-      // @DEDA
+      self.model.timerButtonTapped(value: value)
     } label: {
       VStack {
         Text("\(value.formattedDescription)s")
@@ -200,7 +219,7 @@ private struct TimerSection: View {
           )
           .clipShape(Circle())
         
-        Text("\("Subtitle")")
+        Text("\(value.formattedDescription)s")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
@@ -227,7 +246,7 @@ private struct RecordingSection: View {
         Spacer()
         
         HStack {
-          ForEach(["HD", "4k"], id: \.self) { value in
+          ForEach(UserSettings.RecordingQuality.allCases) { value in
             button(quality: value)
           }
         }
@@ -236,11 +255,11 @@ private struct RecordingSection: View {
     }
   }
 
-  private func button(quality value: String) -> some View {
-    let isSelected = Bool.random()
+  private func button(quality value: UserSettings.RecordingQuality) -> some View {
+    let isSelected = self.model.userSettings.videoCaptureRecordingQuality == value
     
     return Button {
-      // @DEDA
+      self.model.recordingQualityButtonTapped(value: value)
     } label: {
       VStack {
         Text("\(value)")
@@ -255,7 +274,7 @@ private struct RecordingSection: View {
           )
           .clipShape(Circle())
         
-        Text("\("Subtitle")")
+        Text(value.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
@@ -282,23 +301,22 @@ private struct FlashSection: View {
         Spacer()
         
         HStack {
-          ForEach(["On", "Off"], id: \.self) { value in
-            button(isEnabled: value)
-          }
+          button(isEnabled: true)
+          button(isEnabled: false)
         }
         .padding(8)
       }
     }
   }
 
-  private func button(isEnabled value: String) -> some View {
-    let isSelected = Bool.random()
+  private func button(isEnabled value: Bool) -> some View {
+    let isSelected = self.model.userSettings.isFlashEnabled == value
     
     return Button {
-      // @DEDA
+      self.model.flashButtonTapped(value: value)
     } label: {
       VStack {
-        Text("\(value)")
+        Text(value ? "On" : "Off")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -310,7 +328,7 @@ private struct FlashSection: View {
           )
           .clipShape(Circle())
         
-        Text("\("Subtitle")")
+        Text(value ? "Enabled" : "Disabled")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
