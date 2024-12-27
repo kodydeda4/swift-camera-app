@@ -59,19 +59,8 @@ struct SettingsView: View {
   
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      Spacer()
       self.content
-      .padding()
-      .background { Color.black.opacity(0.55) }
-      .background {
-        LinearGradient(
-          colors: [.black, .clear],
-          startPoint: .bottom,
-          endPoint: .top
-        )
-      }
-      .shadow(radius: 12)
-
+      Spacer()
       self.cameraControlsBackground
     }
     .frame(
@@ -79,31 +68,35 @@ struct SettingsView: View {
       maxHeight: .infinity,
       alignment: .top
     )
+    .background { Color.black.opacity(0.7) }
   }
   
   @MainActor private var content: some View {
-    VStack(alignment: .leading) {
-      Text("Settings")
-        .font(.title2)
-        .fontWeight(.heavy)
-        .foregroundColor(.white)
-        .padding(.top, 8)
-      
-      Text("Camera \(self.model.buildNumber.description)")
-        .foregroundColor(.white)
-        .opacity(0.75)
-        .padding(.bottom)
-
-      self.divider(padding: 0)
-      CameraSection(model: self.model)
-      self.divider()
-      ZoomSection(model: self.model)
-      self.divider()
-      TimerSection(model: self.model)
-      self.divider()
-      RecordingSection(model: self.model)
-      self.divider()
-      FlashSection(model: self.model)
+    ScrollView {
+      VStack(alignment: .leading) {
+        Text("Settings")
+          .font(.title2)
+          .fontWeight(.heavy)
+          .foregroundColor(.white)
+          .padding(.top, 8)
+        
+        Text("Camera \(self.model.buildNumber.description)")
+          .foregroundColor(.white)
+          .opacity(0.75)
+          .padding(.bottom)
+        
+        self.divider
+        CameraSection(model: self.model)
+        self.divider
+        ZoomSection(model: self.model)
+        self.divider
+        TimerSection(model: self.model)
+        self.divider
+        RecordingSection(model: self.model)
+        self.divider
+        FlashSection(model: self.model)
+      }
+      .padding([.horizontal, .top])
     }
   }
   
@@ -112,18 +105,18 @@ struct SettingsView: View {
       Rectangle()
         .frame(height: 0.5)
         .foregroundColor(Color(.darkGray))
-      Rectangle()
-        .foregroundColor(.black)
+      
+      LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
         .frame(height: 150)
     }
+//    .opacity(0.8)
   }
   
-  private func divider(padding: CGFloat = 32) -> some View {
+  private var divider: some View {
     Rectangle()
       .frame(height: 1)
       .foregroundColor(.white)
       .opacity(0.15)
-      .padding(.leading, padding)
   }
 }
 
@@ -339,37 +332,28 @@ private struct RecordingSection: View {
 private struct FlashSection: View {
   @Bindable var model: SettingsModel
 
-   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(alignment: .firstTextBaseline) {
-        HStack {
-          Image(systemName: "bolt.fill")
-            .foregroundColor(.white)
-          
-          Text("Flash")
-            .fontWeight(.heavy)
-            .foregroundColor(.white)
+  var body: some View {
+    Section(
+      systemImage: "bolt.fill",
+      title: "Flash",
+      subtitle: "Lorem ipsum"
+    ) {
+      HStack {
+        ForEach([true, false], id: \.self) { isEnabled in
+          button(isEnabled)
         }
-        
-        Spacer()
-        
-        HStack {
-          button(isEnabled: true)
-          button(isEnabled: false)
-        }
-        .padding(8)
       }
     }
   }
 
-  private func button(isEnabled value: Bool) -> some View {
-    let isSelected = self.model.userSettings.isFlashEnabled == value
+  private func button(_ isEnabled: Bool) -> some View {
+    let isSelected = self.model.userSettings.isFlashEnabled == isEnabled
     
     return Button {
-      self.model.flashButtonTapped(value: value)
+      self.model.flashButtonTapped(value: isEnabled)
     } label: {
       VStack {
-        Text(value ? "On" : "Off")
+        Text(isEnabled ? "On" : "Off")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -381,7 +365,7 @@ private struct FlashSection: View {
           )
           .clipShape(Circle())
         
-        Text(value ? "Enabled" : "Disabled")
+        Text(isEnabled ? "Enabled" : "Disabled")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
