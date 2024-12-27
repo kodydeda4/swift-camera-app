@@ -59,8 +59,10 @@ struct SettingsView: View {
   
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
+      self.divider.opacity(0.5)
       self.content
-      self.cameraControlsBackground
+      self.divider.opacity(0.5)
+      self.footer
     }
     .frame(
       maxWidth: .infinity,
@@ -99,12 +101,8 @@ struct SettingsView: View {
     }
   }
   
-  private var cameraControlsBackground: some View {
+  private var footer: some View {
     VStack(spacing: 0) {
-      Rectangle()
-        .frame(height: 0.5)
-        .foregroundColor(Color(.darkGray))
-      
       LinearGradient(
         colors: [
           Color.black.opacity(0.5),
