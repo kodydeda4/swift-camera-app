@@ -12,6 +12,7 @@ final class CameraModel {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var latestVideoThumbnail: UIImage?
+  var recordingStartDate: Date?
   
   // Shared
   @ObservationIgnored @Shared(.camera) var camera
@@ -31,6 +32,28 @@ final class CameraModel {
     case settings(SettingsModel)
   }
   
+  var navigationTitle: String {
+    print("recomputing navigation title: \(recordingStartDate)")
+    guard let recordingStartDate else {
+      return "00:00:00"
+    }
+    return self.formattedRecordingDuration(from: recordingStartDate)
+  }
+  
+  // oop
+  private func formattedRecordingDuration(from startDate: Date) -> String {
+    let now = Date() // Current date and time
+    let elapsedTime = now.timeIntervalSince(startDate) // Time difference in seconds
+    
+    // Use DateComponentsFormatter to format the elapsed time
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.hour, .minute, .second] // Use hours, minutes, and seconds
+    formatter.unitsStyle = .positional // Ensures the "00:00:00" style
+    formatter.zeroFormattingBehavior = .pad // Pads with leading zeros
+    
+    return formatter.string(from: elapsedTime) ?? "00:00:00"
+  }
+  
   var hasFullPermissions: Bool {
     self.userPermissions == .authorized
   }
@@ -40,19 +63,24 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
-    _ = Result {
-      try !camera.isRecording
-      ? cameraClient.startRecording(self.movieFileOutput)
-      : cameraClient.stopRecording()
-      
-      self.$camera.isRecording.withLock { $0.toggle() }
-    }
+    !camera.isRecording ? self.startRecording() : self.stopRecording()
   }
   
+  private func startRecording() {
+    try? self.cameraClient.startRecording(self.movieFileOutput)
+    self.recordingStartDate = .now
+    self.$camera.isRecording.withLock { $0 = true }
+  }
+  
+  private func stopRecording() {
+    try? cameraClient.stopRecording()
+    self.recordingStartDate = .none
+    self.$camera.isRecording.withLock { $0 = false }
+  }
+
   func permissionsButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
   }
-  
   
   func navigateCameraRoll() {
     self.destination = .library(LibraryModel())
@@ -203,9 +231,10 @@ struct CameraView: View {
         }
       }
       ToolbarItem(placement: .principal) {
-        Text("00:00")
+        Text(self.model.navigationTitle)
           .foregroundColor(.white)
           .fontWeight(.semibold)
+          .background(Color.red.opacity(self.model.camera.isRecording ? 1 : 0))
       }
       ToolbarItem(placement: .topBarTrailing) {
         Button(action: self.model.navigateSettings) {
