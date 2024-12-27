@@ -31,10 +31,46 @@ struct UserSettings: Equatable, Codable {
     }
   }
   
-  enum CameraPosition: Equatable, Codable {
+  enum CameraPosition:
+    Identifiable, Equatable, Codable,
+    CustomStringConvertible, CaseIterable
+  {
     case front
     case back
     case unspecified
+    
+    var id: Self {
+      self
+    }
+    
+    var description: String {
+      switch self {
+        
+      case .front:
+        return "Front"
+        
+      case .back:
+        return "Back"
+        
+      case .unspecified:
+        return "Unspecified"
+      }
+    }
+
+    var rawValue: AVCaptureDevice.Position {
+      switch self {
+        
+      case .unspecified:
+        return .unspecified
+        
+      case .back:
+        return .back
+        
+      case .front:
+        return .front
+      }
+    }
+    
     
     init(_ rawValue: AVCaptureDevice.Position) {
       switch rawValue {

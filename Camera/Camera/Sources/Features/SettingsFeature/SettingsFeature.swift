@@ -18,23 +18,15 @@ final class SettingsModel: Identifiable {
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @Dependency(\.camera) var cameraClient
   
+  func cameraPositionButtonTapped(_ value: UserSettings.CameraPosition) {
+    _ = Result {
+      try self.cameraClient.setCameraPosition(value.rawValue)
+      self.$userSettings.cameraPosition.withLock { $0 = value }
+    }
+  }
+
   var isZoomButtonsDisabled: Bool {
     self.userSettings.cameraPosition == .front
-  }
-  
-  func flashButtonTapped(value: Bool) {
-    //@DEDA trigger flash to update.
-    self.$userSettings.isFlashEnabled.withLock { $0 = value }
-  }
-  
-  func timerButtonTapped(value: CGFloat) {
-    //@DEDA handle somewhere else
-    self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
-  }
-  
-  func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
-    //@DEDA handle somewhere else
-    self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
   }
 
   func zoomButtonTapped(_ value: CGFloat) {
@@ -42,6 +34,21 @@ final class SettingsModel: Identifiable {
       try self.cameraClient.zoom(value)
       self.$userSettings.videoZoomFactor.withLock { $0 = value }
     }
+  }
+  
+  func timerButtonTapped(value: CGFloat) {
+    //@DEDA handle somewhere else
+    self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
+  }
+
+  func flashButtonTapped(value: Bool) {
+    //@DEDA trigger flash to update.
+    self.$userSettings.isFlashEnabled.withLock { $0 = value }
+  }
+  
+  func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
+    //@DEDA handle somewhere else
+    self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
   }
 }
 
@@ -88,6 +95,8 @@ struct SettingsView: View {
         .padding(.bottom)
 
       self.divider(padding: 0)
+      CameraSection(model: self.model)
+      self.divider()
       ZoomSection(model: self.model)
       self.divider()
       TimerSection(model: self.model)
@@ -118,29 +127,95 @@ struct SettingsView: View {
   }
 }
 
-private struct ZoomSection: View {
-  @Bindable var model: SettingsModel
-
-   var body: some View {
+private struct Section<Content: View>: View {
+  let systemImage: String
+  let title: String
+  let subtitle: String
+  let content: () -> Content
+    
+  var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline) {
-        HStack {
-          Image(systemName: "binoculars")
-            .foregroundColor(.white)
+        VStack(alignment: .leading, spacing: 0) {
+          HStack(alignment: .firstTextBaseline) {
+            Image(systemName: systemImage)
+              .foregroundColor(.white)
+            Text(title)
+              .fontWeight(.heavy)
+              .foregroundColor(.white)
+          }
           
-          Text("Zoom")
-            .fontWeight(.heavy)
+          Text(subtitle)
+            .fontWeight(.bold)
             .foregroundColor(.white)
+            .opacity(0.65)
         }
         
         Spacer()
         
         HStack {
-          ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-            button(value)
-          }
+          content()
         }
         .padding(8)
+      }
+    }
+  }
+}
+
+private struct CameraSection: View {
+  @Bindable var model: SettingsModel
+
+  var body: some View {
+    Section(
+      systemImage: "camera",
+      title: "Camera",
+      subtitle: "Lorem ipsum"
+    ) {
+      ForEach([UserSettings.CameraPosition]([.front, .back]), id: \.self) { cameraPosition in
+        button(cameraPosition)
+      }
+    }
+  }
+
+  private func button(_ cameraPosition: UserSettings.CameraPosition) -> some View {
+    let isSelected = self.model.userSettings.cameraPosition == cameraPosition
+    
+    return Button {
+      self.model.cameraPositionButtonTapped(cameraPosition)
+    } label: {
+      VStack {
+        Text(cameraPosition.description)
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+        
+        Text(cameraPosition.description)
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
+}
+
+private struct ZoomSection: View {
+  @Bindable var model: SettingsModel
+
+  var body: some View {
+    Section(
+      systemImage: "binoculars",
+      title: "Zoom",
+      subtitle: "Lorem ipsum"
+    ) {
+      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { zoom in
+        button(zoom)
       }
     }
   }
@@ -175,39 +250,27 @@ private struct ZoomSection: View {
 
 private struct TimerSection: View {
   @Bindable var model: SettingsModel
-
-   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(alignment: .firstTextBaseline) {
-        HStack {
-          Image(systemName: "timer")
-            .foregroundColor(.white)
-          
-          Text("Timer")
-            .fontWeight(.heavy)
-            .foregroundColor(.white)
-        }
-        
-        Spacer()
-        
-        HStack {
-          ForEach([CGFloat]([0, 3, 5]), id: \.self) { value in
-            button(seconds: value)
-          }
-        }
-        .padding(8)
+  
+  var body: some View {
+    Section(
+      systemImage: "timer",
+      title: "Timer",
+      subtitle: "Lorem ipsum"
+    ) {
+      ForEach([CGFloat]([0, 3, 5]), id: \.self) { seconds in
+        button(seconds)
       }
     }
   }
 
-  private func button(seconds value: CGFloat) -> some View {
-    let isSelected = self.model.userSettings.videoCaptureCountdownTimerDuration == value
+  private func button(_ seconds: CGFloat) -> some View {
+    let isSelected = self.model.userSettings.videoCaptureCountdownTimerDuration == seconds
 
     return Button {
-      self.model.timerButtonTapped(value: value)
+      self.model.timerButtonTapped(value: seconds)
     } label: {
       VStack {
-        Text("\(value.formattedDescription)s")
+        Text("\(seconds.formattedDescription)s")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -219,7 +282,7 @@ private struct TimerSection: View {
           )
           .clipShape(Circle())
         
-        Text("\(value.formattedDescription)s")
+        Text("\(seconds.formattedDescription)s")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
@@ -230,39 +293,29 @@ private struct TimerSection: View {
 
 private struct RecordingSection: View {
   @Bindable var model: SettingsModel
-
-   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(alignment: .firstTextBaseline) {
-        HStack {
-          Image(systemName: "camera")
-            .foregroundColor(.white)
-          
-          Text("Recording")
-            .fontWeight(.heavy)
-            .foregroundColor(.white)
+  
+  var body: some View {
+    Section(
+      systemImage: "camera",
+      title: "Recording",
+      subtitle: "Lorem ipsum"
+    ) {
+      HStack {
+        ForEach(UserSettings.RecordingQuality.allCases) { quality in
+          button(quality)
         }
-        
-        Spacer()
-        
-        HStack {
-          ForEach(UserSettings.RecordingQuality.allCases) { value in
-            button(quality: value)
-          }
-        }
-        .padding(8)
       }
     }
   }
 
-  private func button(quality value: UserSettings.RecordingQuality) -> some View {
-    let isSelected = self.model.userSettings.videoCaptureRecordingQuality == value
+  private func button(_ quality: UserSettings.RecordingQuality) -> some View {
+    let isSelected = self.model.userSettings.videoCaptureRecordingQuality == quality
     
     return Button {
-      self.model.recordingQualityButtonTapped(value: value)
+      self.model.recordingQualityButtonTapped(value: quality)
     } label: {
       VStack {
-        Text("\(value)")
+        Text("\(quality)")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -274,7 +327,7 @@ private struct RecordingSection: View {
           )
           .clipShape(Circle())
         
-        Text(value.description)
+        Text(quality.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
