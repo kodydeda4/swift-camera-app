@@ -10,11 +10,11 @@ final class SettingsModel: Identifiable {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
-    = unimplemented("Settings.dismiss")
+  = unimplemented("Settings.dismiss")
   
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Dependency(\.camera) var cameraClient
-
+  
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -38,7 +38,7 @@ final class SettingsModel: Identifiable {
       self.$camera.zoom.withLock { $0 = value }
     }
   }
-
+  
   private func bind() {
     switch destination {
       
@@ -57,46 +57,62 @@ struct SettingsView: View {
   @Bindable var model: SettingsModel
   
   var body: some View {
-    NavigationStack {
-      List {
-        Section {
-          Button {
-            self.model.navigateToPermissions()
-          } label: {
-            HStack {
-              Label("Permissions", systemImage: "lock")
-              Spacer()
-              Image(systemName: "chevron.forward")
-                .foregroundColor(.secondary)
-            }
-          }
-        }
-        Section {
-          self.zoomButtons
-            .disabled(self.model.isZoomButtonsDisabled)
-        }
-        
-        Section {
-          Text("Camera \(self.model.buildNumber.description)")
-            .foregroundColor(.secondary)
-        }
-      }
-      .navigationTitle("Settings")
-      .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Button(action: self.model.cancelButtonTapped) {
-            Image(systemName: "xmark.circle.fill")
+    //    NavigationStack {
+    VStack(alignment: .leading) {
+      Section {
+        Button {
+          self.model.navigateToPermissions()
+        } label: {
+          HStack {
+            Label("Permissions", systemImage: "lock")
+            Spacer()
+            Image(systemName: "chevron.forward")
               .foregroundColor(.secondary)
           }
         }
       }
-      .listStyle(.plain)
-      .navigationDestination(item: $model.destination.userPermissions) { model in
-        UserPermissionsSheet(model: model)
+      Button(action: self.model.cancelButtonTapped) {
+        Image(systemName: "xmark.circle.fill")
+          .foregroundColor(.secondary)
+      }
+      Section {
+        HStack {
+          HStack {
+            Image(systemName: "binoculars")
+            Text("Zoom")
+              .bold()
+          }
+          Spacer()
+          self.zoomButtons
+        }
+        .disabled(self.model.isZoomButtonsDisabled)
+      }
+      
+      Spacer()
+      
+      Section {
+        Text("Camera \(self.model.buildNumber.description)")
+          .foregroundColor(.secondary)
       }
     }
+    .frame(maxWidth: .infinity)
+    .padding()
+    .background { Color.black.opacity(0.75) }
+    //      .navigationTitle("Settings")
+    //      .toolbar {
+    //        ToolbarItem(placement: .topBarTrailing) {
+    //          Button(action: self.model.cancelButtonTapped) {
+    //            Image(systemName: "xmark.circle.fill")
+    //              .foregroundColor(.secondary)
+    //          }
+    //        }
+    //      }
+    //      .listStyle(.plain)
+    //      .navigationDestination(item: $model.destination.userPermissions) { model in
+    //        UserPermissionsSheet(model: model)
+    //      }
   }
-    
+  
   private var zoomButtons: some View {
     HStack {
       ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
@@ -146,5 +162,5 @@ fileprivate extension CGFloat {
   ]
   @Shared(.userPermissions) var userPermissions = value
   
-  CameraView(model: CameraModel())
+  SettingsView(model: SettingsModel())
 }

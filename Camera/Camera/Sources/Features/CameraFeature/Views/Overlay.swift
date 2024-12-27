@@ -23,12 +23,20 @@ extension CameraView {
 
 fileprivate extension CameraView {
   private var top: some View {
-    EmptyView()//@DEDA remove 
+    EmptyView()//@DEDA remove
   }
   
   private var bottom: some View {
     VStack {
       HStack {
+        
+              Button("Show bottom menu") {
+                withAnimation {
+                  count = 0
+                }
+                }
+                
+
         self.cameraRollButton
           .frame(maxWidth: .infinity)
         CameraRecordingButton(model: model)

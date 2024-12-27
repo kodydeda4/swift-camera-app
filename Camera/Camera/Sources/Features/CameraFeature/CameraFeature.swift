@@ -27,6 +27,7 @@ final class CameraModel {
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
   @ObservationIgnored @Dependency(\.continuousClock) var clock
 
+  @dynamicMemberLookup
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -84,6 +85,10 @@ final class CameraModel {
     self.destination = .settings(SettingsModel())
   }
   
+  func dismissSettingsButtonTapped() {
+    self.destination = .none
+  }
+
   func switchCameraButtonTapped() {
     _ = Result {
       let position = try self.cameraClient.switchCamera()
@@ -195,7 +200,8 @@ private extension CameraModel {
 
 struct CameraView: View {
   @Bindable var model: CameraModel
-  
+  @State var count: Int?
+
   var body: some View {
     NavigationStack {
       self.content
@@ -206,11 +212,11 @@ struct CameraView: View {
         .sheet(item: $model.destination.userPermissions) { model in
           UserPermissionsSheet(model: model)
         }
-        .sheet(item: $model.destination.settings) { model in
-          SettingsView(model: model)
-        }
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
+        }
+        .bottomMenu(item: $model.destination.settings) { $model in
+          SettingsView(model: model)
         }
     }
   }
