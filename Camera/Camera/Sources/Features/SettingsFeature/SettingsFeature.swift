@@ -61,7 +61,10 @@ struct SettingsView: View {
           endPoint: .top
         )
       }
-      
+      .clipShape(
+        RoundedCornerShape(radius: 16, corners: [.topLeft, .topRight])
+      )
+
       self.cameraControlsBackground
     }
     .frame(
@@ -140,6 +143,20 @@ struct SettingsView: View {
           .foregroundColor(.white)
       }
     }
+  }
+}
+
+private struct RoundedCornerShape: Shape {
+  var radius: CGFloat
+  var corners: UIRectCorner
+  
+  func path(in rect: CGRect) -> Path {
+    let path = UIBezierPath(
+      roundedRect: rect,
+      byRoundingCorners: corners,
+      cornerRadii: CGSize(width: radius, height: radius)
+    )
+    return Path(path.cgPath)
   }
 }
 

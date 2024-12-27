@@ -14,7 +14,8 @@ final class CameraModel {
   var navigationTitle = "00:00:00"
   var latestVideoThumbnail: UIImage?
   var recordingStartDate: Date?
-  
+  var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
+
   // Shared
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
@@ -149,7 +150,7 @@ final class CameraModel {
         }
       }
       taskGroup.addTask {
-        try? await self.cameraClient.connect(self.camera.captureVideoPreviewLayer)
+        try? await self.cameraClient.connect(self.captureVideoPreviewLayer)
       }
       taskGroup.addTask {
         for await event in await self.cameraClient.events() {
@@ -233,8 +234,7 @@ struct CameraView: View {
     Group {
       if self.model.hasFullPermissions {
         CaptureVideoPreviewLayerView(
-          captureVideoPreviewLayer: self.model.camera
-            .captureVideoPreviewLayer
+          captureVideoPreviewLayer: self.model.captureVideoPreviewLayer
         )
         .onTapGesture(count: 2) {
           self.model.switchCameraButtonTapped()
