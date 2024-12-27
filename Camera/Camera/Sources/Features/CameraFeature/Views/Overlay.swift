@@ -9,10 +9,18 @@ private struct Style {
 extension CameraView {
   internal func overlay() -> some View {
     VStack {
-      self.top
       Spacer()
       if self.model.hasFullPermissions {
-        self.bottom
+        VStack {
+          HStack {
+            self.cameraRollButton
+              .frame(maxWidth: .infinity)
+            self.recordingButton
+              .frame(maxWidth: .infinity)
+            self.switchCameraButton
+              .frame(maxWidth: .infinity)
+          }
+        }
       }
     }
     .frame(maxWidth: .infinity)
@@ -22,22 +30,6 @@ extension CameraView {
 }
 
 fileprivate extension CameraView {
-  private var top: some View {
-    EmptyView()//@DEDA remove
-  }
-  
-  private var bottom: some View {
-    VStack {
-      HStack {
-        self.cameraRollButton
-          .frame(maxWidth: .infinity)
-        CameraRecordingButton(model: model)
-          .frame(maxWidth: .infinity)
-        self.switchCameraButton
-          .frame(maxWidth: .infinity)
-      }
-    }
-  }
   
   private var cameraRollButton: some View {
     Button {
@@ -60,21 +52,14 @@ fileprivate extension CameraView {
   }
   
   private var recordingButton: some View {
-    Button(action: self.model.recordingButtonTapped) {
-      Image(systemName: self.model.camera.isRecording ? "circle.fill" : "circle")
-        .resizable()
-        .scaledToFit()
-        .fontWeight(.semibold)
-        .frame(
-          width: Style.buttonSizeRecording,
-          height: Style.buttonSizeRecording
-        )
-        .padding(8)
-        .background(.regularMaterial)
-        .foregroundColor(self.model.camera.isRecording ? .red : .gray)
-        .clipShape(Circle())
+    Button {
+      withAnimation {
+        self.model.recordingButtonTapped()
+      }
+    } label: {
+      CameraRecordingButtonLabel(isRecording: self.model.camera.isRecording)
     }
-    .padding(.horizontal)
+    .buttonStyle(.plain)
     .disabled(!self.model.hasFullPermissions)
   }
   
@@ -98,37 +83,29 @@ fileprivate extension CameraView {
   }
 }
 
-
-fileprivate struct CameraRecordingButton: View {
-  @Bindable var model: CameraModel
-  
-  var body: some View {
-    Button {
-      withAnimation {
-        self.model.recordingButtonTapped()
-      }
-    } label: {
-      ZStack {
-        Circle()
-          .stroke(lineWidth: 6)
-          .foregroundColor(.white)
-          .frame(width: 65, height: 65)
-        
-        RoundedRectangle(
-          cornerRadius: self.model.camera.isRecording ? 8 : self.innerCircleWidth / 2
-        )
-        .foregroundColor(.red)
-        .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
-        
-      }
-      .animation(.linear(duration: 0.2), value: self.model.camera.isRecording)
-      .padding(20)
-    }
-    .buttonStyle(.plain)
-  }
+fileprivate struct CameraRecordingButtonLabel: View {
+  let isRecording: Bool
   
   private var innerCircleWidth: CGFloat {
-    self.model.camera.isRecording ? 32 : 55
+    self.isRecording ? 32 : 55
+  }
+
+  var body: some View {
+    ZStack {
+      Circle()
+        .stroke(lineWidth: 6)
+        .foregroundColor(.white)
+        .frame(width: 65, height: 65)
+      
+      RoundedRectangle(
+        cornerRadius: self.isRecording ? 8 : self.innerCircleWidth / 2
+      )
+      .foregroundColor(.red)
+      .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
+      
+    }
+    .animation(.linear(duration: 0.2), value: self.isRecording)
+    .padding(20)
   }
 }
 
