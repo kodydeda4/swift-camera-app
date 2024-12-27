@@ -246,32 +246,11 @@ struct CameraView: View {
   }
   
   @MainActor private func toolbar() -> some ToolbarContent {
-    Group {
-      ToolbarItem(placement: .topBarLeading) {
-        Button(action: {}) {
-          Image(systemName: "bolt.fill")
-        }
-      }
-      ToolbarItem(placement: .principal) {
-        Text(self.model.navigationTitle)
-          .foregroundColor(.white)
-          .fontWeight(.semibold)
-          .background(Color.red.opacity(self.model.camera.isRecording ? 1 : 0))
-      }
-      ToolbarItem(placement: .topBarTrailing) {
-        Button(action: self.model.toggleSettingsButtonTapped) {
-          Image(
-            systemName: !self.model.destination.is(\.settings)
-              ? "ellipsis"
-              : "xmark.circle.fill"
-          )
-          .foregroundColor(
-            !self.model.destination.is(\.settings) ? .accentColor : .white
-          )
-        }
-        .fixedSize()
-        .buttonStyle(.plain)
-      }
+    ToolbarItem(placement: .principal) {
+      Text(self.model.navigationTitle)
+        .foregroundColor(.white)
+        .fontWeight(.semibold)
+        .background(Color.red.opacity(self.model.camera.isRecording ? 1 : 0))
     }
   }
 }

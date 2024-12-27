@@ -33,6 +33,8 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: 0) {
       VStack(alignment: .leading) {
         
+        Spacer()
+        
         Text("Settings")
           .font(.title2)
           .fontWeight(.heavy)
@@ -51,7 +53,6 @@ struct SettingsView: View {
           .opacity(0.75)
           .padding(.top)
         
-        Spacer()
         
         self.cameraControlsBackground
       }
@@ -64,8 +65,8 @@ struct SettingsView: View {
       .background {
         LinearGradient(
           colors: [.black, .clear],
-          startPoint: .top,
-          endPoint: .bottom
+          startPoint: .bottom,
+          endPoint: .top
         )
       }
       .background { Color.black.opacity(0.55) }

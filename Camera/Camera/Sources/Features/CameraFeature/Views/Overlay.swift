@@ -13,7 +13,7 @@ extension CameraView {
               .frame(maxWidth: .infinity)
             self.recordingButton
               .frame(maxWidth: .infinity)
-            self.switchCameraButton
+            self.toggleSettingsButton
               .frame(maxWidth: .infinity)
           }
         }
@@ -60,11 +60,13 @@ fileprivate extension CameraView {
     .disabled(!self.model.hasFullPermissions)
   }
 
-  private var switchCameraButton: some View {
+  // @DEDA formerly switch camera button
+  // @DEDA idk why this mf is animating but it's annoying af.
+  private var toggleSettingsButton: some View {
     let size: CGFloat = 30
     
-    return Button(action: self.model.switchCameraButtonTapped) {
-      Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
+    return Button(action: self.model.toggleSettingsButtonTapped) {
+      Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark")
         .resizable()
         .scaledToFit()
         .fontWeight(.semibold)
