@@ -71,9 +71,9 @@ struct SettingsView: View {
       self.divider(padding: 0)
       ZoomSection(model: self.model)
       self.divider()
-      ZoomSection(model: self.model)
+      TimerSection(model: self.model)
       self.divider()
-      ZoomSection(model: self.model)
+      RecordingSection(model: self.model)
     }
   }
   
@@ -116,7 +116,7 @@ private struct ZoomSection: View {
         
         HStack {
           ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-            zoomButton(videoZoomFactor: value)
+            button(videoZoomFactor: value)
           }
         }
         .padding(8)
@@ -124,7 +124,7 @@ private struct ZoomSection: View {
     }
   }
 
-  private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
+  private func button(videoZoomFactor value: CGFloat) -> some View {
     let isSelected = self.model.camera.zoom == value
     
     return Button {
@@ -152,6 +152,115 @@ private struct ZoomSection: View {
   }
 }
 
+private struct TimerSection: View {
+  @Bindable var model: SettingsModel
+
+   var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .firstTextBaseline) {
+        HStack {
+          Image(systemName: "timer")
+            .foregroundColor(.white)
+          
+          Text("Timer")
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+        }
+        
+        Spacer()
+        
+        HStack {
+          ForEach([CGFloat]([0, 3, 5]), id: \.self) { value in
+            button(seconds: value)
+          }
+        }
+        .padding(8)
+      }
+    }
+  }
+
+  private func button(seconds value: CGFloat) -> some View {
+    let isSelected = Bool.random()
+
+    return Button {
+      // @DEDA
+    } label: {
+      VStack {
+        Text("\(value.formattedDescription)s")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+        
+        Text("\("Subtitle")")
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
+}
+
+private struct RecordingSection: View {
+  @Bindable var model: SettingsModel
+
+   var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .firstTextBaseline) {
+        HStack {
+          Image(systemName: "camera")
+            .foregroundColor(.white)
+          
+          Text("Recording")
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+        }
+        
+        Spacer()
+        
+        HStack {
+          ForEach(["HD", "4k"], id: \.self) { value in
+            button(quality: value)
+          }
+        }
+        .padding(8)
+      }
+    }
+  }
+
+  private func button(quality value: String) -> some View {
+    let isSelected = Bool.random()
+    
+    return Button {
+      // @DEDA
+    } label: {
+      VStack {
+        Text("\(value)")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+        
+        Text("\("Subtitle")")
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
+}
 
 fileprivate extension CGFloat {
   var formattedDescription: String {
