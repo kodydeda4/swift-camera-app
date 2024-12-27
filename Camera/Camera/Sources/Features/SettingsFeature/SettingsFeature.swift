@@ -8,39 +8,18 @@ import SwiftUINavigation
 final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
-  var destination: Destination? { didSet { self.bind() } }
   
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Dependency(\.camera) var cameraClient
   
-  @CasePathable
-  enum Destination {
-    case userPermissions(UserPermissionsModel)
-  }
-  
   var isZoomButtonsDisabled: Bool {
     self.camera.position == .front
-  }
-  
-  func navigateToPermissions() {
-    self.destination = .userPermissions(UserPermissionsModel())
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
       try self.cameraClient.zoom(value)
       self.$camera.zoom.withLock { $0 = value }
-    }
-  }
-  
-  private func bind() {
-    switch destination {
-      
-    case let .userPermissions(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case .none:
-      break
     }
   }
 }
@@ -51,56 +30,58 @@ struct SettingsView: View {
   @Bindable var model: SettingsModel
   
   var body: some View {
-    //    NavigationStack {
-    VStack(alignment: .leading) {
-      Section {
-        Button {
-          self.model.navigateToPermissions()
-        } label: {
-          HStack {
-            Label("Permissions", systemImage: "lock")
-            Spacer()
-            Image(systemName: "chevron.forward")
-              .foregroundColor(.secondary)
-          }
-        }
+    VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: 0) {
+        
+        self.zoom
+          .disabled(self.model.isZoomButtonsDisabled)
+        
+        self.divider
+        
+        Text("Camera \(self.model.buildNumber.description)")
+          .foregroundColor(.white)
+          .opacity(0.75)
+          .padding(.top)
+        
+        Spacer()
       }
-      Section {
-        HStack {
-          HStack {
-            Image(systemName: "binoculars")
-            Text("Zoom")
-              .bold()
-          }
-          Spacer()
-          self.zoomButtons
-        }
-        .disabled(self.model.isZoomButtonsDisabled)
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .padding()
+      .background {
+        LinearGradient(
+          colors: [.black, .clear],
+          startPoint: .top,
+          endPoint: .bottom
+        )
+      }
+      .background { Color.black.opacity(0.75) }
+      
+      Spacer()
+    }
+  }
+  
+  private var divider: some View {
+    Rectangle()
+       .frame(height: 1)
+       .foregroundColor(.white)
+       .opacity(0.15)
+       .padding(.leading, 32)
+  }
+  
+  private var zoom: some View {
+    HStack(alignment: .firstTextBaseline) {
+      HStack {
+        Image(systemName: "binoculars")
+          .foregroundColor(.white)
+        
+        Text("Zoom")
+          .fontWeight(.heavy)
+          .foregroundColor(.white)
       }
       
       Spacer()
-      
-      Section {
-        Text("Camera \(self.model.buildNumber.description)")
-          .foregroundColor(.secondary)
-      }
+      self.zoomButtons
     }
-    .frame(maxWidth: .infinity)
-    .padding()
-    .background { Color.black.opacity(0.75) }
-    //      .navigationTitle("Settings")
-    //      .toolbar {
-    //        ToolbarItem(placement: .topBarTrailing) {
-    //          Button(action: self.model.cancelButtonTapped) {
-    //            Image(systemName: "xmark.circle.fill")
-    //              .foregroundColor(.secondary)
-    //          }
-    //        }
-    //      }
-    //      .listStyle(.plain)
-    //      .navigationDestination(item: $model.destination.userPermissions) { model in
-    //        UserPermissionsSheet(model: model)
-    //      }
   }
   
   private var zoomButtons: some View {
@@ -110,24 +91,32 @@ struct SettingsView: View {
       }
     }
     .padding(8)
-    .background {
-      Color.white.opacity(0.5)
-    }
-    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
   }
   
   private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
     let isSelected = self.model.camera.zoom == value
-    
+
     return Button {
       self.model.zoomButtonTapped(value)
     } label: {
-      Text("\(value.formattedDescription)x")
-        .font(.caption)
-        .frame(width: 32, height: 32)
-        .foregroundColor(isSelected ? .white : .black)
-        .background(isSelected ? Color.black.opacity(0.65) : Color.white.opacity(0.5))
-        .clipShape(Circle())
+      VStack {
+        Text("\(value.formattedDescription)x")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+        
+        Text("\("Subtitle")")
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
     }
   }
 }

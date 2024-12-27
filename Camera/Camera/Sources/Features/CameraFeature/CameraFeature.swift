@@ -59,6 +59,7 @@ final class CameraModel {
   
   func recordingButtonTapped() {
     !camera.isRecording ? self.startRecording() : self.stopRecording()
+    self.destination = .none
   }
   
   private func startRecording() {
@@ -92,6 +93,7 @@ final class CameraModel {
     _ = Result {
       let position = try self.cameraClient.switchCamera()
       self.$camera.position.withLock { $0 = position }
+      self.destination = .none
     }
   }
   
@@ -205,8 +207,8 @@ struct CameraView: View {
     NavigationStack {
       self.content
         .task { await self.model.task() }
+        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
-        .overlay(content: self.overlay)
         .toolbar(content: self.toolbar)
         .sheet(item: $model.destination.userPermissions) { model in
           UserPermissionsSheet(model: model)
@@ -217,6 +219,7 @@ struct CameraView: View {
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
         }
+        .overlay(content: self.overlay)
     }
   }
   
@@ -251,14 +254,25 @@ struct CameraView: View {
       }
       ToolbarItem(placement: .topBarTrailing) {
         Button(action: self.model.toggleSettingsButtonTapped) {
-          Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark.circle")
+          Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark.circle.fill")
+            .foregroundColor(
+              !self.model.destination.is(\.settings) ? .accentColor : .white)
         }
+        .fixedSize()
+        .buttonStyle(.plain)
       }
     }
   }
 }
 
 // MARK: - SwiftUI Previews
+
+#Preview("Settings") {
+  @Shared(.userPermissions) var userPermissions = .authorized
+  var model = CameraModel()
+  model.destination = .settings(SettingsModel())
+  return CameraView(model: model)
+}
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
