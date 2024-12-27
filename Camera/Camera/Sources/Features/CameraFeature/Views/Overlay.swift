@@ -1,10 +1,6 @@
 import Sharing
 import SwiftUI
-
-private struct Style {
-  static let buttonSize: CGFloat = 24
-  static let buttonSizeRecording: CGFloat = 50
-}
+import CasePaths
 
 extension CameraView {
   internal func overlay() -> some View {
@@ -65,22 +61,26 @@ fileprivate extension CameraView {
   }
 
   private var switchCameraButton: some View {
-    Button(action: self.model.switchCameraButtonTapped) {
+    let size: CGFloat = 30
+    
+    return Button(action: self.model.switchCameraButtonTapped) {
       Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
         .resizable()
         .scaledToFit()
         .fontWeight(.semibold)
-        .frame(
-          width: Style.buttonSizeRecording,
-          height: Style.buttonSizeRecording
-        )
+        .frame(width: size, height: size)
         .padding(8)
-        .background(.regularMaterial)
-        .foregroundColor(self.model.camera.isRecording ? .red : .gray)
+        .background(
+          !self.model.destination.is(\.settings)
+          ? Color.black.opacity(0.5)
+          : Color.white.opacity(0.1)
+        )
+        .foregroundColor(.white)
         .clipShape(Circle())
     }
     .padding(.horizontal)
     .disabled(self.model.isSwitchCameraButtonDisabled)
+    .opacity(!self.model.camera.isRecording ? 1 : 0.00000000001)
   }
 }
 

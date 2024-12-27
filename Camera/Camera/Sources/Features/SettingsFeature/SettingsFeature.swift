@@ -68,7 +68,7 @@ struct SettingsView: View {
           endPoint: .bottom
         )
       }
-      .background { Color.black.opacity(0.75) }
+      .background { Color.black.opacity(0.55) }
       
       Spacer()
     }
