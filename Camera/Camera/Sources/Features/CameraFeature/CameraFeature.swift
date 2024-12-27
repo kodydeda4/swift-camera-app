@@ -123,11 +123,11 @@ final class CameraModel {
 
   func switchCameraButtonTapped() {
     _ = Result {
-      let cameraPosition: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back
+      let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
         ? .front
         : .back
       try self.camera.setPosition(cameraPosition.rawValue)
-      self.$userSettings.cameraPosition.withLock { $0 = cameraPosition }
+      self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
     }
   }

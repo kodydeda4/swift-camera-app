@@ -34,9 +34,15 @@ import SwiftUINavigation
  - [ ] SPM
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
+ 
+ Photos
+ - [ ] Reactive (AsyncStream)
+ - [ ] Cached (@Shared(.inMemory))
+ - [ ] Infinite Loading (.onAppear)
 
  Idk Features
  - [ ] Handle app backgrounding
+ - [ ] Handle device rotation
  - [ ] Record video vs take picture
  - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll
@@ -44,8 +50,8 @@ import SwiftUINavigation
 
   UI Rework
  - [ ] Sound effect when you tap a button.
- - [ ] Haptic feedback for recording button
- - [ ] Video Recording duration
+ - [x] Haptic feedback for recording button
+ - [x] Video Recording duration
  - [ ] Improve user permissions ui
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
  - [ ] Finished recording toast / progress

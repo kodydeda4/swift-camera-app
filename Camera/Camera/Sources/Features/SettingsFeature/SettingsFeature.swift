@@ -15,28 +15,28 @@ final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
 
-  @ObservationIgnored @Shared(.userSettings) var userSettings
+  @ObservationIgnored @Shared(.userSettings) private(set) var userSettings
   @ObservationIgnored @Dependency(\.camera) var camera
 
-  func cameraPositionButtonTapped(_ value: UserSettings.CameraPosition) {
+  func cameraButtonTapped(_ value: UserSettings.Camera) {
     _ = Result {
       try self.camera.setPosition(value.rawValue)
-      self.$userSettings.cameraPosition.withLock { $0 = value }
+      self.$userSettings.camera.withLock { $0 = value }
     }
   }
 
   var isZoomButtonsDisabled: Bool {
-    self.userSettings.cameraPosition == .front
+    self.userSettings.camera == .front
   }
 
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
       try self.camera.setVideoZoomFactor(value)
-      self.$userSettings.videoZoomFactor.withLock { $0 = value }
+      self.$userSettings.zoom.withLock { $0 = value }
     }
   }
 
-  func timerButtonTapped(value: Int) {
+  func countdownTimerButtonTapped(value: Int) {
     self.$userSettings.countdownTimer.withLock { $0 = value }
   }
 
@@ -48,7 +48,7 @@ final class SettingsModel: Identifiable {
   }
 
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
-    self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
+    self.$userSettings.recordingQuality.withLock { $0 = value }
   }
 }
 
@@ -91,11 +91,11 @@ struct SettingsView: View {
         self.divider
         ZoomSection(model: self.model)
         self.divider
-        TimerSection(model: self.model)
+        CountdownTimerSection(model: self.model)
         self.divider
-        RecordingSection(model: self.model)
+        RecordingQualitySection(model: self.model)
         self.divider
-        TorchSection(model: self.model)
+        TorchModeSection(model: self.model)
       }
       .padding([.horizontal, .top])
     }
@@ -169,20 +169,20 @@ private struct CameraSection: View {
       title: "Camera",
       subtitle: "Select a camera."
     ) {
-      ForEach([UserSettings.CameraPosition]([.front, .back]), id: \.self) { cameraPosition in
+      ForEach([UserSettings.Camera]([.front, .back]), id: \.self) { cameraPosition in
         button(cameraPosition)
       }
     }
   }
 
-  private func button(_ cameraPosition: UserSettings.CameraPosition) -> some View {
-    let isSelected = self.model.userSettings.cameraPosition == cameraPosition
+  private func button(_ camera: UserSettings.Camera) -> some View {
+    let isSelected = self.model.userSettings.camera == camera
 
     return Button {
-      self.model.cameraPositionButtonTapped(cameraPosition)
+      self.model.cameraButtonTapped(camera)
     } label: {
       VStack {
-        Text(cameraPosition.description)
+        Text(camera.description)
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -194,7 +194,7 @@ private struct CameraSection: View {
           )
           .clipShape(Circle())
 
-        Text(cameraPosition.description)
+        Text(camera.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
@@ -219,7 +219,7 @@ private struct ZoomSection: View {
   }
 
   private func button(_ zoom: CGFloat) -> some View {
-    let isSelected = self.model.userSettings.videoZoomFactor == zoom
+    let isSelected = self.model.userSettings.zoom == zoom
 
     return Button {
       self.model.zoomButtonTapped(zoom)
@@ -246,7 +246,7 @@ private struct ZoomSection: View {
   }
 }
 
-private struct TimerSection: View {
+private struct CountdownTimerSection: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
@@ -265,7 +265,7 @@ private struct TimerSection: View {
     let isSelected = self.model.userSettings.countdownTimer == seconds
 
     return Button {
-      self.model.timerButtonTapped(value: seconds)
+      self.model.countdownTimerButtonTapped(value: seconds)
     } label: {
       VStack {
         Text("\(seconds.description)s")
@@ -289,13 +289,13 @@ private struct TimerSection: View {
   }
 }
 
-private struct RecordingSection: View {
+private struct RecordingQualitySection: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
     Section(
       systemImage: "camera",
-      title: "Recording",
+      title: "Recording Quality",
       subtitle: "Select a video recording quality."
     ) {
       HStack {
@@ -307,7 +307,7 @@ private struct RecordingSection: View {
   }
 
   private func button(_ quality: UserSettings.RecordingQuality) -> some View {
-    let isSelected = self.model.userSettings.videoCaptureRecordingQuality == quality
+    let isSelected = self.model.userSettings.recordingQuality == quality
 
     return Button {
       self.model.recordingQualityButtonTapped(value: quality)
@@ -334,7 +334,7 @@ private struct RecordingSection: View {
   }
 }
 
-private struct TorchSection: View {
+private struct TorchModeSection: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
@@ -348,7 +348,7 @@ private struct TorchSection: View {
           button(torchMode)
         }
       }
-      .disabled(self.model.userSettings.cameraPosition == .front)
+      .disabled(self.model.userSettings.camera == .front)
     }
   }
 

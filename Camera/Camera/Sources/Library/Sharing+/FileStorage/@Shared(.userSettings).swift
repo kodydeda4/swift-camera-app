@@ -2,10 +2,10 @@ import AVFoundation
 import Sharing
 
 struct UserSettings: Equatable, Codable {
-  var cameraPosition = CameraPosition.front
-  var videoZoomFactor: CGFloat = 1
+  var camera = Camera.front
+  var zoom: CGFloat = 1
   var countdownTimer = 0
-  var videoCaptureRecordingQuality = RecordingQuality.hd
+  var recordingQuality = RecordingQuality.hd
   var torchMode = TorchMode.off
 
   enum TorchMode: Equatable, Codable, CaseIterable {
@@ -19,7 +19,7 @@ struct UserSettings: Equatable, Codable {
     case fourK
   }
   
-  enum CameraPosition: Equatable, Codable, CaseIterable {
+  enum Camera: Equatable, Codable, CaseIterable {
     case front
     case back
     case unspecified
@@ -78,7 +78,7 @@ extension UserSettings.RecordingQuality: Identifiable, CustomStringConvertible {
   }
 }
 
-extension UserSettings.CameraPosition: Identifiable, CustomStringConvertible {
+extension UserSettings.Camera: Identifiable, CustomStringConvertible {
   
   var id: Self { self }
   
