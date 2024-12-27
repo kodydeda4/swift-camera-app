@@ -61,9 +61,7 @@ struct SettingsView: View {
           endPoint: .top
         )
       }
-      .clipShape(
-        RoundedCornerShape(radius: 16, corners: [.topLeft, .topRight])
-      )
+      .clipShape(RoundedCornerShape(radius: 16, corners: [.topLeft, .topRight]))
 
       self.cameraControlsBackground
     }
