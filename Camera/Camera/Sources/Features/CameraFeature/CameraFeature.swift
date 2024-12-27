@@ -212,8 +212,14 @@ struct CameraView: View {
         .sheet(item: $model.destination.userPermissions) { model in
           UserPermissionsSheet(model: model)
         }
+        .fullScreenCover(isPresented: .constant(true)) {
+          Text("sup")
+        }
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
+        }
+        .overlay {
+          
         }
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
