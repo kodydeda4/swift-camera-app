@@ -49,11 +49,7 @@ fileprivate extension CameraView {
   }
 
   private var recordingButton: some View {
-    Button {
-      withAnimation {
-        self.model.recordingButtonTapped()
-      }
-    } label: {
+    Button(action: self.model.recordingButtonTapped) {
       CameraRecordingButtonLabel(isRecording: self.model.isRecording)
     }
     .buttonStyle(.plain)
