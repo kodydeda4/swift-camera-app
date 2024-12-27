@@ -11,19 +11,19 @@ final class CountdownModel: Identifiable {
   let id = UUID()
   var secondsElapsed = 0
   var onFinish: () -> Void
-  = unimplemented("RecordingCountdownModel.onFinish")
+    = unimplemented("RecordingCountdownModel.onFinish")
   
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
-  
-  private var isTimerFinished: Bool {
-    self.secondsElapsed >= self.userSettings.countdownTimer - 1
-  }
   
   var countdown: Int {
     self.userSettings.countdownTimer - self.secondsElapsed
   }
   
+  private var isTimerFinished: Bool {
+    self.secondsElapsed >= self.userSettings.countdownTimer - 1
+  }
+
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {

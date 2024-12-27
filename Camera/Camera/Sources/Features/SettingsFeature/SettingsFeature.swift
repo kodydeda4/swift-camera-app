@@ -1,8 +1,8 @@
+import AVFoundation
 import Dependencies
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import AVFoundation
 
 // @DEDA
 // Settings need to be resent to camera view on appear.
@@ -14,10 +14,10 @@ import AVFoundation
 final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
-  
+
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @Dependency(\.camera) var camera
-  
+
   func cameraPositionButtonTapped(_ value: UserSettings.CameraPosition) {
     _ = Result {
       try self.camera.setPosition(value.rawValue)
@@ -35,7 +35,7 @@ final class SettingsModel: Identifiable {
       self.$userSettings.videoZoomFactor.withLock { $0 = value }
     }
   }
-  
+
   func timerButtonTapped(value: Int) {
     self.$userSettings.countdownTimer.withLock { $0 = value }
   }
@@ -46,7 +46,7 @@ final class SettingsModel: Identifiable {
       self.$userSettings.torchMode.withLock { $0 = value }
     }
   }
-  
+
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
     self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
   }
@@ -56,7 +56,7 @@ final class SettingsModel: Identifiable {
 
 struct SettingsView: View {
   @Bindable var model: SettingsModel
-  
+
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       self.divider.opacity(0.5)
@@ -71,7 +71,7 @@ struct SettingsView: View {
     )
     .background { Color.black.opacity(0.7) }
   }
-  
+
   @MainActor private var content: some View {
     ScrollView {
       VStack(alignment: .leading) {
@@ -80,12 +80,12 @@ struct SettingsView: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
           .padding(.top, 8)
-        
+
         Text("Camera \(self.model.buildNumber.description)")
           .foregroundColor(.white)
           .opacity(0.75)
           .padding(.bottom)
-        
+
         self.divider
         CameraSection(model: self.model)
         self.divider
@@ -100,7 +100,7 @@ struct SettingsView: View {
       .padding([.horizontal, .top])
     }
   }
-  
+
   private var footer: some View {
     VStack(spacing: 0) {
       LinearGradient(
@@ -112,12 +112,12 @@ struct SettingsView: View {
         endPoint: .bottom
       )
       .frame(height: 70)
-      
+
       Color.black
         .frame(height: 70)
     }
   }
-  
+
   private var divider: some View {
     Rectangle()
       .frame(height: 1)
@@ -131,7 +131,7 @@ private struct Section<Content: View>: View {
   let title: String
   let subtitle: String
   let content: () -> Content
-    
+
   var body: some View {
     HStack(alignment: .firstTextBaseline) {
       self.header
@@ -140,7 +140,7 @@ private struct Section<Content: View>: View {
         .padding([.leading, .top], 8)
     }
   }
-  
+
   private var header: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline) {
@@ -151,7 +151,7 @@ private struct Section<Content: View>: View {
           .foregroundColor(.white)
       }
       .padding(.bottom, 2)
-      
+
       Text(subtitle)
         .fontWeight(.bold)
         .foregroundColor(.white)
@@ -177,7 +177,7 @@ private struct CameraSection: View {
 
   private func button(_ cameraPosition: UserSettings.CameraPosition) -> some View {
     let isSelected = self.model.userSettings.cameraPosition == cameraPosition
-    
+
     return Button {
       self.model.cameraPositionButtonTapped(cameraPosition)
     } label: {
@@ -189,11 +189,11 @@ private struct CameraSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-        
+
         Text(cameraPosition.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -220,7 +220,7 @@ private struct ZoomSection: View {
 
   private func button(_ zoom: CGFloat) -> some View {
     let isSelected = self.model.userSettings.videoZoomFactor == zoom
-    
+
     return Button {
       self.model.zoomButtonTapped(zoom)
     } label: {
@@ -232,11 +232,11 @@ private struct ZoomSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-        
+
         Text("\(zoom.formattedDescription)x")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -248,7 +248,7 @@ private struct ZoomSection: View {
 
 private struct TimerSection: View {
   @Bindable var model: SettingsModel
-  
+
   var body: some View {
     Section(
       systemImage: "timer",
@@ -275,11 +275,11 @@ private struct TimerSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-        
+
         Text("\(seconds.description)s")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -291,7 +291,7 @@ private struct TimerSection: View {
 
 private struct RecordingSection: View {
   @Bindable var model: SettingsModel
-  
+
   var body: some View {
     Section(
       systemImage: "camera",
@@ -308,7 +308,7 @@ private struct RecordingSection: View {
 
   private func button(_ quality: UserSettings.RecordingQuality) -> some View {
     let isSelected = self.model.userSettings.videoCaptureRecordingQuality == quality
-    
+
     return Button {
       self.model.recordingQualityButtonTapped(value: quality)
     } label: {
@@ -320,11 +320,11 @@ private struct RecordingSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-        
+
         Text(quality.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -354,7 +354,7 @@ private struct TorchSection: View {
 
   private func button(_ torchMode: UserSettings.TorchMode) -> some View {
     let isSelected = self.model.userSettings.torchMode == torchMode
-    
+
     return Button {
       self.model.torchModeButtonTapped(value: torchMode)
     } label: {
@@ -366,11 +366,11 @@ private struct TorchSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-        
+
         Text(torchMode.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -399,6 +399,6 @@ fileprivate extension CGFloat {
     .photos: .authorized,
   ]
   @Shared(.userPermissions) var userPermissions = value
-  
+
   SettingsView(model: SettingsModel())
 }

@@ -1,6 +1,6 @@
+import CasePaths
 import Sharing
 import SwiftUI
-import CasePaths
 
 extension CameraView {
   internal func overlay() -> some View {
@@ -60,7 +60,7 @@ fileprivate extension CameraView {
   // @DEDA idk why this mf is animating but it's annoying af.
   private var toggleSettingsButton: some View {
     let size: CGFloat = 30
-    
+
     return Button(action: self.model.toggleSettingsButtonTapped) {
       Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark")
         .resizable()
@@ -70,8 +70,8 @@ fileprivate extension CameraView {
         .padding(8)
         .background(
           !self.model.destination.is(\.settings)
-          ? Color.black.opacity(0.5)
-          : Color.white.opacity(0.1)
+            ? Color.black.opacity(0.5)
+            : Color.white.opacity(0.1)
         )
         .foregroundColor(.white)
         .clipShape(Circle())

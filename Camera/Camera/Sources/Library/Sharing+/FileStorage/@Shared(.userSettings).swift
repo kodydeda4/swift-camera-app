@@ -1,5 +1,5 @@
-import Sharing
 import AVFoundation
+import Sharing
 
 struct UserSettings: Equatable, Codable {
   var torchMode = TorchMode.off

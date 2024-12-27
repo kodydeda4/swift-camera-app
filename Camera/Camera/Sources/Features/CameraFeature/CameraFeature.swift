@@ -1,11 +1,11 @@
 import AVFoundation
+import CasePaths
 import Combine
 import Dependencies
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import CasePaths
 
 @MainActor
 @Observable
@@ -123,7 +123,9 @@ final class CameraModel {
 
   func switchCameraButtonTapped() {
     _ = Result {
-      let cameraPosition: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back ? .front : .back
+      let cameraPosition: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back
+        ? .front
+        : .back
       try self.camera.setPosition(cameraPosition.rawValue)
       self.$userSettings.cameraPosition.withLock { $0 = cameraPosition }
       self.destination = .none
