@@ -53,10 +53,6 @@ struct SettingsView: View {
         
         Spacer()
         
-        self
-          .divider(padding: 0)
-          .padding(-16)
-        
         self.cameraControlsBackground
       }
       .frame(
@@ -79,10 +75,16 @@ struct SettingsView: View {
   }
   
   private var cameraControlsBackground: some View {
-    Rectangle()
-      .foregroundColor(.black)
-      .padding(-16)
-      .frame(height: 90)
+    VStack(spacing: 0) {
+      Rectangle()
+        .frame(height: 1)
+        .foregroundColor(.white)
+        .opacity(0.15)
+      Rectangle()
+        .foregroundColor(.black)
+        .frame(height: 100)
+    }
+    .padding(.horizontal, -16)
   }
   
   private func divider(padding: CGFloat = 32) -> some View {
