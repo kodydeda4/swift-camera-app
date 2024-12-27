@@ -79,7 +79,7 @@ struct SettingsView: View {
       Rectangle()
         .frame(height: 1)
         .foregroundColor(.white)
-        .opacity(0.15)
+        .opacity(0.075)
       Rectangle()
         .foregroundColor(.black)
         .frame(height: 116)
