@@ -62,19 +62,28 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
-    guard !self.destination.is(\.countdown) else {
-      self.destination = .none
-      return
+    Task {
+      guard !self.destination.is(\.countdown) else {
+        await self.hapticFeedback.generate(.soft)
+        self.destination = .none
+        return
+      }
+      
+      !isRecording ? self.prepareForRecording() : self.stopRecording()
     }
-    
-    !isRecording ? self.prepareForRecording() : self.stopRecording()
   }
   
   // @DEDA here you can determine wether or not to show the recording countdown overlay
   private func prepareForRecording() {
-    self.userSettings.countdownTimer == 0
-    ? { self.startRecording() }()
-    : { self.destination = .countdown(CountdownModel()) }()
+    Task {
+      guard self.userSettings.countdownTimer == 0 else {
+        await self.hapticFeedback.generate(.soft)
+        self.destination = .countdown(CountdownModel())
+        return
+      }
+      
+      self.startRecording()
+    }
   }
   
   private func startRecording() {
