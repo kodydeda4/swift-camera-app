@@ -21,6 +21,7 @@ extension CameraView {
               .frame(maxWidth: .infinity)
           }
         }
+        .padding(.bottom)
       }
     }
     .frame(maxWidth: .infinity)

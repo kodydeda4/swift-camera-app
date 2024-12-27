@@ -82,7 +82,7 @@ struct SettingsView: View {
         .opacity(0.15)
       Rectangle()
         .foregroundColor(.black)
-        .frame(height: 100)
+        .frame(height: 116)
     }
     .padding(.horizontal, -16)
   }
