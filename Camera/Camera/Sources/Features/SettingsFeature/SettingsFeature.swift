@@ -9,8 +9,6 @@ final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
-  var dismiss: () -> Void
-  = unimplemented("Settings.dismiss")
   
   @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Dependency(\.camera) var cameraClient
@@ -26,10 +24,6 @@ final class SettingsModel: Identifiable {
   
   func navigateToPermissions() {
     self.destination = .userPermissions(UserPermissionsModel())
-  }
-  
-  func cancelButtonTapped() {
-    self.dismiss()
   }
   
   func zoomButtonTapped(_ value: CGFloat) {
@@ -70,10 +64,6 @@ struct SettingsView: View {
               .foregroundColor(.secondary)
           }
         }
-      }
-      Button(action: self.model.cancelButtonTapped) {
-        Image(systemName: "xmark.circle.fill")
-          .foregroundColor(.secondary)
       }
       Section {
         HStack {

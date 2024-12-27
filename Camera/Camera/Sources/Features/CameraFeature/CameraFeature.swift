@@ -80,9 +80,8 @@ final class CameraModel {
   func navigateCameraRoll() {
     self.destination = .library(LibraryModel())
   }
-  
-  func navigateSettings() {
-    self.destination = .settings(SettingsModel())
+  func toggleSettingsButtonTapped () {
+    self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
   }
   
   func dismissSettingsButtonTapped() {
@@ -165,8 +164,8 @@ private extension CameraModel {
     case let .library(model):
       model.dismiss = { [weak self] in self?.destination = .none }
       
-    case let .settings(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
+    case .settings:
+      break
       
     case .none:
       break
@@ -224,7 +223,11 @@ struct CameraView: View {
   @MainActor private var content: some View {
     Group {
       if self.model.hasFullPermissions {
-        self.cameraPreview.onTapGesture(count: 2) {
+        CaptureVideoPreviewLayerView(
+          captureVideoPreviewLayer: self.model.camera
+            .captureVideoPreviewLayer
+        )
+        .onTapGesture(count: 2) {
           self.model.switchCameraButtonTapped()
         }
       } else {
@@ -247,8 +250,8 @@ struct CameraView: View {
           .background(Color.red.opacity(self.model.camera.isRecording ? 1 : 0))
       }
       ToolbarItem(placement: .topBarTrailing) {
-        Button(action: self.model.navigateSettings) {
-          Image(systemName: "ellipsis")
+        Button(action: self.model.toggleSettingsButtonTapped) {
+          Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark.circle")
         }
       }
     }
@@ -257,13 +260,12 @@ struct CameraView: View {
 
 // MARK: - SwiftUI Previews
 
-#Preview("Happy path") {
-  let value: UserPermissions.State = [
-    .camera: .authorized,
-    .microphone: .authorized,
-    .photos: .authorized,
-  ]
-  @Shared(.userPermissions) var userPermissions = value
-  
+#Preview("Camera") {
+  @Shared(.userPermissions) var userPermissions = .authorized
+  CameraView(model: CameraModel())
+}
+
+#Preview("Permissions Required") {
+  @Shared(.userPermissions) var userPermissions = .denied
   CameraView(model: CameraModel())
 }
