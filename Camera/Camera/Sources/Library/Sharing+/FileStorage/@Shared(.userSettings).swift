@@ -2,24 +2,24 @@ import AVFoundation
 import Sharing
 
 struct UserSettings: Equatable, Codable {
-  var torchMode = TorchMode.off
+  var cameraPosition = CameraPosition.front
+  var videoZoomFactor: CGFloat = 1
   var countdownTimer = 0
   var videoCaptureRecordingQuality = RecordingQuality.hd
-  var videoZoomFactor: CGFloat = 1
-  var cameraPosition = CameraPosition.front
-  
-  enum TorchMode {
+  var torchMode = TorchMode.off
+
+  enum TorchMode: Equatable, Codable, CaseIterable {
     case on
     case off
     case auto
   }
-
-  enum RecordingQuality {
+  
+  enum RecordingQuality: Equatable, Codable, CaseIterable {
     case hd
     case fourK
   }
   
-  enum CameraPosition {
+  enum CameraPosition: Equatable, Codable, CaseIterable {
     case front
     case back
     case unspecified
@@ -34,122 +34,79 @@ extension SharedReaderKey where Self == FileStorageKey<UserSettings>.Default {
 
 // MARK: - Extensions
 
-extension UserSettings.TorchMode:
-  Identifiable, Equatable, Codable,
-  CustomStringConvertible, CaseIterable
-{
+extension UserSettings.TorchMode: Identifiable, CustomStringConvertible {
   
-  var id: Self {
-    self
-  }
+  var id: Self { self }
   
   var description: String {
     switch self {
-    case .on:
-      return "On"
-    case .off:
-      return "Off"
-    case .auto:
-      return "Auto"
+    case .on: return "On"
+    case .off: return "Off"
+    case .auto: return "Auto"
     }
   }
   
   var rawValue: AVCaptureDevice.TorchMode {
     switch self {
-    case .on:
-      return .on
-    case .off:
-      return .off
-    case .auto:
-      return .auto
+    case .on: return .on
+    case .off: return .off
+    case .auto: return .auto
     }
   }
   
   init(_ rawValue: AVCaptureDevice.TorchMode) {
-    switch rawValue {
-    case .on:
-      self = .on
-    case .off:
-      self = .off
-    case .auto:
-      self = .auto
-    @unknown default:
-      fatalError("????")
+    self = {
+      switch rawValue {
+      case .on: return .on
+      case .off: return .off
+      case .auto: return .auto
+      @unknown default: fatalError("????")
+      }
+    }()
+  }
+}
+
+extension UserSettings.RecordingQuality: Identifiable, CustomStringConvertible {
+  
+  var id: Self { self }
+  
+  var description: String {
+    switch self {
+    case .hd: return "HD"
+    case .fourK: return "4k"
     }
   }
 }
 
-extension UserSettings.RecordingQuality:
-  Identifiable, Equatable, Codable,
-  CustomStringConvertible, CaseIterable
-{
+extension UserSettings.CameraPosition: Identifiable, CustomStringConvertible {
   
-  var id: Self {
-    self
-  }
+  var id: Self { self }
   
   var description: String {
     switch self {
-    case .hd:
-      return "HD"
-    case .fourK:
-      return "4k"
+    case .front: return "Front"
+    case .back: return "Back"
+    case .unspecified: return "Unspecified"
     }
   }
-}
-
-extension UserSettings.CameraPosition:
-  Identifiable, Equatable, Codable,
-  CustomStringConvertible, CaseIterable
-{
   
-  var id: Self {
-    self
-  }
-  
-  var description: String {
-    switch self {
-      
-    case .front:
-      return "Front"
-      
-    case .back:
-      return "Back"
-      
-    case .unspecified:
-      return "Unspecified"
-    }
-  }
-
   var rawValue: AVCaptureDevice.Position {
     switch self {
-      
-    case .unspecified:
-      return .unspecified
-      
-    case .back:
-      return .back
-      
-    case .front:
-      return .front
+    case .unspecified: return .unspecified
+    case .back: return .back
+    case .front: return .front
     }
   }
   
   init(_ rawValue: AVCaptureDevice.Position) {
-    switch rawValue {
-      
-    case .unspecified:
-      self = .unspecified
-      
-    case .back:
-      self = .back
-      
-    case .front:
-      self = .front
-     
-    @unknown default:
-      fatalError("????")
-    }
+    self = {
+      switch rawValue {
+      case .unspecified: return .unspecified
+      case .back: return .back
+      case .front: return .front
+      @unknown default: fatalError("????")
+      }
+    }()
   }
 }
 

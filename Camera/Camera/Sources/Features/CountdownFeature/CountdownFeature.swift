@@ -12,14 +12,14 @@ final class CountdownModel: Identifiable {
   var secondsElapsed = 0
   var onFinish: () -> Void
     = unimplemented("RecordingCountdownModel.onFinish")
-  
+
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
-  
+
   var countdown: Int {
     self.userSettings.countdownTimer - self.secondsElapsed
   }
-  
+
   private var isTimerFinished: Bool {
     self.secondsElapsed >= self.userSettings.countdownTimer - 1
   }
@@ -29,12 +29,12 @@ final class CountdownModel: Identifiable {
       taskGroup.addTask {
         for await _ in await self.clock.timer(interval: .seconds(1)) {
           await MainActor.run {
-            
+
             guard !self.isTimerFinished else {
               self.onFinish()
               return
             }
-            
+
             self.secondsElapsed += 1
           }
         }
@@ -47,7 +47,7 @@ final class CountdownModel: Identifiable {
 
 struct CountdownView: View {
   @Bindable var model: CountdownModel
-  
+
   var body: some View {
     Text(self.model.countdown.description)
       .font(.largeTitle)
