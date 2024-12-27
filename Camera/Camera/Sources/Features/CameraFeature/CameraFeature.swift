@@ -215,7 +215,7 @@ struct CameraView: View {
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
         }
-        .bottomMenu(item: $model.destination.settings) { $model in
+        .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
         }
     }
