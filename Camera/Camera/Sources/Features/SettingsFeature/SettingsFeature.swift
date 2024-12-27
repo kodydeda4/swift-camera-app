@@ -31,37 +31,29 @@ struct SettingsView: View {
   
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
+      Spacer()
+      
       VStack(alignment: .leading) {
-        
-        Spacer()
-        
         Text("Settings")
           .font(.title2)
           .fontWeight(.heavy)
           .foregroundColor(.white)
           .padding(.vertical, 8)
-
+        
         self.divider(padding: 0)
-
+        
         VStack(alignment: .leading, spacing: 0) {
           self.zoom.disabled(self.model.isZoomButtonsDisabled)
           self.divider()
         }
-        
+
         Text("Camera \(self.model.buildNumber.description)")
           .foregroundColor(.white)
           .opacity(0.75)
-          .padding(.top)
-        
-        
-        self.cameraControlsBackground
+          .padding(.vertical)
       }
-      .frame(
-        maxWidth: .infinity,
-        maxHeight: .infinity,
-        alignment: .top
-      )
       .padding()
+      .background { Color.black.opacity(0.55) }
       .background {
         LinearGradient(
           colors: [.black, .clear],
@@ -69,23 +61,25 @@ struct SettingsView: View {
           endPoint: .top
         )
       }
-      .background { Color.black.opacity(0.55) }
       
-      Spacer()
+      self.cameraControlsBackground
     }
+    .frame(
+      maxWidth: .infinity,
+      maxHeight: .infinity,
+      alignment: .top
+    )
   }
   
   private var cameraControlsBackground: some View {
     VStack(spacing: 0) {
       Rectangle()
-        .frame(height: 1)
-        .foregroundColor(.white)
-        .opacity(0.075)
+        .frame(height: 0.5)
+        .foregroundColor(Color(.darkGray))
       Rectangle()
         .foregroundColor(.black)
-        .frame(height: 116)
+        .frame(height: 150)
     }
-    .padding(.horizontal, -16)
   }
   
   private func divider(padding: CGFloat = 32) -> some View {
@@ -123,7 +117,7 @@ struct SettingsView: View {
   
   private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
     let isSelected = self.model.camera.zoom == value
-
+    
     return Button {
       self.model.zoomButtonTapped(value)
     } label: {
@@ -135,8 +129,8 @@ struct SettingsView: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
