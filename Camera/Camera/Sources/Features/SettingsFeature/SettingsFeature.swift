@@ -41,11 +41,9 @@ final class SettingsModel: Identifiable {
   }
 
   func torchModeButtonTapped(value: UserSettings.TorchMode) {
-    do {
+    _ = Result {
       try self.camera.setTorchMode(value.rawValue)
       self.$userSettings.torchMode.withLock { $0 = value }
-    } catch {
-      print(error.localizedDescription)
     }
   }
   
@@ -350,6 +348,7 @@ private struct TorchSection: View {
           button(torchMode)
         }
       }
+      .disabled(self.model.userSettings.cameraPosition == .front)
     }
   }
 
