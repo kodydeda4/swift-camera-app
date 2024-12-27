@@ -184,20 +184,14 @@ fileprivate final class Camera: NSObject {
   }
   
   func setTorchMode(_ torchMode: AVCaptureDevice.TorchMode) throws {
-    print("setTorchMode\(torchMode)")
-    do {
-      guard device.hasTorch else {
-        print("Device does not have a torch.")
-        return
-      }
-      try self.device.lockForConfiguration()
-      if device.isTorchModeSupported(.on) {
-        device.torchMode = torchMode
-      }
-      self.device.unlockForConfiguration()
-    } catch {
-      print("Error configuring torch mode: \(error)")
+    guard device.hasTorch else {
+      throw CameraClient.Failure.custom("device does not have a torch.")
     }
+    try self.device.lockForConfiguration()
+    if device.isTorchModeSupported(.on) {
+      device.torchMode = torchMode
+    }
+    self.device.unlockForConfiguration()
   }
   
   /// Start recording video to a url.
