@@ -36,6 +36,7 @@ final class CameraModel {
     case userPermissions(UserPermissionsModel)
     case library(LibraryModel)
     case settings(SettingsModel)
+    case recordingCountdown(RecordingCountdownModel)
   }
   
   // oop
@@ -61,23 +62,39 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
-    Task {
-      await self.hapticFeedback.generate(.soft)
-      !isRecording ? self.startRecording() : self.stopRecording()
+    guard !self.destination.is(\.recordingCountdown) else {
       self.destination = .none
+      return
     }
+    
+    !isRecording ? self.prepareForRecording() : self.stopRecording()
+  }
+  
+  // @DEDA here you can determine wether or not to show the recording countdown overlay
+  private func prepareForRecording() {
+    self.userSettings.countdownTimer == 0
+    ? { self.startRecording() }()
+    : { self.destination = .recordingCountdown(RecordingCountdownModel()) }()
   }
   
   private func startRecording() {
-    try? self.camera.startRecording(self.movieFileOutput)
-    self.recordingStartDate = .now
-    self.isRecording = true
+    Task {
+      await self.hapticFeedback.generate(.soft)
+      self.destination = .none
+      try? self.camera.startRecording(self.movieFileOutput)
+      self.recordingStartDate = .now
+      self.isRecording = true
+    }
   }
-  
+
   private func stopRecording() {
-    try? camera.stopRecording()
-    self.recordingStartDate = .none
-    self.isRecording = false
+    Task {
+      await self.hapticFeedback.generate(.soft)
+      self.destination = .none
+      try? camera.stopRecording()
+      self.recordingStartDate = .none
+      self.isRecording = false
+    }
   }
 
   func permissionsButtonTapped() {
@@ -183,6 +200,13 @@ private extension CameraModel {
     case .settings:
       break
       
+    case let .recordingCountdown(model):
+      model.onFinish = { [weak self] in
+        self?.destination = .none
+        self?.startRecording()
+      }
+      break
+      
     case .none:
       break
     }
@@ -232,6 +256,9 @@ struct CameraView: View {
         }
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
+        }
+        .overlay(item: $model.destination.recordingCountdown) { $model in
+          RecordingCountdownView(model: model)
         }
         .overlay(content: self.overlay)
     }

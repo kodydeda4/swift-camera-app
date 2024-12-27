@@ -36,8 +36,8 @@ final class SettingsModel: Identifiable {
     }
   }
   
-  func timerButtonTapped(value: CGFloat) {
-    self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
+  func timerButtonTapped(value: Int) {
+    self.$userSettings.countdownTimer.withLock { $0 = value }
   }
 
   func torchModeButtonTapped(value: UserSettings.TorchMode) {
@@ -255,20 +255,20 @@ private struct TimerSection: View {
       title: "Timer",
       subtitle: "Create a timer before the video starts recording."
     ) {
-      ForEach([CGFloat]([0, 3, 5]), id: \.self) { seconds in
+      ForEach([0, 3, 5], id: \.self) { seconds in
         button(seconds)
       }
     }
   }
 
-  private func button(_ seconds: CGFloat) -> some View {
-    let isSelected = self.model.userSettings.videoCaptureCountdownTimerDuration == seconds
+  private func button(_ seconds: Int) -> some View {
+    let isSelected = self.model.userSettings.countdownTimer == seconds
 
     return Button {
       self.model.timerButtonTapped(value: seconds)
     } label: {
       VStack {
-        Text("\(seconds.formattedDescription)s")
+        Text("\(seconds.description)s")
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -280,7 +280,7 @@ private struct TimerSection: View {
           )
           .clipShape(Circle())
         
-        Text("\(seconds.formattedDescription)s")
+        Text("\(seconds.description)s")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
