@@ -16,11 +16,11 @@ final class SettingsModel: Identifiable {
   var buildNumber: Build.Version { Build.version }
   
   @ObservationIgnored @Shared(.userSettings) var userSettings
-  @ObservationIgnored @Dependency(\.camera) var cameraClient
+  @ObservationIgnored @Dependency(\.camera) var camera
   
   func cameraPositionButtonTapped(_ value: UserSettings.CameraPosition) {
     _ = Result {
-      try self.cameraClient.setCameraPosition(value.rawValue)
+      try self.camera.setPosition(value.rawValue)
       self.$userSettings.cameraPosition.withLock { $0 = value }
     }
   }
@@ -31,7 +31,7 @@ final class SettingsModel: Identifiable {
 
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
-      try self.cameraClient.zoom(value)
+      try self.camera.setVideoZoomFactor(value)
       self.$userSettings.videoZoomFactor.withLock { $0 = value }
     }
   }
@@ -40,9 +40,13 @@ final class SettingsModel: Identifiable {
     self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
   }
 
-  func flashButtonTapped(value: Bool) {
-    //@DEDA trigger flash to update.
-    self.$userSettings.isFlashEnabled.withLock { $0 = value }
+  func torchModeButtonTapped(value: UserSettings.TorchMode) {
+    do {
+      try self.camera.setTorchMode(value.rawValue)
+      self.$userSettings.torchMode.withLock { $0 = value }
+    } catch {
+      print(error.localizedDescription)
+    }
   }
   
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
@@ -93,7 +97,7 @@ struct SettingsView: View {
         self.divider
         RecordingSection(model: self.model)
         self.divider
-        FlashSection(model: self.model)
+        TorchSection(model: self.model)
       }
       .padding([.horizontal, .top])
     }
@@ -332,31 +336,31 @@ private struct RecordingSection: View {
   }
 }
 
-private struct FlashSection: View {
+private struct TorchSection: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
     Section(
       systemImage: "bolt.fill",
-      title: "Flash",
-      subtitle: "Turn flash on/off."
+      title: "Torch",
+      subtitle: "Turn torch on/off/auto."
     ) {
       HStack {
-        ForEach([true, false], id: \.self) { isEnabled in
-          button(isEnabled)
+        ForEach(UserSettings.TorchMode.allCases) { torchMode in
+          button(torchMode)
         }
       }
     }
   }
 
-  private func button(_ isEnabled: Bool) -> some View {
-    let isSelected = self.model.userSettings.isFlashEnabled == isEnabled
+  private func button(_ torchMode: UserSettings.TorchMode) -> some View {
+    let isSelected = self.model.userSettings.torchMode == torchMode
     
     return Button {
-      self.model.flashButtonTapped(value: isEnabled)
+      self.model.torchModeButtonTapped(value: torchMode)
     } label: {
       VStack {
-        Text(isEnabled ? "On" : "Off")
+        Text(torchMode.description)
           .font(.caption)
           .bold()
           .frame(width: 32, height: 32)
@@ -368,7 +372,7 @@ private struct FlashSection: View {
           )
           .clipShape(Circle())
         
-        Text(isEnabled ? "Enabled" : "Disabled")
+        Text(torchMode.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)

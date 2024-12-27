@@ -2,12 +2,60 @@ import Sharing
 import AVFoundation
 
 struct UserSettings: Equatable, Codable {
-  var isFlashEnabled = false
+  var torchMode = TorchMode.off
   var videoCaptureCountdownTimerDuration: CGFloat = 0
   var videoCaptureRecordingQuality = RecordingQuality.hd
   var videoZoomFactor: CGFloat = 1
   var cameraPosition = CameraPosition.front
   
+  enum TorchMode:
+    Identifiable, Equatable, Codable,
+    CustomStringConvertible, CaseIterable
+  {
+    case on
+    case off
+    case auto
+    
+    var id: Self {
+      self
+    }
+    
+    var description: String {
+      switch self {
+      case .on:
+        return "On"
+      case .off:
+        return "Off"
+      case .auto:
+        return "Auto"
+      }
+    }
+    
+    var rawValue: AVCaptureDevice.TorchMode {
+      switch self {
+      case .on:
+        return .on
+      case .off:
+        return .off
+      case .auto:
+        return .auto
+      }
+    }
+    
+    init(_ rawValue: AVCaptureDevice.TorchMode) {
+      switch rawValue {
+      case .on:
+        self = .on
+      case .off:
+        self = .off
+      case .auto:
+        self = .auto
+      @unknown default:
+        fatalError("????")
+      }
+    }
+  }
+
   enum RecordingQuality:
     Identifiable, Equatable, Codable,
     CustomStringConvertible, CaseIterable
@@ -21,10 +69,8 @@ struct UserSettings: Equatable, Codable {
     
     var description: String {
       switch self {
-        
       case .hd:
         return "HD"
-        
       case .fourK:
         return "4k"
       }
@@ -70,7 +116,6 @@ struct UserSettings: Equatable, Codable {
         return .front
       }
     }
-    
     
     init(_ rawValue: AVCaptureDevice.Position) {
       switch rawValue {

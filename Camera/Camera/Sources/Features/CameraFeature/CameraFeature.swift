@@ -13,24 +13,24 @@ final class CameraModel {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var navigationTitle = "00:00:00"
+  var isRecording = false
   var latestVideoThumbnail: UIImage?
   var recordingStartDate: Date?
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 
   // Shared
-  @ObservationIgnored @Shared(.camera) var camera
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
   
   // Dependencies
-  @ObservationIgnored @Dependency(\.camera) var cameraClient
+  @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
+  @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
   @ObservationIgnored @Dependency(\.continuousClock) var clock
 
-  @dynamicMemberLookup
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -57,25 +57,27 @@ final class CameraModel {
   }
   
   var isSwitchCameraButtonDisabled: Bool {
-    self.camera.isRecording
+    self.isRecording
   }
   
   func recordingButtonTapped() {
-    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-    !camera.isRecording ? self.startRecording() : self.stopRecording()
-    self.destination = .none
+    Task {
+      await self.hapticFeedback.generate(.soft)
+      !isRecording ? self.startRecording() : self.stopRecording()
+      self.destination = .none
+    }
   }
   
   private func startRecording() {
-    try? self.cameraClient.startRecording(self.movieFileOutput)
+    try? self.camera.startRecording(self.movieFileOutput)
     self.recordingStartDate = .now
-    self.$camera.isRecording.withLock { $0 = true }
+    self.isRecording = true
   }
   
   private func stopRecording() {
-    try? cameraClient.stopRecording()
+    try? camera.stopRecording()
     self.recordingStartDate = .none
-    self.$camera.isRecording.withLock { $0 = false }
+    self.isRecording = false
   }
 
   func permissionsButtonTapped() {
@@ -95,9 +97,9 @@ final class CameraModel {
 
   func switchCameraButtonTapped() {
     _ = Result {
-      let position: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back ? .front : .back
-      try self.cameraClient.setCameraPosition(position.rawValue)
-      self.$userSettings.cameraPosition.withLock { $0 = position }
+      let cameraPosition: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back ? .front : .back
+      try self.camera.setPosition(cameraPosition.rawValue)
+      self.$userSettings.cameraPosition.withLock { $0 = cameraPosition }
       self.destination = .none
     }
   }
@@ -153,11 +155,12 @@ final class CameraModel {
         }
       }
       taskGroup.addTask {
-        try? await self.cameraClient.connect(self.captureVideoPreviewLayer)
-//        try? await self.cameraClient.setCameraPosition(self.userSettings.cameraPosition.rawValue)
+        try? await self.camera.connect(self.captureVideoPreviewLayer)
+        // @DEDA
+        // try? await self.camera.setCameraPosition(self.userSettings.cameraPosition.rawValue)
       }
       taskGroup.addTask {
-        for await event in await self.cameraClient.events() {
+        for await event in await self.camera.events() {
           await self.handle(event)
         }
       }
@@ -254,7 +257,7 @@ struct CameraView: View {
       Text(self.model.navigationTitle)
         .foregroundColor(.white)
         .fontWeight(.semibold)
-        .background(Color.red.opacity(self.model.camera.isRecording ? 1 : 0))
+        .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
     }
   }
 }
@@ -263,7 +266,7 @@ struct CameraView: View {
 
 #Preview("Settings") {
   @Shared(.userPermissions) var userPermissions = .authorized
-  var model = CameraModel()
+  let model = CameraModel()
   model.destination = .settings(SettingsModel())
   return CameraView(model: model)
 }

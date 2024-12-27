@@ -54,7 +54,7 @@ fileprivate extension CameraView {
         self.model.recordingButtonTapped()
       }
     } label: {
-      CameraRecordingButtonLabel(isRecording: self.model.camera.isRecording)
+      CameraRecordingButtonLabel(isRecording: self.model.isRecording)
     }
     .buttonStyle(.plain)
     .disabled(!self.model.hasFullPermissions)
@@ -82,7 +82,7 @@ fileprivate extension CameraView {
     }
     .padding(.horizontal)
     .disabled(self.model.isSwitchCameraButtonDisabled)
-    .opacity(!self.model.camera.isRecording ? 1 : 0.00000000001)
+    .opacity(!self.model.isRecording ? 1 : 0.00000000001)
   }
 }
 

@@ -9,13 +9,13 @@ import SwiftUINavigation
 @DependencyClient
 struct CameraClient: Sendable {
   var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
-  var authorizationStatus: @Sendable (AVMediaType)
-    -> AVAuthorizationStatus = { _ in .notDetermined }
+  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in .notDetermined }
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
-  var setCameraPosition: @Sendable (AVCaptureDevice.Position) throws -> Void
-  var zoom: @Sendable (CGFloat) throws -> Void
+  var setPosition: @Sendable (AVCaptureDevice.Position) throws -> Void
+  var setVideoZoomFactor: @Sendable (CGFloat) throws -> Void
+  var setTorchMode: @Sendable (AVCaptureDevice.TorchMode) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
   enum Failure: Error, Equatable {
@@ -68,11 +68,14 @@ extension CameraClient: DependencyKey {
       stopRecording: {
         camera.stopRecording()
       },
-      setCameraPosition: { position in
+      setPosition: { position in
         try camera.setPosition(position)
       },
-      zoom: { zoomFactor in
-        try camera.zoom(zoomFactor)
+      setVideoZoomFactor: { zoomFactor in
+        try camera.setVideoZoomFactor(zoomFactor)
+      },
+      setTorchMode: { torchMode in
+        try camera.setTorchMode(torchMode)
       },
       events: {
         camera.events
@@ -148,7 +151,7 @@ fileprivate final class Camera: NSObject {
   }
 
   /// Adjust the zoom - may require switching cameras.
-  func zoom(_ videoZoomFactor: CGFloat) throws {
+  func setVideoZoomFactor(_ videoZoomFactor: CGFloat) throws {
     var newDevice: AVCaptureDevice? {
       AVCaptureDevice.DiscoverySession(
         deviceTypes: [videoZoomFactor < 1 ? .builtInUltraWideCamera : .builtInWideAngleCamera],
@@ -178,6 +181,23 @@ fileprivate final class Camera: NSObject {
       ? 1
       : videoZoomFactor
     self.device.unlockForConfiguration()
+  }
+  
+  func setTorchMode(_ torchMode: AVCaptureDevice.TorchMode) throws {
+    print("setTorchMode\(torchMode)")
+    do {
+      guard device.hasTorch else {
+        print("Device does not have a torch.")
+        return
+      }
+      try self.device.lockForConfiguration()
+      if device.isTorchModeSupported(.on) {
+        device.torchMode = torchMode
+      }
+      self.device.unlockForConfiguration()
+    } catch {
+      print("Error configuring torch mode: \(error)")
+    }
   }
   
   /// Start recording video to a url.
