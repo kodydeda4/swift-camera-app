@@ -7,18 +7,19 @@ import SwiftUI
 
 @MainActor
 @Observable
-final class RecordingCountdownModel: Identifiable {
+final class CountdownModel: Identifiable {
   let id = UUID()
   var secondsElapsed = 0
   var onFinish: () -> Void
-    = unimplemented("RecordingCountdownModel.onFinish")
+  = unimplemented("RecordingCountdownModel.onFinish")
+  
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
   
   var countdown: Int {
     self.userSettings.countdownTimer - self.secondsElapsed
   }
-
+  
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
@@ -36,12 +37,12 @@ final class RecordingCountdownModel: Identifiable {
   }
 }
 
-struct RecordingCountdownView: View {
-  @Bindable var model: RecordingCountdownModel
+struct CountdownView: View {
+  @Bindable var model: CountdownModel
   
   var body: some View {
     Text(self.model.countdown.description)
-      .font(.title)
+      .font(.largeTitle)
       .fontWeight(.bold)
       .task { await self.model.task() }
   }
@@ -49,5 +50,5 @@ struct RecordingCountdownView: View {
 
 //@DEDA fix this preview
 #Preview("Settings") {
-  RecordingCountdownView(model: RecordingCountdownModel())
+  CountdownView(model: CountdownModel())
 }

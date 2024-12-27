@@ -36,7 +36,7 @@ final class CameraModel {
     case userPermissions(UserPermissionsModel)
     case library(LibraryModel)
     case settings(SettingsModel)
-    case recordingCountdown(RecordingCountdownModel)
+    case countdown(CountdownModel)
   }
   
   // oop
@@ -62,7 +62,7 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
-    guard !self.destination.is(\.recordingCountdown) else {
+    guard !self.destination.is(\.countdown) else {
       self.destination = .none
       return
     }
@@ -74,7 +74,7 @@ final class CameraModel {
   private func prepareForRecording() {
     self.userSettings.countdownTimer == 0
     ? { self.startRecording() }()
-    : { self.destination = .recordingCountdown(RecordingCountdownModel()) }()
+    : { self.destination = .countdown(CountdownModel()) }()
   }
   
   private func startRecording() {
@@ -200,11 +200,8 @@ private extension CameraModel {
     case .settings:
       break
       
-    case let .recordingCountdown(model):
-      model.onFinish = { [weak self] in
-        self?.destination = .none
-        self?.startRecording()
-      }
+    case let .countdown(model):
+      model.onFinish = { [weak self] in self?.startRecording() }
       break
       
     case .none:
@@ -257,8 +254,8 @@ struct CameraView: View {
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
         }
-        .overlay(item: $model.destination.recordingCountdown) { $model in
-          RecordingCountdownView(model: model)
+        .overlay(item: $model.destination.countdown) { $model in
+          CountdownView(model: model)
         }
         .overlay(content: self.overlay)
     }

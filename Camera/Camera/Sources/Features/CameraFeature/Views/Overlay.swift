@@ -50,7 +50,7 @@ fileprivate extension CameraView {
 
   private var recordingButton: some View {
     Button(action: self.model.recordingButtonTapped) {
-      CameraRecordingButtonLabel(isRecording: self.model.isRecording)
+      CameraRecordingButtonLabel(model: self.model)
     }
     .buttonStyle(.plain)
     .disabled(!self.model.hasFullPermissions)
@@ -77,16 +77,15 @@ fileprivate extension CameraView {
         .clipShape(Circle())
     }
     .padding(.horizontal)
-    .disabled(self.model.isSwitchCameraButtonDisabled)
     .opacity(!self.model.isRecording ? 1 : 0.00000000001)
   }
 }
 
 fileprivate struct CameraRecordingButtonLabel: View {
-  let isRecording: Bool
+  @Bindable var model: CameraModel
 
   private var innerCircleWidth: CGFloat {
-    self.isRecording ? 32 : 55
+    self.model.isRecording ? 32 : 55
   }
 
   var body: some View {
@@ -97,13 +96,13 @@ fileprivate struct CameraRecordingButtonLabel: View {
         .frame(width: 65, height: 65)
 
       RoundedRectangle(
-        cornerRadius: self.isRecording ? 8 : self.innerCircleWidth / 2
+        cornerRadius: self.model.isRecording ? 8 : self.innerCircleWidth / 2
       )
-      .foregroundColor(.red)
+      .foregroundColor(self.model.destination.is(\.countdown) ? .white : .red)
       .frame(width: self.innerCircleWidth, height: self.innerCircleWidth)
 
     }
-    .animation(.linear(duration: 0.2), value: self.isRecording)
+    .animation(.linear(duration: 0.2), value: self.model.isRecording)
     .padding(20)
   }
 }
