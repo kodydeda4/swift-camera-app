@@ -58,6 +58,7 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
+    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
     !camera.isRecording ? self.startRecording() : self.stopRecording()
     self.destination = .none
   }
