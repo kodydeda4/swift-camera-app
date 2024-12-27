@@ -3,6 +3,8 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+//@DEDA you should create a userSettings type that is stored in the app...
+
 @MainActor
 @Observable
 final class SettingsModel: Identifiable {
@@ -32,26 +34,7 @@ struct SettingsView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       Spacer()
-      
-      VStack(alignment: .leading) {
-        Text("Settings")
-          .font(.title2)
-          .fontWeight(.heavy)
-          .foregroundColor(.white)
-          .padding(.vertical, 8)
-        
-        self.divider(padding: 0)
-        
-        VStack(alignment: .leading, spacing: 0) {
-          self.zoom.disabled(self.model.isZoomButtonsDisabled)
-          self.divider()
-        }
-
-        Text("Camera \(self.model.buildNumber.description)")
-          .foregroundColor(.white)
-          .opacity(0.75)
-          .padding(.vertical)
-      }
+      self.content
       .padding()
       .background { Color.black.opacity(0.55) }
       .background {
@@ -61,7 +44,7 @@ struct SettingsView: View {
           endPoint: .top
         )
       }
-      .clipShape(RoundedCornerShape(radius: 16, corners: [.topLeft, .topRight]))
+      .shadow(radius: 12)
 
       self.cameraControlsBackground
     }
@@ -70,6 +53,28 @@ struct SettingsView: View {
       maxHeight: .infinity,
       alignment: .top
     )
+  }
+  
+  @MainActor private var content: some View {
+    VStack(alignment: .leading) {
+      Text("Settings")
+        .font(.title2)
+        .fontWeight(.heavy)
+        .foregroundColor(.white)
+        .padding(.top, 8)
+      
+      Text("Camera \(self.model.buildNumber.description)")
+        .foregroundColor(.white)
+        .opacity(0.75)
+        .padding(.bottom)
+
+      self.divider(padding: 0)
+      ZoomSection(model: self.model)
+      self.divider()
+      ZoomSection(model: self.model)
+      self.divider()
+      ZoomSection(model: self.model)
+    }
   }
   
   private var cameraControlsBackground: some View {
@@ -90,32 +95,35 @@ struct SettingsView: View {
       .opacity(0.15)
       .padding(.leading, padding)
   }
-  
-  private var zoom: some View {
-    HStack(alignment: .firstTextBaseline) {
-      HStack {
-        Image(systemName: "binoculars")
-          .foregroundColor(.white)
+}
+
+private struct ZoomSection: View {
+  @Bindable var model: SettingsModel
+
+   var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .firstTextBaseline) {
+        HStack {
+          Image(systemName: "binoculars")
+            .foregroundColor(.white)
+          
+          Text("Zoom")
+            .fontWeight(.heavy)
+            .foregroundColor(.white)
+        }
         
-        Text("Zoom")
-          .fontWeight(.heavy)
-          .foregroundColor(.white)
-      }
-      
-      Spacer()
-      self.zoomButtons
-    }
-  }
-  
-  private var zoomButtons: some View {
-    HStack {
-      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
-        zoomButton(videoZoomFactor: value)
+        Spacer()
+        
+        HStack {
+          ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { value in
+            zoomButton(videoZoomFactor: value)
+          }
+        }
+        .padding(8)
       }
     }
-    .padding(8)
   }
-  
+
   private func zoomButton(videoZoomFactor value: CGFloat) -> some View {
     let isSelected = self.model.camera.zoom == value
     
@@ -144,19 +152,6 @@ struct SettingsView: View {
   }
 }
 
-private struct RoundedCornerShape: Shape {
-  var radius: CGFloat
-  var corners: UIRectCorner
-  
-  func path(in rect: CGRect) -> Path {
-    let path = UIBezierPath(
-      roundedRect: rect,
-      byRoundingCorners: corners,
-      cornerRadii: CGSize(width: radius, height: radius)
-    )
-    return Path(path.cgPath)
-  }
-}
 
 fileprivate extension CGFloat {
   var formattedDescription: String {
