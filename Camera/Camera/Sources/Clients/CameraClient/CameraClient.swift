@@ -14,7 +14,6 @@ struct CameraClient: Sendable {
   var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
   var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
-  var switchCamera: @Sendable () throws -> AVCaptureDevice.Position
   var setCameraPosition: @Sendable (AVCaptureDevice.Position) throws -> Void
   var zoom: @Sendable (CGFloat) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
@@ -68,9 +67,6 @@ extension CameraClient: DependencyKey {
       },
       stopRecording: {
         camera.stopRecording()
-      },
-      switchCamera: {
-        try camera.switchCamera()
       },
       setCameraPosition: { position in
         try camera.setPosition(position)
@@ -126,38 +122,7 @@ fileprivate final class Camera: NSObject {
     videoPreviewLayer.session = self.session
   }
   
-  /// Switch between front & back camera.
-  func switchCamera() throws -> AVCaptureDevice.Position {
-    let newPosition: AVCaptureDevice.Position = deviceInput.device.position == .back
-      ? .front
-      : .back
-
-    let discoverySession = AVCaptureDevice.DiscoverySession(
-      deviceTypes: [.builtInWideAngleCamera],
-      mediaType: .video,
-      position: newPosition
-    )
-    
-    guard
-      let newDevice = discoverySession.devices.first,
-      let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
-    else {
-      throw CameraClient.Failure.cannotMakeDeviceInput
-    }
-    
-    self.session.beginConfiguration()
-    self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else {
-      throw CameraClient.Failure.cannotAddInput
-    }
-    self.session.addInput(newDeviceInput)
-    self.deviceInput = newDeviceInput
-    self.session.commitConfiguration()
-    return newPosition
-  }
-  
   func setPosition(_ newPosition: AVCaptureDevice.Position) throws {
-
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [.builtInWideAngleCamera],
       mediaType: .video,

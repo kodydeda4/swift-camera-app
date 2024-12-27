@@ -37,7 +37,6 @@ final class SettingsModel: Identifiable {
   }
   
   func timerButtonTapped(value: CGFloat) {
-    //@DEDA handle somewhere else
     self.$userSettings.videoCaptureCountdownTimerDuration.withLock { $0 = value }
   }
 
@@ -47,7 +46,6 @@ final class SettingsModel: Identifiable {
   }
   
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
-    //@DEDA handle somewhere else
     self.$userSettings.videoCaptureRecordingQuality.withLock { $0 = value }
   }
 }
@@ -137,7 +135,7 @@ private struct Section<Content: View>: View {
       self.header
       Spacer()
       HStack(content: self.content)
-        .padding(8)
+        .padding([.leading, .top], 8)
     }
   }
   
@@ -150,6 +148,7 @@ private struct Section<Content: View>: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
       }
+      .padding(.bottom, 2)
       
       Text(subtitle)
         .fontWeight(.bold)
@@ -166,7 +165,7 @@ private struct CameraSection: View {
     Section(
       systemImage: "camera",
       title: "Camera",
-      subtitle: "Lorem ipsum"
+      subtitle: "Select a camera."
     ) {
       ForEach([UserSettings.CameraPosition]([.front, .back]), id: \.self) { cameraPosition in
         button(cameraPosition)
@@ -209,9 +208,9 @@ private struct ZoomSection: View {
     Section(
       systemImage: "binoculars",
       title: "Zoom",
-      subtitle: "Lorem ipsum"
+      subtitle: "Select the back camera zoom. "
     ) {
-      ForEach([CGFloat]([0.5, 1, 2, 3]), id: \.self) { zoom in
+      ForEach([CGFloat]([0.5, 1, 2]), id: \.self) { zoom in
         button(zoom)
       }
     }
@@ -252,7 +251,7 @@ private struct TimerSection: View {
     Section(
       systemImage: "timer",
       title: "Timer",
-      subtitle: "Lorem ipsum"
+      subtitle: "Create a timer before the video starts recording."
     ) {
       ForEach([CGFloat]([0, 3, 5]), id: \.self) { seconds in
         button(seconds)
@@ -295,7 +294,7 @@ private struct RecordingSection: View {
     Section(
       systemImage: "camera",
       title: "Recording",
-      subtitle: "Lorem ipsum"
+      subtitle: "Select a video recording quality."
     ) {
       HStack {
         ForEach(UserSettings.RecordingQuality.allCases) { quality in
@@ -340,7 +339,7 @@ private struct FlashSection: View {
     Section(
       systemImage: "bolt.fill",
       title: "Flash",
-      subtitle: "Lorem ipsum"
+      subtitle: "Turn flash on/off."
     ) {
       HStack {
         ForEach([true, false], id: \.self) { isEnabled in

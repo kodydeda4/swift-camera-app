@@ -5,6 +5,7 @@ import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
+import CasePaths
 
 @MainActor
 @Observable
@@ -94,10 +95,9 @@ final class CameraModel {
 
   func switchCameraButtonTapped() {
     _ = Result {
-      let position = try self.cameraClient.switchCamera()
-      self.$userSettings.cameraPosition.withLock {
-        $0 = UserSettings.CameraPosition(position)
-      }
+      let position: UserSettings.CameraPosition = self.userSettings.cameraPosition == .back ? .front : .back
+      try self.cameraClient.setCameraPosition(position.rawValue)
+      self.$userSettings.cameraPosition.withLock { $0 = position }
       self.destination = .none
     }
   }
@@ -154,6 +154,7 @@ final class CameraModel {
       }
       taskGroup.addTask {
         try? await self.cameraClient.connect(self.captureVideoPreviewLayer)
+//        try? await self.cameraClient.setCameraPosition(self.userSettings.cameraPosition.rawValue)
       }
       taskGroup.addTask {
         for await event in await self.cameraClient.events() {
