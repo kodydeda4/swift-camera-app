@@ -73,14 +73,7 @@ struct SettingsView: View {
       maxHeight: .infinity,
       alignment: .top
     )
-    .background {
-      ZStack {
-        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-        LinearGradient(colors: [.black, .clear], startPoint: .bottom, endPoint: .top)
-      }
-      .opacity(0.75)
-    }
-//    .background { Color.black.opacity(0.7) }
+    .background { Color.black.opacity(0.5) }
   }
 
   @MainActor private var content: some View {
@@ -166,7 +159,7 @@ private struct Section<Content: View>: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
       }
-      .padding(.bottom, 2)
+      .padding(.bottom, 4)
 
       Text(subtitle)
         .fontWeight(.bold)
