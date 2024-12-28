@@ -9,7 +9,6 @@ import SwiftUINavigation
 @Observable
 final class MainModel {
   private(set) var cameraModel = CameraModel()
-  let assetCollectionTitle = String.assetCollectionTitle
   
   // Shared
   @ObservationIgnored @Shared(.videos) var videos
@@ -21,20 +20,20 @@ final class MainModel {
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
   
   func task() async {
-    await withTaskGroup(of: Void.self) { taskGroup in
+    await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        guard let assetCollection = try? await self.fetchOrCreateAssetCollection(with: self.assetCollectionTitle) else {
-          print("Failed to fetch or create asset collection.")
-          return
-        }
+        let assetCollection = try await self.fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
+          
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }
         }
+        
         for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
           await MainActor.run {
             fetchResult.enumerateObjects { asset, _, _ in
               self.$videos.withLock {
                 $0[id: asset] = Video(phAsset: asset)
+                // @DEDA idk. here is where i would think you would just start cooking it.
               }
             }
           }
@@ -69,7 +68,7 @@ final class MainModel {
   }
 
   private func fetchOrCreateAssetCollection(
-    with title: String
+    withTitle title: String
   ) async throws -> PHAssetCollection {
     
     // Fetch collections with title.
@@ -84,7 +83,7 @@ final class MainModel {
     
     // Else, try to create to the album, refetch, and update.
     try await self.photos.performChanges(
-      .createAssetCollection(withTitle: self.assetCollectionTitle)
+      .createAssetCollection(withTitle: title)
     )
     
     albums = try await self.photos.fetchAssetCollections(
@@ -96,7 +95,7 @@ final class MainModel {
     }
     
     // If that didn't work, throw an error.
-    throw AnyError("Couldn't fetch asset collection.")
+    throw AnyError("Couldn't fetch or create asset collection.")
   }
 }
 
