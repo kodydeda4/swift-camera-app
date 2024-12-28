@@ -4,10 +4,12 @@ import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
+import IdentifiedCollections
 
 @MainActor
 @Observable
 final class MainModel {
+  private var assets = [PHAsset]() { didSet { self.syncVideos() } }
   private(set) var cameraModel = CameraModel()
   
   // Shared
@@ -23,49 +25,53 @@ final class MainModel {
     await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         let assetCollection = try await self.fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
-          
+        
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }
         }
         
         for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
           await MainActor.run {
-            fetchResult.enumerateObjects { asset, _, _ in
-              self.$videos.withLock {
-                $0[id: asset] = Video(phAsset: asset)
-                // @DEDA idk. here is where i would think you would just start cooking it.
-              }
+            self.assets = (0..<fetchResult.count).compactMap {
+              fetchResult.object(at: $0)
             }
           }
         }
       }
-//      for video in self.videos {
-//        print("yo kody")
-//
-//        taskGroup.addTask {
-//          let avAsset = await self.photos.requestAVAsset(
-//            video.phAsset, .none
-//          )?.asset
-//
-//          let avURLAsset = (avAsset as? AVURLAsset)
-//
-//          await MainActor.run {
-//            self.$videos.withLock {
-//              $0[id: video.id]?.avURLAsset = avURLAsset
-//            }
-//          }
-//
-//          if let avAsset, let image = try? await self.imageGenerator.image(avAsset)?.image {
-//            await MainActor.run {
-//              self.$videos.withLock {
-//                $0[id: video.id]?.thumbnail = UIImage(cgImage: image)
-//              }
-//            }
-//          }
-//        }
-//      }
     }
   }
+  
+  private func syncVideos() {
+    self.$videos.withLock {
+      $0 = []
+    }
+    
+    Task {
+      for asset in self.assets {
+        print("yo kody")
+        
+        guard
+          let avAsset = await self.photos.requestAVAsset(asset, .none)?.asset,
+          let avURLAsset = (avAsset as? AVURLAsset),
+          let thumbnail = try? await self.imageGenerator.image(avAsset)?.image
+        else {
+          print("gg")
+          return
+        }
+        
+        await MainActor.run {
+          self.$videos.withLock {
+            $0[id: asset] = Video(
+              phAsset: asset,
+              avURLAsset: avURLAsset,
+              thumbnail: UIImage(cgImage: thumbnail)
+            )
+          }
+        }
+      }
+    }
+  }
+  
 
   private func fetchOrCreateAssetCollection(
     withTitle title: String

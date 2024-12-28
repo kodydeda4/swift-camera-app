@@ -117,9 +117,9 @@ extension PhotosLibraryClient: DependencyKey {
       )
     },
     streamAssets: { request in
-      let fetchResult = PHAsset.fetchAssets(in: request.collection, options: request.options)
-      
-      return AsyncStream { continuation in
+      AsyncStream { continuation in
+        let fetchResult = PHAsset.fetchAssets(in: request.collection, options: request.options)
+        
         continuation.yield(fetchResult)
         
         let observer = PhotoLibraryChangeObserver { change in
