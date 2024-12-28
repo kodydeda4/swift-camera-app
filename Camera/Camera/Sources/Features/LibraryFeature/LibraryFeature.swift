@@ -10,22 +10,10 @@ import SwiftUINavigation
 @Observable
 final class LibraryModel: Identifiable {
   public let id = UUID()
-  var videos: IdentifiedArrayOf<Video> = []
+  @ObservationIgnored @Shared(.videos) var videos
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
     = unimplemented("Library.dismiss")
-
-  @ObservationIgnored @Dependency(\.uuid) var uuid
-  @ObservationIgnored @SharedReader(.assetCollection) var assetCollection
-  @ObservationIgnored @Dependency(\.photos) var photos
-  @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
-  
-  struct Video: Identifiable {
-    var id: UUID
-    let phAsset: PHAsset
-    var avURLAsset: AVURLAsset?
-    var thumbnail: UIImage?
-  }
   
   @CasePathable
   enum Destination {
@@ -49,44 +37,7 @@ final class LibraryModel: Identifiable {
     }
   }
   
-  // @DEDA this should be reactive.
-  
-  func task() async {
-    _ = await Result {
-      guard let assetCollection else {
-        throw AnyError("collection was nil somehow.")
-      }
-      
-      self.videos = []
-      let fetchResult = try await self.photos.fetchAssets(.videos(in: assetCollection))
-      
-      fetchResult.enumerateObjects { asset, _, _ in
-        self.videos.append(.init(id: self.uuid(), phAsset: asset))
-      }
-      
-      await withTaskGroup(of: Void.self) { taskGroup in
-        for video in self.videos {
-          taskGroup.addTask {
-            let avAsset = await self.photos.requestAVAsset(
-              video.phAsset, .none
-            )?.asset
-            
-            let avURLAsset = (avAsset as? AVURLAsset)
-            
-            await MainActor.run {
-              self.videos[id: video.id]?.avURLAsset = avURLAsset
-            }
-
-            if let avAsset, let image = try? await self.imageGenerator.image(avAsset)?.image {
-              await MainActor.run {
-                self.videos[id: video.id]?.thumbnail = UIImage(cgImage: image)
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  func task() async {}
   
   private func bind() {
     switch destination {
@@ -149,7 +100,7 @@ struct LibraryView: View {
     }
   }
   
-  @MainActor private func videoView(video: LibraryModel.Video) -> some View {
+  @MainActor private func videoView(video: Video) -> some View {
     Button {
       self.model.buttonTapped(video: video)
     } label: {

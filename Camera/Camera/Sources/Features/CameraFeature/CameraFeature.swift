@@ -14,11 +14,11 @@ final class CameraModel {
   var destination: Destination? { didSet { self.bind() } }
   var navigationTitle = "00:00:00"
   var isRecording = false
-  var latestVideoThumbnail: UIImage?
   var recordingStartDate: Date?
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 
   // Shared
+  @ObservationIgnored @Shared(.videos) var videos
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
@@ -141,39 +141,6 @@ final class CameraModel {
               since: self.recordingStartDate ?? .now
             )
           }
-        }
-      }
-      taskGroup.addTask {
-        // @DEDA you have to wait for MainModel to finish syncing the asset collection before you can continue. You will nuke MainModel soon.
-        // also, this is supposed to be responsive.. after you finish recording.
-        try? await Task.sleep(for: .seconds(1))
-        guard let assetCollection = await self.assetCollection else {
-          print("Asset collection was nil.")
-          return
-        }
-        guard let fetchResult = try? await self.photos.fetchAssets(.lastVideo(in: assetCollection))
-        else {
-          print("Fetch result failed.")
-          return
-        }
-        guard let phAsset = fetchResult.lastObject else {
-          print("PHAsset was nil.")
-          return
-        }
-        guard let avAsset = (
-          await self.photos.requestAVAsset(phAsset, .none)?
-            .asset as? AVURLAsset
-        )
-        else {
-          print("AVAsset was nil.")
-          return
-        }
-        guard let imageThumbnail = try? await self.imageGenerator.image(avAsset)?.image else {
-          print("Failed to generate image thumbnail")
-          return
-        }
-        await MainActor.run {
-          self.latestVideoThumbnail = UIImage(cgImage: imageThumbnail)
         }
       }
       taskGroup.addTask {
