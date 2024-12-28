@@ -73,7 +73,7 @@ struct SettingsView: View {
       maxHeight: .infinity,
       alignment: .top
     )
-    .background { Color.black.opacity(0.5) }
+    .background { Color.black.opacity(0.75) }
   }
 
   @MainActor private var content: some View {
