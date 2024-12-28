@@ -104,7 +104,7 @@ struct LibraryView: View {
             .fontWeight(.semibold)
         }
         ToolbarItem(placement: .bottomBar) {
-          Text("\(self.model.movies.count) movies")
+          Text("\(self.model.videos.count) videos")
         }
       }
     }
