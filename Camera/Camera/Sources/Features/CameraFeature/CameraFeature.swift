@@ -114,7 +114,10 @@ final class CameraModel {
     self.destination = .library(LibraryModel())
   }
   func toggleSettingsButtonTapped () {
-    self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
+    Task {
+      await self.hapticFeedback.generate(.soft)
+      self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
+    }
   }
   
   func dismissSettingsButtonTapped() {

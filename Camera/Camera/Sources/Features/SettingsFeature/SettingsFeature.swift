@@ -50,7 +50,7 @@ final class SettingsModel: Identifiable {
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
     self.$userSettings.recordingQuality.withLock { $0 = value }
   }
-  
+
   func gridButtonTapped(value: Bool) {
     self.$userSettings.isGridEnabled.withLock { $0 = value }
   }
@@ -73,7 +73,14 @@ struct SettingsView: View {
       maxHeight: .infinity,
       alignment: .top
     )
-    .background { Color.black.opacity(0.7) }
+    .background {
+      ZStack {
+        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+        LinearGradient(colors: [.black, .clear], startPoint: .bottom, endPoint: .top)
+      }
+      .opacity(0.75)
+    }
+//    .background { Color.black.opacity(0.7) }
   }
 
   @MainActor private var content: some View {
@@ -91,19 +98,22 @@ struct SettingsView: View {
           .padding(.bottom)
 
         self.divider
-        CameraSection(model: self.model)
-        self.divider
-        ZoomSection(model: self.model)
-        self.divider
-        CountdownTimerSection(model: self.model)
-        self.divider
-        RecordingQualitySection(model: self.model)
-        self.divider
-        TorchModeSection(model: self.model)
-        self.divider
-        GridSection(model: self.model)
+        VStack(alignment: .leading, spacing: 20) {
+          CameraSection(model: self.model)
+          self.divider
+          ZoomSection(model: self.model)
+          self.divider
+          CountdownTimerSection(model: self.model)
+          self.divider
+          RecordingQualitySection(model: self.model)
+          self.divider
+          TorchModeSection(model: self.model)
+          self.divider
+          GridSection(model: self.model)
+        }
       }
       .padding([.horizontal, .top])
+      .shadow(color: Color.black, radius: 16, y: 12)
     }
   }
 
