@@ -78,6 +78,19 @@ struct LibraryView: View {
       .navigationDestination(item: $model.destination.videoPlayer) { model in
         VideoPlayerView(model: model)
       }
+      .overlay {
+        VStack {
+          Button(action: self.model.cancelButtonTapped) {
+            Image(systemName: "xmark.circle.fill")
+              .resizable()
+              .scaledToFit()
+              .frame(width: 60, height: 60)
+              .foregroundColor(.secondary)
+              .padding()
+          }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+      }
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
           Button(action: self.model.editButtonTapped) {
@@ -90,11 +103,8 @@ struct LibraryView: View {
           Text("Library")
             .fontWeight(.semibold)
         }
-        ToolbarItem(placement: .topBarTrailing) {
-          Button(action: self.model.cancelButtonTapped) {
-            Image(systemName: "xmark.circle.fill")
-              .foregroundColor(.secondary)
-          }
+        ToolbarItem(placement: .bottomBar) {
+          Text("\(self.model.movies.count) movies")
         }
       }
     }

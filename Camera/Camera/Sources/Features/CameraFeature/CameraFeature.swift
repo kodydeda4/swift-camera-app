@@ -39,20 +39,6 @@ final class CameraModel {
     case countdown(CountdownModel)
   }
   
-  // oop
-  private static func formattedRecordingDuration(since startDate: Date) -> String {
-    let now = Date() // Current date and time
-    let elapsedTime = now.timeIntervalSince(startDate) // Time difference in seconds
-    
-    // Use DateComponentsFormatter to format the elapsed time
-    let formatter = DateComponentsFormatter()
-    formatter.allowedUnits = [.hour, .minute, .second] // Use hours, minutes, and seconds
-    formatter.unitsStyle = .positional // Ensures the "00:00:00" style
-    formatter.zeroFormattingBehavior = .pad // Pads with leading zeros
-    
-    return formatter.string(from: elapsedTime) ?? "00:00:00"
-  }
-  
   var hasFullPermissions: Bool {
     self.userPermissions == .authorized
   }
@@ -85,7 +71,7 @@ final class CameraModel {
   private func startRecording() {
     self.hapticFeedback.generate(.soft)
     self.destination = .none
-    try? self.camera.startRecording(self.movieFileOutput)
+    try? self.camera.startRecording(.movieFileOutput(id: self.uuid()))
     self.recordingStartDate = .now
     self.isRecording = true
   }
@@ -137,9 +123,9 @@ final class CameraModel {
         for await _ in await self.clock.timer(interval: .seconds(1)) {
           await MainActor.run {
             // update timer
-            self.navigationTitle = Self.formattedRecordingDuration(
-              since: self.recordingStartDate ?? .now
-            )
+            self.navigationTitle = DateComponentsFormatter.recordingDuration.string(
+              from: Date().timeIntervalSince(self.recordingStartDate ?? .now)
+            ) ?? "00:00:00"
           }
         }
       }
@@ -154,6 +140,24 @@ final class CameraModel {
         }
       }
     }
+  }
+}
+
+fileprivate extension URL {
+  static func movieFileOutput(id: UUID) -> Self {
+    URL.temporaryDirectory
+      .appending(component: id.uuidString)
+      .appendingPathExtension(for: .quickTimeMovie)
+  }
+}
+
+fileprivate extension DateComponentsFormatter {
+  static var recordingDuration: DateComponentsFormatter {
+    let rv = DateComponentsFormatter()
+    rv.allowedUnits = [.hour, .minute, .second] // Use hours, minutes, and seconds
+    rv.unitsStyle = .positional // Ensures the "00:00:00" style
+    rv.zeroFormattingBehavior = .pad // Pads with leading zeros
+    return rv
   }
 }
 
@@ -195,12 +199,6 @@ private extension CameraModel {
         }
       }
     }
-  }
-  
-  var movieFileOutput: URL {
-    URL.temporaryDirectory
-      .appending(component: self.uuid().uuidString)
-      .appendingPathExtension(for: .quickTimeMovie)
   }
 }
 
