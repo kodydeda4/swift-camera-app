@@ -10,10 +10,12 @@ import SwiftUINavigation
 @Observable
 final class LibraryModel: Identifiable {
   public let id = UUID()
-  @ObservationIgnored @Shared(.videos) var videos
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
     = unimplemented("Library.dismiss")
+
+  @ObservationIgnored @Shared(.videos) var videos
+  @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   
   @CasePathable
   enum Destination {
@@ -21,6 +23,7 @@ final class LibraryModel: Identifiable {
   }
   
   func cancelButtonTapped() {
+    self.hapticFeedback.generate(.soft)
     self.dismiss()
   }
   
@@ -89,7 +92,7 @@ struct LibraryView: View {
               .padding()
           }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       }
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {

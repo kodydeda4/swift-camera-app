@@ -89,6 +89,7 @@ final class CameraModel {
   }
   
   func navigateCameraRoll() {
+    self.hapticFeedback.generate(.soft)
     self.destination = .library(LibraryModel())
   }
   
