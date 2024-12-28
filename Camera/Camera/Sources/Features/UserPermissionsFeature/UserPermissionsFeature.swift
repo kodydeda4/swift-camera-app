@@ -44,9 +44,7 @@ final class UserPermissionsModel: Identifiable {
       break
       
     case .denied:
-      Task {
-        await self.application.open(URL(string: UIApplication.openSettingsURLString)!)
-      }
+      self.application.open(URL(string: UIApplication.openSettingsURLString)!)
       
     default:
       Task {

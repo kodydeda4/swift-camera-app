@@ -62,48 +62,40 @@ final class CameraModel {
   }
   
   func recordingButtonTapped() {
-    Task {
-      guard !self.destination.is(\.countdown) else {
-        await self.hapticFeedback.generate(.soft)
-        self.destination = .none
-        return
-      }
-      
-      !isRecording ? self.prepareForRecording() : self.stopRecording()
+    guard !self.destination.is(\.countdown) else {
+      self.hapticFeedback.generate(.soft)
+      self.destination = .none
+      return
     }
+    
+    !isRecording ? self.prepareForRecording() : self.stopRecording()
   }
   
   // @DEDA here you can determine wether or not to show the recording countdown overlay
   private func prepareForRecording() {
-    Task {
-      guard self.userSettings.countdownTimer == 0 else {
-        await self.hapticFeedback.generate(.soft)
-        self.destination = .countdown(CountdownModel())
-        return
-      }
-      
-      self.startRecording()
+    guard self.userSettings.countdownTimer == 0 else {
+      self.hapticFeedback.generate(.soft)
+      self.destination = .countdown(CountdownModel())
+      return
     }
+    
+    self.startRecording()
   }
   
   private func startRecording() {
-    Task {
-      await self.hapticFeedback.generate(.soft)
-      self.destination = .none
-      try? self.camera.startRecording(self.movieFileOutput)
-      self.recordingStartDate = .now
-      self.isRecording = true
-    }
+    self.hapticFeedback.generate(.soft)
+    self.destination = .none
+    try? self.camera.startRecording(self.movieFileOutput)
+    self.recordingStartDate = .now
+    self.isRecording = true
   }
 
   private func stopRecording() {
-    Task {
-      await self.hapticFeedback.generate(.soft)
-      self.destination = .none
-      try? camera.stopRecording()
-      self.recordingStartDate = .none
-      self.isRecording = false
-    }
+    self.hapticFeedback.generate(.soft)
+    self.destination = .none
+    try? camera.stopRecording()
+    self.recordingStartDate = .none
+    self.isRecording = false
   }
 
   func permissionsButtonTapped() {
@@ -113,11 +105,10 @@ final class CameraModel {
   func navigateCameraRoll() {
     self.destination = .library(LibraryModel())
   }
+  
   func toggleSettingsButtonTapped () {
-    Task {
-      await self.hapticFeedback.generate(.soft)
-      self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
-    }
+    self.hapticFeedback.generate(.soft)
+    self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
   }
   
   func dismissSettingsButtonTapped() {

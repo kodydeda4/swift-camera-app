@@ -3,8 +3,8 @@ import DependenciesMacros
 import SwiftUI
 
 @DependencyClient
-struct HapticFeedbackClient: Sendable {
-  var generate: @Sendable (UIImpactFeedbackGenerator.FeedbackStyle) async -> Void
+struct HapticFeedbackClient {
+  var generate: (UIImpactFeedbackGenerator.FeedbackStyle) -> Void
 }
 
 extension DependencyValues {
@@ -15,7 +15,9 @@ extension DependencyValues {
 }
 
 extension HapticFeedbackClient: DependencyKey {
-  static var liveValue = Self {
-    UIImpactFeedbackGenerator(style: $0).impactOccurred()
+  static var liveValue: Self {
+    return Self {
+      UIImpactFeedbackGenerator(style: $0).impactOccurred()
+    }
   }
 }

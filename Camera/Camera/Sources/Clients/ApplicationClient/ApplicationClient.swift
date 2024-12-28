@@ -3,8 +3,8 @@ import DependenciesMacros
 import SwiftUI
 
 @DependencyClient
-struct ApplicationClient: Sendable {
-  var open: @Sendable (URL) async -> Void
+struct ApplicationClient {
+  var open: (URL) -> Void
 }
 
 extension DependencyValues {
@@ -15,7 +15,9 @@ extension DependencyValues {
 }
 
 extension ApplicationClient: DependencyKey {
-  static var liveValue = Self {
-    UIApplication.shared.open($0, options: [:], completionHandler: nil)
+  static var liveValue: Self {
+    return Self {
+      UIApplication.shared.open($0, options: [:], completionHandler: nil)
+    }
   }
 }
