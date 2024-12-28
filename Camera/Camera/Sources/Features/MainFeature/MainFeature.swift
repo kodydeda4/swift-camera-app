@@ -1,10 +1,10 @@
 import AVFoundation
 import Dependencies
+import IdentifiedCollections
 import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-import IdentifiedCollections
 
 @MainActor
 @Observable
@@ -24,7 +24,8 @@ final class MainModel {
   func task() async {
     await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        let assetCollection = try await self.fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
+        let assetCollection = try await self
+          .fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
         
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }

@@ -1,6 +1,6 @@
+import IdentifiedCollections
 import Photos
 import Sharing
-import IdentifiedCollections
 import UIKit
 
 struct Video: Identifiable {

@@ -76,8 +76,8 @@ fileprivate extension CameraView {
             .padding(8)
             .background(
               !self.model.destination.is(\.settings)
-              ? Color.black.opacity(0.5)
-              : Color.white.opacity(0.1)
+                ? Color.black.opacity(0.5)
+                : Color.white.opacity(0.1)
             )
             .foregroundColor(.white)
             .clipShape(Circle())
