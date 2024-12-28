@@ -91,7 +91,7 @@ struct SettingsView: View {
           .padding(.bottom)
 
         self.divider
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading) {
           CameraSection(model: self.model)
           self.divider
           ZoomSection(model: self.model)
