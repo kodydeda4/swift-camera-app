@@ -300,6 +300,7 @@ struct CameraView: View {
   }
 }
 
+// @DEDA fix up the grid bro
 private struct CameraGridView: View {
   private let color = Color.gray
   private let spacing: CGFloat = 128
