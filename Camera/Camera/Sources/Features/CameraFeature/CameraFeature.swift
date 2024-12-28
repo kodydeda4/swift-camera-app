@@ -39,6 +39,14 @@ final class CameraModel {
     case countdown(CountdownModel)
   }
   
+  var isCameraRollButtonPresented: Bool {
+    !self.isRecording
+  }
+  
+  var isSettingsButtonPresented: Bool {
+    !self.isRecording
+  }
+
   var hasFullPermissions: Bool {
     self.userPermissions == .authorized
   }
