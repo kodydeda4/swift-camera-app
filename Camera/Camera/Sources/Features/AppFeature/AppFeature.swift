@@ -26,6 +26,7 @@ import SwiftUINavigation
  - [x] CRUD the videos
  - [x] Share videos
  - [x] Different zooms
+ - [x] Grid
  - [ ] Slow motion settings?
  - [ ] Fix app backgrounding
  - [ ] Log4Swift

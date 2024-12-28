@@ -7,6 +7,7 @@ struct UserSettings: Equatable, Codable {
   var countdownTimer = 0
   var recordingQuality = RecordingQuality.hd
   var torchMode = TorchMode.off
+  var isGridEnabled = false
 
   enum TorchMode: Equatable, Codable, CaseIterable {
     case on

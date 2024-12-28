@@ -50,6 +50,10 @@ final class SettingsModel: Identifiable {
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
     self.$userSettings.recordingQuality.withLock { $0 = value }
   }
+  
+  func gridButtonTapped(value: Bool) {
+    self.$userSettings.isGridEnabled.withLock { $0 = value }
+  }
 }
 
 // MARK: - SwiftUI
@@ -96,6 +100,8 @@ struct SettingsView: View {
         RecordingQualitySection(model: self.model)
         self.divider
         TorchModeSection(model: self.model)
+        self.divider
+        GridSection(model: self.model)
       }
       .padding([.horizontal, .top])
     }
@@ -341,7 +347,7 @@ private struct TorchModeSection: View {
     Section(
       systemImage: "bolt.fill",
       title: "Torch",
-      subtitle: "Turn torch on/off/auto."
+      subtitle: "Toggle torch on/off/auto."
     ) {
       HStack {
         ForEach(UserSettings.TorchMode.allCases) { torchMode in
@@ -372,6 +378,51 @@ private struct TorchModeSection: View {
           .clipShape(Circle())
 
         Text(torchMode.description)
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
+}
+
+private struct GridSection: View {
+  @Bindable var model: SettingsModel
+
+  var body: some View {
+    Section(
+      systemImage: "grid",
+      title: "Grid",
+      subtitle: "Toggle grid on/off."
+    ) {
+      HStack {
+        ForEach([true, false], id: \.self) { isEnabled in
+          button(isEnabled)
+        }
+      }
+    }
+  }
+
+  private func button(_ isEnabled: Bool) -> some View {
+    let isSelected = self.model.userSettings.isGridEnabled == isEnabled
+
+    return Button {
+      self.model.gridButtonTapped(value: isEnabled)
+    } label: {
+      VStack {
+        Text(isEnabled ? "On" : "Off")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+
+        Text(isEnabled ? "On" : "Off")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)

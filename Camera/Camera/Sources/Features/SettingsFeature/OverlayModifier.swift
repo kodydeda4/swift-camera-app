@@ -4,12 +4,12 @@ import SwiftUINavigation
 private struct OverlayModifier<OverlayModifier>: ViewModifier
   where OverlayModifier: View
 {
-  @Binding var isActive: Bool
+  @Binding var isPresented: Bool
   let content: () -> OverlayModifier
 
   func body(content: Content) -> some View {
     content.overlay {
-      if isActive {
+      if isPresented {
         self.content()
       }
     }
@@ -20,14 +20,14 @@ extension View {
   /// Layers the views that you specify in front of this view,
   /// when the binding to a Boolean value you provide is true.
   func overlay<Content>(
-    isActive: Binding<Bool>,
+    isPresented: Binding<Bool>,
     @ViewBuilder content: @escaping () -> Content
   ) -> some View
     where Content: View
   {
     modifier(
       OverlayModifier(
-        isActive: isActive,
+        isPresented: isPresented,
         content: content
       )
     )
@@ -43,7 +43,7 @@ extension View {
   {
     modifier(
       OverlayModifier(
-        isActive: Binding(item),
+        isPresented: Binding(item),
         content: { Binding(unwrapping: item).map(content) }
       )
     )
