@@ -4,7 +4,7 @@ import IdentifiedCollections
 import UIKit
 
 struct Video: Identifiable {
-  var id: UUID
+  var id: PHAsset { phAsset }
   let phAsset: PHAsset
   var avURLAsset: AVURLAsset?
   var thumbnail: UIImage?

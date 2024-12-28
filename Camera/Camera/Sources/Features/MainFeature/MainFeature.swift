@@ -23,8 +23,43 @@ final class MainModel {
         await self.syncAssetCollection(Result {
           try await self.fetchOrCreateAssetCollection(with: self.assetCollectionTitle)
         })
-        await self.syncVideos()
+//      }
+//      taskGroup.addTask {
+        guard let assetCollection = await self.assetCollection else {
+          print("asset collection was nil.")
+          return
+        }
+        for await fetchResult in await self.photos.streamAssets(
+          .videos(in: assetCollection)
+        ) {
+          await self.streamAssetsResponse(fetchResult)
+        }
       }
+//        for video in self.videos {
+//          print("yo kody")
+//          
+//          taskGroup.addTask {
+//            let avAsset = await self.photos.requestAVAsset(
+//              video.phAsset, .none
+//            )?.asset
+//            
+//            let avURLAsset = (avAsset as? AVURLAsset)
+//            
+//            await MainActor.run {
+//              self.$videos.withLock {
+//                $0[id: video.id]?.avURLAsset = avURLAsset
+//              }
+//            }
+//            
+//            if let avAsset, let image = try? await self.imageGenerator.image(avAsset)?.image {
+//              await MainActor.run {
+//                self.$videos.withLock {
+//                  $0[id: video.id]?.thumbnail = UIImage(cgImage: image)
+//                }
+//              }
+//            }
+//          }
+//        }
     }
   }
   
@@ -70,49 +105,22 @@ final class MainModel {
     throw AnyError("Couldn't fetch asset collection.")
   }
   
-  
-  private func syncVideos() async {
-    _ = await Result {
-      guard let assetCollection else {
-        throw AnyError("collection was nil somehow.")
-      }
-      
-      self.$videos.withLock { $0 = [] }
-      let fetchResult = try await self.photos.fetchAssets(.videos(in: assetCollection))
-      
-      fetchResult.enumerateObjects { asset, _, _ in
-        self.$videos.withLock {
-          $0.append(.init(id: self.uuid(), phAsset: asset))
-        }
-      }
-      
-      await withTaskGroup(of: Void.self) { taskGroup in
-        for video in self.videos {
-          taskGroup.addTask {
-            let avAsset = await self.photos.requestAVAsset(
-              video.phAsset, .none
-            )?.asset
-            
-            let avURLAsset = (avAsset as? AVURLAsset)
-            
-            await MainActor.run {
-              self.$videos.withLock {
-                $0[id: video.id]?.avURLAsset = avURLAsset
-              }
-            }
-
-            if let avAsset, let image = try? await self.imageGenerator.image(avAsset)?.image {
-              await MainActor.run {
-                self.$videos.withLock {
-                  $0[id: video.id]?.thumbnail = UIImage(cgImage: image)
-                }
-              }
-            }
-          }
-        }
+  private func streamAssetsResponse(_ fetchResult: PHFetchResult<PHAsset>) {
+    fetchResult.enumerateObjects { asset, _, _ in
+      self.$videos.withLock {
+        $0[id: asset] = Video(phAsset: asset)
       }
     }
   }
+  
+//  private func syncVideos() async {
+//    guard let assetCollection else {
+//      print("collection was nil somehow.")
+//      return
+//    }
+//    await withThrowingTaskGroup(of: Void.self) { taskGroup in
+//    }
+//  }
 }
 
 // MARK: - SwiftUI

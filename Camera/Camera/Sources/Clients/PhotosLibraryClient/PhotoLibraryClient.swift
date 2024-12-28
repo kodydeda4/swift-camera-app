@@ -14,27 +14,31 @@ import UIKit
 
 @DependencyClient
 struct PhotosLibraryClient: Sendable {
-
+  
   var authorizationStatus: @Sendable (
     _ for: PHAccessLevel
   ) -> PHAuthorizationStatus = { _ in .notDetermined }
-
+  
   var requestAuthorization: @Sendable (
     _ for: PHAccessLevel
   ) async -> PHAuthorizationStatus = { _ in .notDetermined }
-
+  
   var performChanges: @Sendable (
     Request.PhotoLibraryChange
   ) async throws -> Void
-
+  
   var fetchAssetCollections: @Sendable (
     Request.AssetCollections
   ) async throws -> PHFetchResult<PHAssetCollection>
-
+  
   var fetchAssets: @Sendable (
     Request.Assets
   ) async throws -> PHFetchResult<PHAsset>
-
+  
+  var streamAssets: @Sendable (
+    Request.Assets
+  ) async -> AsyncStream<PHFetchResult<PHAsset>> = { _ in .finished }
+  
   var requestAVAsset: @Sendable (
     _ asset: PHAsset,
     _ options: PHVideoRequestOptions?
@@ -112,6 +116,25 @@ extension PhotosLibraryClient: DependencyKey {
         options: request.options
       )
     },
+    streamAssets: { request in
+      let fetchResult = PHAsset.fetchAssets(in: request.collection, options: request.options)
+      
+      return AsyncStream { continuation in
+        continuation.yield(fetchResult)
+        
+        let observer = PhotoLibraryChangeObserver { change in
+          if let changeDetails = change.changeDetails(for: fetchResult) {
+            continuation.yield(changeDetails.fetchResultAfterChanges)
+          }
+        }
+        
+        PHPhotoLibrary.shared().register(observer)
+        
+        continuation.onTermination = { @Sendable _ in
+          PHPhotoLibrary.shared().unregisterChangeObserver(observer)
+        }
+      }
+    },
     requestAVAsset: { asset, options in
       await withCheckedContinuation { continuation in
         PHImageManager.default().requestAVAsset(
@@ -132,6 +155,18 @@ extension PhotosLibraryClient: DependencyKey {
   )
 }
 
+private final class PhotoLibraryChangeObserver: NSObject, PHPhotoLibraryChangeObserver {
+  private let changeHandler: (PHChange) -> Void
+  
+  init(changeHandler: @escaping (PHChange) -> Void) {
+    self.changeHandler = changeHandler
+  }
+  
+  func photoLibraryDidChange(_ change: PHChange) {
+    changeHandler(change)
+  }
+}
+
 // MARK: - Requests
 
 extension PhotosLibraryClient.Request.PhotoLibraryChange {
@@ -141,20 +176,20 @@ extension PhotosLibraryClient.Request.PhotoLibraryChange {
   ) -> Self {
     Self {
       let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-
+      
       if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
         let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection)
         albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
       }
     }
   }
-
+  
   static func delete(assets: [PHAsset]) -> Self {
     Self {
       PHAssetChangeRequest.deleteAssets(assets as NSArray)
     }
   }
-
+  
   static func createAssetCollection(withTitle title: String) -> Self {
     Self {
       PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)
@@ -180,7 +215,7 @@ extension PhotosLibraryClient.Request.Assets {
       )
     })
   }
-
+  
   static func lastVideo(in collection: PHAssetCollection) -> Self {
     Self(collection: collection, options: .make {
       $0.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
