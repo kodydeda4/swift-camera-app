@@ -262,11 +262,11 @@ struct CameraView: View {
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
         }
-        .overlay(item: $model.destination.settings) { $model in
-          SettingsView(model: model)
-        }
         .overlay(isPresented: .constant(self.model.userSettings.isGridEnabled)) {
           CameraGridView()
+        }
+        .overlay(item: $model.destination.settings) { $model in
+          SettingsView(model: model)
         }
         .overlay(item: $model.destination.countdown) { $model in
           CountdownView(model: model)
