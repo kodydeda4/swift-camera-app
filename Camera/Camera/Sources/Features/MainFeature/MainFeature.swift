@@ -11,8 +11,11 @@ final class MainModel {
   private(set) var cameraModel = CameraModel()
   let assetCollectionTitle = String.assetCollectionTitle
   
+  // Shared
   @ObservationIgnored @Shared(.videos) var videos
   @ObservationIgnored @Shared(.assetCollection) var assetCollection
+  
+  // Dependencies
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
@@ -27,15 +30,14 @@ final class MainModel {
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }
         }
-        
         for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
-          await MainActor.run {
+//          await MainActor.run {
             fetchResult.enumerateObjects { asset, _, _ in
-              self.$videos.withLock {
-                $0[id: asset] = Video(phAsset: asset)
-              }
+//              self.$videos.withLock {
+//                $0[id: asset] = Video(phAsset: asset)
+//              }
             }
-          }
+//          }
         }
       }
 //      for video in self.videos {
