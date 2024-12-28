@@ -21,7 +21,7 @@ final class MainModel {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         guard let assetCollection = try? await self.fetchOrCreateAssetCollection(with: self.assetCollectionTitle) else {
-          print("asset collection was nil.")
+          print("Failed to fetch or create asset collection.")
           return
         }
         await MainActor.run {
