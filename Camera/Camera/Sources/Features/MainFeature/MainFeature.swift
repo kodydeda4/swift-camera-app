@@ -19,7 +19,7 @@ final class MainModel {
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
-
+  
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
@@ -31,13 +31,13 @@ final class MainModel {
           self.$assetCollection.withLock { $0 = assetCollection }
         }
         for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
-//          await MainActor.run {
+          await MainActor.run {
             fetchResult.enumerateObjects { asset, _, _ in
-//              self.$videos.withLock {
-//                $0[id: asset] = Video(phAsset: asset)
-//              }
+              self.$videos.withLock {
+                $0[id: asset] = Video(phAsset: asset)
+              }
             }
-//          }
+          }
         }
       }
 //      for video in self.videos {
