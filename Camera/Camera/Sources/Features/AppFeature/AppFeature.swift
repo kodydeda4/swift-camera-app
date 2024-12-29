@@ -28,7 +28,8 @@ import SwiftUINavigation
  - [x] Different zooms
  - [x] Grid
  - [x] Add sounds for when the camera starts/stops
- - [ ] display time in grid
+ - [x] display time in grid
+ - [ ] back camera zoom buttons on camera feature (without opening settings)
  - [ ] multi-select crud
  - [ ] Slow motion settings?
  - [ ] Fix app backgrounding
