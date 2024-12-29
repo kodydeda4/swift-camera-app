@@ -117,7 +117,19 @@ extension PhotosLibraryClient: DependencyKey {
       )
     },
     streamAssets: { request in
-      AsyncStream { continuation in
+      final class PhotoLibraryChangeObserver: NSObject, PHPhotoLibraryChangeObserver {
+        private let handleChange: (PHChange) -> Void
+        
+        init(handleChange: @escaping (PHChange) -> Void) {
+          self.handleChange = handleChange
+        }
+        
+        func photoLibraryDidChange(_ change: PHChange) {
+          handleChange(change)
+        }
+      }
+      
+      return AsyncStream { continuation in
         let fetchResult = PHAsset.fetchAssets(in: request.collection, options: request.options)
         
         continuation.yield(fetchResult)
@@ -153,87 +165,5 @@ extension PhotosLibraryClient: DependencyKey {
       }
     }
   )
-}
-
-private final class PhotoLibraryChangeObserver: NSObject, PHPhotoLibraryChangeObserver {
-  private let changeHandler: (PHChange) -> Void
-  
-  init(changeHandler: @escaping (PHChange) -> Void) {
-    self.changeHandler = changeHandler
-  }
-  
-  func photoLibraryDidChange(_ change: PHChange) {
-    changeHandler(change)
-  }
-}
-
-// MARK: - Requests
-
-extension PhotosLibraryClient.Request.PhotoLibraryChange {
-  static func save(
-    contentsOf url: URL,
-    to photosContext: PHAssetCollection
-  ) -> Self {
-    Self {
-      let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-      
-      if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
-        let albumChangeRequest = PHAssetCollectionChangeRequest(for: photosContext)
-        albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
-      }
-    }
-  }
-  
-  static func delete(assets: [PHAsset]) -> Self {
-    Self {
-      PHAssetChangeRequest.deleteAssets(assets as NSArray)
-    }
-  }
-  
-  static func createAssetCollection(withTitle title: String) -> Self {
-    Self {
-      PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)
-    }
-  }
-}
-
-extension PhotosLibraryClient.Request.AssetCollections {
-  static func albums(with title: String) -> Self {
-    Self(type: .album, subtype: .any, options: .make {
-      $0.predicate = NSPredicate(format: "title = %@", title)
-    })
-  }
-}
-
-extension PhotosLibraryClient.Request.Assets {
-  static func videos(in collection: PHAssetCollection) -> Self {
-    Self(collection: collection, options: .make {
-      $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-      $0.predicate = NSPredicate(
-        format: "mediaType == %d",
-        PHAssetMediaType.video.rawValue
-      )
-    })
-  }
-  
-  static func lastVideo(in collection: PHAssetCollection) -> Self {
-    Self(collection: collection, options: .make {
-      $0.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
-      $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-      $0.fetchLimit = 1
-    })
-  }
-}
-
-// MARK: Private
-
-fileprivate extension PHFetchOptions {
-  static func make(
-    with mutations: (PHFetchOptions) -> Void
-  ) -> PHFetchOptions {
-    let rv = Self()
-    mutations(rv)
-    return rv
-  }
 }
 
