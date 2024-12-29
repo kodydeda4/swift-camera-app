@@ -6,8 +6,8 @@ import UIKit
 struct Video: Identifiable {
   var id: PHAsset { phAsset }
   let phAsset: PHAsset
-  var avURLAsset: AVURLAsset?
-  var thumbnail: UIImage?
+  var avURLAsset: AVURLAsset
+  var thumbnail: UIImage
 }
 
 extension SharedReaderKey where Self == InMemoryKey<PHAssetCollection?>.Default {

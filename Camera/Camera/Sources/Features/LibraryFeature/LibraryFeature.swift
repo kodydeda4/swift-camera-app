@@ -12,8 +12,8 @@ final class LibraryModel: Identifiable {
   public let id = UUID()
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
-    = unimplemented("Library.dismiss")
-
+  = unimplemented("Library.dismiss")
+  
   @ObservationIgnored @Shared(.videos) var videos
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   
@@ -32,12 +32,7 @@ final class LibraryModel: Identifiable {
   }
   
   func buttonTapped(video: Video) {
-    if let avURLAsset = video.avURLAsset {
-      self.destination = .videoPlayer(VideoPlayerModel(
-        phAsset: video.phAsset,
-        avURLAsset: avURLAsset
-      ))
-    }
+    self.destination = .videoPlayer(VideoPlayerModel(video: video))
   }
   
   func task() async {}
@@ -117,15 +112,11 @@ struct LibraryView: View {
     Button {
       self.model.buttonTapped(video: video)
     } label: {
-      if let uiImage = video.thumbnail {
-        Image(uiImage: uiImage)
-          .resizable()
-          .scaledToFit()
-          .cornerRadius(8)
-          .padding(.horizontal)
-      } else {
-        ProgressView()
-      }
+      Image(uiImage: video.thumbnail)
+        .resizable()
+        .scaledToFit()
+        .cornerRadius(8)
+        .padding(.horizontal)
     }
   }
 }

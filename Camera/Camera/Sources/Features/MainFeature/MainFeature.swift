@@ -9,7 +9,6 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  private var assets = [PHAsset]() { didSet { self.syncVideos() } }
   private(set) var cameraModel = CameraModel()
   
   // Shared
@@ -29,24 +28,22 @@ final class MainModel {
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }
         }
-        
         for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
-          await MainActor.run {
-            self.assets = (0..<fetchResult.count).compactMap {
-              fetchResult.object(at: $0)
-            }
-          }
+          await self.syncVideos(with: fetchResult)
         }
       }
     }
   }
   
-  private func syncVideos() {
+  private func syncVideos(with fetchResult: PHFetchResult<PHAsset>) {
+    let assets: [PHAsset] = (0..<fetchResult.count)
+      .compactMap { fetchResult.object(at: $0) }
+    
     self.$videos.withLock { $0 = [] }
     
     Task {
       await withTaskGroup(of: Void.self) { taskGroup in
-        for asset in self.assets {
+        for asset in assets {
           taskGroup.addTask {
             guard
               let avAsset = await self.photos.requestAVAsset(asset, .none)?.asset,
@@ -55,7 +52,6 @@ final class MainModel {
             else {
               return
             }
-            
             await MainActor.run {
               self.$videos.withLock {
                 $0[id: asset] = Video(
