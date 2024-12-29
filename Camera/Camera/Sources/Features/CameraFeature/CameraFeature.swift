@@ -15,11 +15,11 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-  var navigationTitle = "00:00:00"
+//  var navigationTitle = "00:00:00"
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var isRecording = false
-  var recordingStartDate: Date?
+  var recordingSecondsElapsed = 0
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 
   // Shared
@@ -46,6 +46,14 @@ final class CameraModel {
   var isSettingsButtonPresented: Bool { !self.isRecording }
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
   var hasFullPermissions: Bool { self.userPermissions == .authorized }
+  
+  /// @DEDA Example: "00:00:00"
+  var navigationTitle: String {
+    DateComponentsFormatter
+      .recordingDuration
+      .string(from: TimeInterval(recordingSecondsElapsed))
+      .unsafelyUnwrapped
+  }
   
   func recordingButtonTapped() {
     guard !self.destination.is(\.countdown) else {
@@ -91,7 +99,11 @@ final class CameraModel {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         for await _ in await self.clock.timer(interval: .seconds(1)) {
-          await self.timerTick()
+          await MainActor.run {
+            if self.isRecording {
+              self.recordingSecondsElapsed += 1
+            }
+          }
         }
       }
       taskGroup.addTask {
@@ -127,7 +139,7 @@ private extension CameraModel {
     self.hapticFeedback.generate(.soft)
     self.destination = .none
     try? self.camera.startRecording(.movieFileOutput(id: self.uuid()))
-    self.recordingStartDate = .now
+    self.recordingSecondsElapsed = 0
     self.isRecording = true
   }
 
@@ -135,17 +147,10 @@ private extension CameraModel {
     self.hapticFeedback.generate(.soft)
     self.destination = .none
     try? camera.stopRecording()
-    self.recordingStartDate = .none
+    self.recordingSecondsElapsed = 0
     self.isRecording = false
   }
-  
-  private func timerTick() {
-    // update timer
-    self.navigationTitle = DateComponentsFormatter.recordingDuration.string(
-      from: Date().timeIntervalSince(self.recordingStartDate ?? .now)
-    ) ?? "00:00:00"
-  }
-    
+   
   private func handle(_ event: CameraClient.DelegateEvent) {
     switch event {
       
@@ -194,11 +199,11 @@ fileprivate extension URL {
 
 fileprivate extension DateComponentsFormatter {
   static var recordingDuration: DateComponentsFormatter {
-    let rv = DateComponentsFormatter()
-    rv.allowedUnits = [.hour, .minute, .second] // Use hours, minutes, and seconds
-    rv.unitsStyle = .positional // Ensures the "00:00:00" style
-    rv.zeroFormattingBehavior = .pad // Pads with leading zeros
-    return rv
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.hour, .minute, .second]
+    formatter.unitsStyle = .positional
+    formatter.zeroFormattingBehavior = .pad
+    return formatter
   }
 }
 
