@@ -115,11 +115,30 @@ struct LibraryView: View {
       Image(uiImage: video.thumbnail)
         .resizable()
         .scaledToFit()
-        .cornerRadius(8)
+        .overlay {
+          VStack {
+            Text(video.phAsset.duration.formattedDescription)
+              .fontWeight(.semibold)
+              .foregroundColor(.white)
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+          .padding()
+        }
         .padding(.horizontal)
+        .cornerRadius(8)
     }
   }
 }
+
+//@DEDA probably not the perfect solution for this.
+fileprivate extension TimeInterval {
+  var formattedDescription: String {
+    let minutes = Int(self) / 60
+    let seconds = Int(self) % 60
+    return "\(minutes):\(String(format: "%02d", seconds))"
+  }
+}
+
 
 // MARK: - SwiftUI Previews
 
