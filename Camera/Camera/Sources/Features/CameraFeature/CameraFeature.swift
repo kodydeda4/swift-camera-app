@@ -29,6 +29,7 @@ final class CameraModel {
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.photos) var photos
+  @ObservationIgnored @Dependency(\.audio) var audio
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   @ObservationIgnored @Dependency(\.continuousClock) var clock
@@ -134,6 +135,7 @@ private extension CameraModel {
   
   private func startRecording() {
     self.hapticFeedback.generate(.soft)
+    self.audio.play(.beginVideoRecording)
     self.destination = .none
     try? self.camera.startRecording(.movieFileOutput(id: self.uuid()))
     self.recordingSecondsElapsed = 0
@@ -142,6 +144,7 @@ private extension CameraModel {
 
   private func stopRecording() {
     self.hapticFeedback.generate(.soft)
+    self.audio.play(.endVideoRecording)
     self.destination = .none
     try? camera.stopRecording()
     self.recordingSecondsElapsed = 0

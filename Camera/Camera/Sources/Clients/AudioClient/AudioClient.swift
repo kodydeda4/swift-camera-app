@@ -2,11 +2,13 @@ import AVFoundation
 import Dependencies
 import DependenciesMacros
 import SwiftUI
+import AudioToolbox
 
 @DependencyClient
 struct AudioClient: Sendable {
   var recordPermission: @Sendable () -> AVAudioApplication.recordPermission = { .undetermined }
   var requestRecordPermission: @Sendable () async -> Bool = { false }
+  var play: @Sendable (SystemSound) -> Void
 }
 
 extension DependencyValues {
@@ -23,6 +25,9 @@ extension AudioClient: DependencyKey {
     },
     requestRecordPermission: {
       await AVAudioApplication.requestRecordPermission()
+    },
+    play: { systemSound in
+      AudioServicesPlaySystemSound(SystemSoundID(systemSound.rawValue))
     }
   )
 }
