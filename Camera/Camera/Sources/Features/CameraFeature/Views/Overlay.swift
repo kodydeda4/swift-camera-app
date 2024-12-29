@@ -32,7 +32,7 @@ fileprivate extension CameraView {
     Group {
       if self.model.isCameraRollButtonPresented {
         Button {
-          self.model.navigateCameraRoll()
+          self.model.cameraRollButtonTapped()
         } label: {
           Group {
             if let uiImage = self.model.photosContext.videos.first?.thumbnail {
@@ -67,7 +67,7 @@ fileprivate extension CameraView {
 
     return Group {
       if self.model.isSettingsButtonPresented {
-        Button(action: self.model.toggleSettingsButtonTapped) {
+        Button(action: self.model.settingsButtonTapped) {
           Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark")
             .resizable()
             .scaledToFit()

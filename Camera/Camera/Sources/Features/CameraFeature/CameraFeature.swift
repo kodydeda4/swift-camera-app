@@ -15,9 +15,9 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
+  var navigationTitle = "00:00:00"
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
-  var navigationTitle = "00:00:00"
   var isRecording = false
   var recordingStartDate: Date?
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
@@ -32,7 +32,6 @@ final class CameraModel {
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
-  @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
   @ObservationIgnored @Dependency(\.continuousClock) var clock
 
   @CasePathable
@@ -43,21 +42,10 @@ final class CameraModel {
     case countdown(CountdownModel)
   }
   
-  var isCameraRollButtonPresented: Bool {
-    !self.isRecording
-  }
-  
-  var isSettingsButtonPresented: Bool {
-    !self.isRecording
-  }
-
-  var hasFullPermissions: Bool {
-    self.userPermissions == .authorized
-  }
-  
-  var isSwitchCameraButtonDisabled: Bool {
-    self.isRecording
-  }
+  var isCameraRollButtonPresented: Bool { !self.isRecording }
+  var isSettingsButtonPresented: Bool { !self.isRecording }
+  var isSwitchCameraButtonDisabled: Bool { self.isRecording }
+  var hasFullPermissions: Bool { self.userPermissions == .authorized }
   
   func recordingButtonTapped() {
     guard !self.destination.is(\.countdown) else {
@@ -68,6 +56,61 @@ final class CameraModel {
     
     !isRecording ? self.prepareForRecording() : self.stopRecording()
   }
+
+  func permissionsButtonTapped() {
+    self.destination = .userPermissions(UserPermissionsModel())
+  }
+  
+  func cameraRollButtonTapped() {
+    self.hapticFeedback.generate(.soft)
+    self.destination = .library(LibraryModel())
+  }
+  
+  func settingsButtonTapped () {
+    self.hapticFeedback.generate(.soft)
+    self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
+  }
+
+  func switchCameraButtonTapped() {
+    _ = Result {
+      let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
+        ? .front
+        : .back
+      try self.camera.setPosition(cameraPosition.rawValue)
+      self.$userSettings.camera.withLock { $0 = cameraPosition }
+      self.destination = .none
+    }
+  }
+  
+  func task() async {
+    guard hasFullPermissions else {
+      return
+    }
+
+    // @DEDA when you return, start the session again.
+    await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        for await _ in await self.clock.timer(interval: .seconds(1)) {
+          await self.timerTick()
+        }
+      }
+      taskGroup.addTask {
+        //@DEDA
+        //try? await self.camera.configure(with: settings)
+        try? await self.camera.connect(self.captureVideoPreviewLayer)
+      }
+      taskGroup.addTask {
+        for await event in await self.camera.events() {
+          await self.handle(event)
+        }
+      }
+    }
+  }
+}
+
+// MARK: Private
+
+private extension CameraModel {
   
   // @DEDA here you can determine wether or not to show the recording countdown overlay
   private func prepareForRecording() {
@@ -95,63 +138,48 @@ final class CameraModel {
     self.recordingStartDate = .none
     self.isRecording = false
   }
-
-  func permissionsButtonTapped() {
-    self.destination = .userPermissions(UserPermissionsModel())
-  }
   
-  func navigateCameraRoll() {
-    self.hapticFeedback.generate(.soft)
-    self.destination = .library(LibraryModel())
+  private func timerTick() {
+    // update timer
+    self.navigationTitle = DateComponentsFormatter.recordingDuration.string(
+      from: Date().timeIntervalSince(self.recordingStartDate ?? .now)
+    ) ?? "00:00:00"
   }
-  
-  func toggleSettingsButtonTapped () {
-    self.hapticFeedback.generate(.soft)
-    self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
-  }
-  
-  func dismissSettingsButtonTapped() {
-    self.destination = .none
-  }
-
-  func switchCameraButtonTapped() {
-    _ = Result {
-      let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
-        ? .front
-        : .back
-      try self.camera.setPosition(cameraPosition.rawValue)
-      self.$userSettings.camera.withLock { $0 = cameraPosition }
-      self.destination = .none
+    
+  private func handle(_ event: CameraClient.DelegateEvent) {
+    switch event {
+      
+    case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
+      Task {
+        if let assetCollection = self.photosContext.assetCollection {
+          try await self.photos.performChanges(
+            .save(contentsOf: outputFileURL, to: assetCollection)
+          )
+        } else {
+          print("@DEDA yo asset collection wuz nil.")
+        }
+      }
     }
   }
   
-  func task() async {
-    guard hasFullPermissions else {
-      return
-    }
-
-    // @DEDA when you return, start the session again.
-    await withTaskGroup(of: Void.self) { taskGroup in
-      taskGroup.addTask {
-        for await _ in await self.clock.timer(interval: .seconds(1)) {
-          await MainActor.run {
-            // update timer
-            self.navigationTitle = DateComponentsFormatter.recordingDuration.string(
-              from: Date().timeIntervalSince(self.recordingStartDate ?? .now)
-            ) ?? "00:00:00"
-          }
-        }
-      }
-      taskGroup.addTask {
-        try? await self.camera.connect(self.captureVideoPreviewLayer)
-        // @DEDA
-        // try? await self.camera.setCameraPosition(self.userSettings.cameraPosition.rawValue)
-      }
-      taskGroup.addTask {
-        for await event in await self.camera.events() {
-          await self.handle(event)
-        }
-      }
+  private func bind() {
+    switch destination {
+      
+    case let .userPermissions(model):
+      model.dismiss = { [weak self] in self?.destination = .none }
+      
+    case let .library(model):
+      model.dismiss = { [weak self] in self?.destination = .none }
+      
+    case .settings:
+      break
+      
+    case let .countdown(model):
+      model.onFinish = { [weak self] in self?.startRecording() }
+      break
+      
+    case .none:
+      break
     }
   }
 }
@@ -174,46 +202,6 @@ fileprivate extension DateComponentsFormatter {
   }
 }
 
-// MARK: Private
-
-private extension CameraModel {
-  func bind() {
-    switch destination {
-      
-    case let .userPermissions(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case let .library(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case .settings:
-      break
-      
-    case let .countdown(model):
-      model.onFinish = { [weak self] in self?.startRecording() }
-      break
-      
-    case .none:
-      break
-    }
-  }
-  
-  func handle(_ event: CameraClient.DelegateEvent) {
-    switch event {
-      
-    case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
-      Task {
-        if let assetCollection = self.photosContext.assetCollection {
-          try await self.photos.performChanges(
-            .save(contentsOf: outputFileURL, to: assetCollection)
-          )
-        } else {
-          print("@DEDA yo asset collection wuz nil.")
-        }
-      }
-    }
-  }
-}
 
 // MARK: - SwiftUI
 
