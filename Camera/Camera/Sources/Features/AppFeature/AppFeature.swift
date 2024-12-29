@@ -27,8 +27,12 @@ import SwiftUINavigation
  - [x] Share videos
  - [x] Different zooms
  - [x] Grid
+ - [x] Add sounds for when the camera starts/stops
+ - [ ] display time in grid
+ - [ ] multi-select crud
  - [ ] Slow motion settings?
  - [ ] Fix app backgrounding
+ - [ ] Fix app rotation
  - [ ] Log4Swift
  - [ ] Unit Tests
  - [ ] swift 6
@@ -36,12 +40,10 @@ import SwiftUINavigation
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
  
- 
  Photos
  - [x] Reactive (AsyncStream)
  - [x] Cached (@Shared(.inMemory))
  - [ ] Infinite Loading (.onAppear)
- - [ ] Add sounds for when the camera starts/stops..
  
 
  Idk Features
