@@ -42,12 +42,14 @@ final class CameraModel {
     case countdown(CountdownModel)
   }
   
-  var isZoomButtonsPresented: Bool { self.userSettings.camera == .back }
+  var hasFullPermissions: Bool { self.userPermissions == .authorized }
   var isCameraRollButtonPresented: Bool { !self.isRecording }
   var isSettingsButtonPresented: Bool { !self.isRecording }
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
-  var hasFullPermissions: Bool { self.userPermissions == .authorized }
-  
+  var isZoomButtonsPresented: Bool {
+    self.userSettings.camera == .back && self.destination.is(\.none)
+  }
+
   /// Example: `"00:00:00"`
   var navigationTitle: String {
     DateComponentsFormatter
