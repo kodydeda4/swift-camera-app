@@ -46,7 +46,7 @@ final class CameraModel {
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
   var hasFullPermissions: Bool { self.userPermissions == .authorized }
   
-  /// @DEDA Example: "00:00:00"
+  /// Example: `"00:00:00"`
   var navigationTitle: String {
     DateComponentsFormatter
       .recordingDuration
