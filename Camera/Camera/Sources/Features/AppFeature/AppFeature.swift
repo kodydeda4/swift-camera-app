@@ -36,10 +36,13 @@ import SwiftUINavigation
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
  
+ 
  Photos
  - [x] Reactive (AsyncStream)
  - [x] Cached (@Shared(.inMemory))
  - [ ] Infinite Loading (.onAppear)
+ - [ ] Add sounds for when the camera starts/stops..
+ 
 
  Idk Features
  - [ ] Handle app backgrounding

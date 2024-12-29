@@ -61,7 +61,7 @@ final class CameraModel {
       return
     }
     
-    !isRecording ? self.prepareForRecording() : self.stopRecording()
+    !self.isRecording ? self.prepareForRecording() : self.stopRecording()
   }
 
   func permissionsButtonTapped() {
@@ -122,7 +122,6 @@ final class CameraModel {
 
 private extension CameraModel {
   
-  // @DEDA here you can determine wether or not to show the recording countdown overlay
   private func prepareForRecording() {
     guard self.userSettings.countdownTimer == 0 else {
       self.hapticFeedback.generate(.soft)
