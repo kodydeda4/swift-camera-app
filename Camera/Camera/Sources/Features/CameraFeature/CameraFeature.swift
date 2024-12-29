@@ -7,6 +7,11 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
+// @DEDA
+// Settings need to be resent to camera view on appear.
+// when you connect to the video preview layer, you can
+// send all of your state from userSettings.
+
 @MainActor
 @Observable
 final class CameraModel {
