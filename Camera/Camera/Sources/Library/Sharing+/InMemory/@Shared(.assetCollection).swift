@@ -10,7 +10,7 @@ struct PhotosContext: Equatable {
   static let title = "KodysCameraApp"
   var assetCollection: PHAssetCollection?
   var videos: IdentifiedArrayOf<Video> = []
-  
+
   struct Video: Identifiable, Equatable {
     var id: PHAsset { phAsset }
     let phAsset: PHAsset
