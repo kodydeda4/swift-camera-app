@@ -42,6 +42,7 @@ final class CameraModel {
     case countdown(CountdownModel)
   }
   
+  var isZoomButtonsPresented: Bool { self.userSettings.camera == .back }
   var isCameraRollButtonPresented: Bool { !self.isRecording }
   var isSettingsButtonPresented: Bool { !self.isRecording }
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
@@ -74,9 +75,16 @@ final class CameraModel {
     self.destination = .library(LibraryModel())
   }
   
-  func settingsButtonTapped () {
+  func settingsButtonTapped() {
     self.hapticFeedback.generate(.soft)
     self.destination = self.destination.is(\.settings) ? .none : .settings(SettingsModel())
+  }
+  
+  func zoomButtonTapped(_ value: CGFloat) {
+    _ = Result {
+      try self.camera.setVideoZoomFactor(value)
+      self.$userSettings.zoom.withLock { $0 = value }
+    }
   }
 
   func switchCameraButtonTapped() {

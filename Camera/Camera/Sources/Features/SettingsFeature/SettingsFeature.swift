@@ -93,7 +93,7 @@ struct SettingsView: View {
           self.divider
           CountdownTimerSection(model: self.model)
           self.divider
-          RecordingQualitySection(model: self.model)
+          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
           self.divider
           TorchModeSection(model: self.model)
           self.divider

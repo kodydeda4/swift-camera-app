@@ -8,6 +8,13 @@ extension CameraView {
       Spacer()
       if self.model.hasFullPermissions {
         VStack {
+          if self.model.isZoomButtonsPresented {
+            HStack {
+              ForEach([CGFloat]([0.5, 1, 2]), id: \.self) { zoom in
+                self.zoomButton(zoom)
+              }
+            }
+          }
           HStack {
             self.cameraRollButton
               .frame(maxWidth: .infinity)
@@ -27,6 +34,33 @@ extension CameraView {
 }
 
 fileprivate extension CameraView {
+  
+  private func zoomButton(_ zoom: CGFloat) -> some View {
+    let isSelected = self.model.userSettings.zoom == zoom
+
+    return Button {
+      self.model.zoomButtonTapped(zoom)
+    } label: {
+      VStack {
+        Text("\(zoom.formattedDescription)x")
+          .font(.caption)
+          .bold()
+          .frame(width: 32, height: 32)
+          .foregroundColor(isSelected ? .black : .white)
+          .background(
+            isSelected
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
+          )
+          .clipShape(Circle())
+
+        Text("\(zoom.formattedDescription)x")
+          .font(.caption)
+          .fontWeight(isSelected ? .bold : .regular)
+          .foregroundColor(.white)
+      }
+    }
+  }
 
   private var cameraRollButton: some View {
     Group {
@@ -111,6 +145,16 @@ fileprivate struct CameraRecordingButtonLabel: View {
     }
     .animation(.linear(duration: 0.2), value: self.model.isRecording)
     .padding(20)
+  }
+}
+
+fileprivate extension CGFloat {
+  var formattedDescription: String {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
+    formatter.minimumFractionDigits = 0
+    formatter.roundingMode = .halfUp
+    return formatter.string(for: self)!
   }
 }
 
