@@ -37,8 +37,8 @@ import SwiftUINavigation
  - [ ] App demo for camera/mainfeature
  
  Photos
- - [ ] Reactive (AsyncStream)
- - [ ] Cached (@Shared(.inMemory))
+ - [x] Reactive (AsyncStream)
+ - [x] Cached (@Shared(.inMemory))
  - [ ] Infinite Loading (.onAppear)
 
  Idk Features

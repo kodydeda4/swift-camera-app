@@ -5,7 +5,7 @@ import UIKit
 
 /// Referring to the Apple `Photos`app and `PhotosKit` API,
 /// This object contains global shared state associated with the app's
-/// asset collection and videos.
+/// asset collection and videos that are stored in the Photos app.
 struct PhotosContext: Equatable {
   static let title = "KodysCameraApp"
   var assetCollection: PHAssetCollection?

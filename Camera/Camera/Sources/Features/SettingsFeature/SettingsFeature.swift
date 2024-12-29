@@ -98,7 +98,7 @@ struct SettingsView: View {
           self.divider
           CountdownTimerSection(model: self.model)
           self.divider
-          RecordingQualitySection(model: self.model)
+          QualitySection(model: self.model)
           self.divider
           TorchModeSection(model: self.model)
           self.divider
@@ -298,13 +298,13 @@ private struct CountdownTimerSection: View {
   }
 }
 
-private struct RecordingQualitySection: View {
+private struct QualitySection: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
     Section(
       systemImage: "camera",
-      title: "Recording Quality",
+      title: "Quality",
       subtitle: "Select a video recording quality."
     ) {
       HStack {
