@@ -52,14 +52,6 @@ extension PhotosLibraryClient.Request.Assets {
       )
     })
   }
-  
-  static func lastVideo(in collection: PHAssetCollection) -> Self {
-    Self(collection: collection, options: .make {
-      $0.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
-      $0.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-      $0.fetchLimit = 1
-    })
-  }
 }
 
 // MARK: Private
