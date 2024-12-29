@@ -244,7 +244,6 @@ fileprivate final class Camera: NSObject {
   }
 }
 
-
 extension Camera: AVCaptureFileOutputRecordingDelegate {
   func fileOutput(
     _ output: AVCaptureFileOutput,

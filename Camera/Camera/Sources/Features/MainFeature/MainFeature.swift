@@ -24,8 +24,7 @@ final class MainModel {
   func task() async {
     await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        let assetCollection = try await self
-          .fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
+        let assetCollection = try await self.fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
         
         await MainActor.run {
           self.$assetCollection.withLock { $0 = assetCollection }
@@ -43,37 +42,36 @@ final class MainModel {
   }
   
   private func syncVideos() {
-    self.$videos.withLock {
-      $0 = []
-    }
+    self.$videos.withLock { $0 = [] }
     
     Task {
-      for asset in self.assets {
-        print("yo kody")
-        
-        guard
-          let avAsset = await self.photos.requestAVAsset(asset, .none)?.asset,
-          let avURLAsset = (avAsset as? AVURLAsset),
-          let thumbnail = try? await self.imageGenerator.image(avAsset)?.image
-        else {
-          print("gg")
-          return
-        }
-        
-        await MainActor.run {
-          self.$videos.withLock {
-            $0[id: asset] = Video(
-              phAsset: asset,
-              avURLAsset: avURLAsset,
-              thumbnail: UIImage(cgImage: thumbnail)
-            )
+      await withTaskGroup(of: Void.self) { taskGroup in
+        for asset in self.assets {
+          taskGroup.addTask {
+            guard
+              let avAsset = await self.photos.requestAVAsset(asset, .none)?.asset,
+              let avURLAsset = (avAsset as? AVURLAsset),
+              let thumbnail = try? await self.imageGenerator.image(avAsset)?.image
+            else {
+              return
+            }
+            
+            await MainActor.run {
+              self.$videos.withLock {
+                $0[id: asset] = Video(
+                  phAsset: asset,
+                  avURLAsset: avURLAsset,
+                  thumbnail: UIImage(cgImage: thumbnail)
+                )
+              }
+            }
           }
         }
       }
     }
   }
   
-
+  
   private func fetchOrCreateAssetCollection(
     withTitle title: String
   ) async throws -> PHAssetCollection {
