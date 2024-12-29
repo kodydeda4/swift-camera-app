@@ -18,8 +18,7 @@ final class CameraModel {
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 
   // Shared
-  @ObservationIgnored @Shared(.videos) var videos
-  @ObservationIgnored @Shared(.assetCollection) var assetCollection
+  @ObservationIgnored @Shared(.photosContext) var photosContext
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
   
@@ -199,7 +198,7 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let assetCollection {
+        if let assetCollection = self.photosContext.assetCollection {
           try await self.photos.performChanges(
             .save(contentsOf: outputFileURL, to: assetCollection)
           )

@@ -14,7 +14,7 @@ final class LibraryModel: Identifiable {
   var dismiss: () -> Void
   = unimplemented("Library.dismiss")
   
-  @ObservationIgnored @Shared(.videos) var videos
+  @ObservationIgnored @Shared(.photosContext) var photosContext
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   
   @CasePathable
@@ -31,7 +31,7 @@ final class LibraryModel: Identifiable {
     //...@DEDA unimplemented
   }
   
-  func buttonTapped(video: Video) {
+  func buttonTapped(video: PhotosContext.Video) {
     self.destination = .videoPlayer(VideoPlayerModel(video: video))
   }
   
@@ -63,7 +63,7 @@ struct LibraryView: View {
           columns: .init(repeating: GridItem(.flexible()), count: 2),
           spacing: 16
         ) {
-          ForEach(model.videos) { video in
+          ForEach(model.photosContext.videos) { video in
             self.videoView(video: video)
           }
         }
@@ -102,13 +102,13 @@ struct LibraryView: View {
             .fontWeight(.semibold)
         }
         ToolbarItem(placement: .bottomBar) {
-          Text("\(self.model.videos.count) videos")
+          Text("\(self.model.photosContext.videos.count) videos")
         }
       }
     }
   }
   
-  @MainActor private func videoView(video: Video) -> some View {
+  @MainActor private func videoView(video: PhotosContext.Video) -> some View {
     Button {
       self.model.buttonTapped(video: video)
     } label: {

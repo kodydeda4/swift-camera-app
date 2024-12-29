@@ -35,7 +35,7 @@ fileprivate extension CameraView {
           self.model.navigateCameraRoll()
         } label: {
           Group {
-            if let uiImage = self.model.videos.first?.thumbnail {
+            if let uiImage = self.model.photosContext.videos.first?.thumbnail {
               Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFit()

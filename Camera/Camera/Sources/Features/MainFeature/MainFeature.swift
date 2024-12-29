@@ -12,8 +12,7 @@ final class MainModel {
   private(set) var cameraModel = CameraModel()
   
   // Shared
-  @ObservationIgnored @Shared(.videos) var videos
-  @ObservationIgnored @Shared(.assetCollection) var assetCollection
+  @ObservationIgnored @Shared(.photosContext) var photosContext
   
   // Dependencies
   @ObservationIgnored @Dependency(\.photos) var photos
@@ -23,12 +22,14 @@ final class MainModel {
   func task() async {
     await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        let assetCollection = try await self.fetchOrCreateAssetCollection(withTitle: "KodysCameraApp")
+        let photosContext = try await self.fetchOrCreateAssetCollection(
+          withTitle: PhotosContext.title
+        )
         
         await MainActor.run {
-          self.$assetCollection.withLock { $0 = assetCollection }
+          self.$photosContext.assetCollection.withLock { $0 = photosContext }
         }
-        for await fetchResult in await self.photos.streamAssets(.videos(in: assetCollection)) {
+        for await fetchResult in await self.photos.streamAssets(.videos(in: photosContext)) {
           await self.syncVideos(with: fetchResult)
         }
       }
@@ -39,7 +40,7 @@ final class MainModel {
     let assets: [PHAsset] = (0..<fetchResult.count)
       .compactMap { fetchResult.object(at: $0) }
     
-    self.$videos.withLock { $0 = [] }
+    self.$photosContext.videos.withLock { $0 = [] }
     
     Task {
       await withTaskGroup(of: Void.self) { taskGroup in
@@ -53,8 +54,8 @@ final class MainModel {
               return
             }
             await MainActor.run {
-              self.$videos.withLock {
-                $0[id: asset] = Video(
+              self.$photosContext.videos.withLock {
+                $0[id: asset] = PhotosContext.Video(
                   phAsset: asset,
                   avURLAsset: avURLAsset,
                   thumbnail: UIImage(cgImage: thumbnail)

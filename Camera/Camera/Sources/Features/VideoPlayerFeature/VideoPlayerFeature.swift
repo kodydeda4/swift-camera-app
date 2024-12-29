@@ -9,7 +9,7 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class VideoPlayerModel {
-  let video: Video
+  let video: PhotosContext.Video
   let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
@@ -21,7 +21,7 @@ final class VideoPlayerModel {
     case activity(ActivityModel)
   }
 
-  init(video: Video) {
+  init(video: PhotosContext.Video) {
     self.video = video
     self.player = AVPlayer(url: video.avURLAsset.url)
   }

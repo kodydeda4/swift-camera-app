@@ -172,13 +172,13 @@ private final class PhotoLibraryChangeObserver: NSObject, PHPhotoLibraryChangeOb
 extension PhotosLibraryClient.Request.PhotoLibraryChange {
   static func save(
     contentsOf url: URL,
-    to assetCollection: PHAssetCollection
+    to photosContext: PHAssetCollection
   ) -> Self {
     Self {
       let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
       
       if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
-        let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection)
+        let albumChangeRequest = PHAssetCollectionChangeRequest(for: photosContext)
         albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
       }
     }
