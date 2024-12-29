@@ -15,7 +15,6 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-//  var navigationTitle = "00:00:00"
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var isRecording = false
@@ -107,8 +106,7 @@ final class CameraModel {
         }
       }
       taskGroup.addTask {
-        //@DEDA
-        //try? await self.camera.configure(with: settings)
+        //@DEDA try? await self.camera.configure(with: settings)
         try? await self.camera.connect(self.captureVideoPreviewLayer)
       }
       taskGroup.addTask {
