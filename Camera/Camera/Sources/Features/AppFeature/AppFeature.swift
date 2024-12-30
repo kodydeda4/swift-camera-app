@@ -149,6 +149,8 @@ final class AppModel {
 
 // MARK: - SwiftUI
 
+// hey brah
+
 struct AppView: View {
   @Bindable var model: AppModel
   
