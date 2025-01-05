@@ -84,7 +84,7 @@ final class CameraModel {
   
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
-      try self.camera.setVideoZoomFactor(value)
+      try self.camera.adjust(.videoZoomFactor(value))
       self.$userSettings.zoom.withLock { $0 = value }
     }
   }
@@ -94,7 +94,7 @@ final class CameraModel {
       let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
         ? .front
         : .back
-      try self.camera.setPosition(cameraPosition.rawValue)
+      try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
     }

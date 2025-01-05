@@ -1,8 +1,8 @@
+import AudioToolbox
 import AVFoundation
 import Dependencies
 import DependenciesMacros
 import SwiftUI
-import AudioToolbox
 
 @DependencyClient
 struct AudioClient: Sendable {

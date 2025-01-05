@@ -15,7 +15,7 @@ final class SettingsModel: Identifiable {
 
   func cameraButtonTapped(_ value: UserSettings.Camera) {
     _ = Result {
-      try self.camera.setPosition(value.rawValue)
+      try self.camera.adjust(.position(value.rawValue))
       self.$userSettings.camera.withLock { $0 = value }
     }
   }
@@ -26,7 +26,7 @@ final class SettingsModel: Identifiable {
 
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
-      try self.camera.setVideoZoomFactor(value)
+      try self.camera.adjust(.videoZoomFactor(value))
       self.$userSettings.zoom.withLock { $0 = value }
     }
   }
@@ -37,7 +37,7 @@ final class SettingsModel: Identifiable {
 
   func torchModeButtonTapped(value: UserSettings.TorchMode) {
     _ = Result {
-      try self.camera.setTorchMode(value.rawValue)
+      try self.camera.adjust(.torchMode(value.rawValue))
       self.$userSettings.torchMode.withLock { $0 = value }
     }
   }

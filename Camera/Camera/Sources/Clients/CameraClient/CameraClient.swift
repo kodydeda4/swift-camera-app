@@ -8,39 +8,20 @@ import SwiftUINavigation
 
 @DependencyClient
 struct CameraClient: Sendable {
-  
-  var requestAccess: @Sendable (
-    _ for: AVMediaType
-  ) async -> Bool = { _ in false }
-  
-  var authorizationStatus: @Sendable (
-    _ for: AVMediaType
-  ) -> AVAuthorizationStatus = { _ in .notDetermined }
-  
-  var connect: @Sendable (
-    _ to: AVCaptureVideoPreviewLayer
-  ) throws -> Void
-  
-  var startRecording: @Sendable (
-    _ to: URL
-  ) throws -> Void
-  
+  var requestAccess: @Sendable (AVMediaType) async -> Bool = { _ in false }
+  var authorizationStatus: @Sendable (AVMediaType) -> AVAuthorizationStatus = { _ in .notDetermined }
+  var connect: @Sendable (AVCaptureVideoPreviewLayer) throws -> Void
+  var startRecording: @Sendable (URL) throws -> Void
   var stopRecording: @Sendable () throws -> Void
-  
-  var setPosition: @Sendable (
-    AVCaptureDevice.Position
-  ) throws -> Void
-  
-  var setVideoZoomFactor: @Sendable (
-    CGFloat
-  ) throws -> Void
-  
-  var setTorchMode: @Sendable (
-    AVCaptureDevice.TorchMode
-  ) throws -> Void
-  
+  var adjust: @Sendable (CameraSetting) throws -> Void
   var events: @Sendable () -> AsyncChannel<DelegateEvent> = { .init() }
   
+  enum CameraSetting: Equatable {
+    case position(AVCaptureDevice.Position)
+    case torchMode(AVCaptureDevice.TorchMode)
+    case videoZoomFactor(CGFloat)
+  }
+
   enum Failure: Error, Equatable {
     case custom(String)
     case cannotAddInput
@@ -83,7 +64,7 @@ extension CameraClient: DependencyKey {
         AVCaptureDevice.authorizationStatus(for: mediaType)
       },
       connect: { videoPreviewLayer in
-        try camera.connect(videoPreviewLayer)
+        try camera.connect(to: videoPreviewLayer)
       },
       startRecording: { url in
         try camera.startRecording(to: url)
@@ -91,14 +72,8 @@ extension CameraClient: DependencyKey {
       stopRecording: {
         camera.stopRecording()
       },
-      setPosition: { position in
-        try camera.setPosition(position)
-      },
-      setVideoZoomFactor: { zoomFactor in
-        try camera.setVideoZoomFactor(zoomFactor)
-      },
-      setTorchMode: { torchMode in
-        try camera.setTorchMode(torchMode)
+      adjust: { value in
+        try camera.adjust(setting: value)
       },
       events: {
         camera.events
@@ -122,7 +97,7 @@ fileprivate final class Camera: NSObject {
   ///
   /// - Note: This method is required to enable the functionality of other methods within the class.
   /// - Note: Ensure that user permissions (e.g., camera and microphone) are verified before invoking this method.
-  func connect(_ videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
+  func connect(to videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
     
     guard
       let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
@@ -148,7 +123,47 @@ fileprivate final class Camera: NSObject {
     videoPreviewLayer.session = self.session
   }
   
-  func setPosition(_ newPosition: AVCaptureDevice.Position) throws {
+  /// Start recording video to a url.
+  func startRecording(to url: URL) throws {
+    guard let connection = self.movieFileOutput.connection(with: .video) else {
+      throw CameraClient.Failure.custom("self.movieFileOutput.connection(with: .video) was nil")
+    }
+    
+    // Configure connection for HEVC capture.
+    if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {
+      self.movieFileOutput.setOutputSettings(
+        [AVVideoCodecKey: AVVideoCodecType.hevc],
+        for: connection
+      )
+    }
+    
+    // Enable video stabilization if the connection supports it.
+    if connection.isVideoStabilizationSupported {
+      connection.preferredVideoStabilizationMode = .auto
+    }
+    
+    self.movieFileOutput.startRecording(to: url, recordingDelegate: self)
+  }
+  
+  func stopRecording() {
+    self.movieFileOutput.stopRecording()
+  }
+  
+  func adjust(setting: CameraClient.CameraSetting) throws {
+    switch setting {
+      
+    case let .torchMode(value):
+      try setTorchMode(value)
+      
+    case let .position(value):
+      try setPosition(value)
+
+    case let .videoZoomFactor(value):
+      try setVideoZoomFactor(value)
+    }
+  }
+
+  private func setPosition(_ newPosition: AVCaptureDevice.Position) throws {
     let discoverySession = AVCaptureDevice.DiscoverySession(
       deviceTypes: [.builtInWideAngleCamera],
       mediaType: .video,
@@ -174,7 +189,7 @@ fileprivate final class Camera: NSObject {
   }
 
   /// Adjust the zoom - may require switching cameras.
-  func setVideoZoomFactor(_ videoZoomFactor: CGFloat) throws {
+  private func setVideoZoomFactor(_ videoZoomFactor: CGFloat) throws {
     var newDevice: AVCaptureDevice? {
       AVCaptureDevice.DiscoverySession(
         deviceTypes: [videoZoomFactor < 1 ? .builtInUltraWideCamera : .builtInWideAngleCamera],
@@ -206,7 +221,7 @@ fileprivate final class Camera: NSObject {
     self.device.unlockForConfiguration()
   }
   
-  func setTorchMode(_ torchMode: AVCaptureDevice.TorchMode) throws {
+  private func setTorchMode(_ torchMode: AVCaptureDevice.TorchMode) throws {
     guard device.hasTorch else {
       throw CameraClient.Failure.custom("device does not have a torch.")
     }
@@ -215,32 +230,6 @@ fileprivate final class Camera: NSObject {
       device.torchMode = torchMode
     }
     self.device.unlockForConfiguration()
-  }
-  
-  /// Start recording video to a url.
-  func startRecording(to url: URL) throws {
-    guard let connection = self.movieFileOutput.connection(with: .video) else {
-      throw CameraClient.Failure.custom("self.movieFileOutput.connection(with: .video) was nil")
-    }
-    
-    // Configure connection for HEVC capture.
-    if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.movieFileOutput.setOutputSettings(
-        [AVVideoCodecKey: AVVideoCodecType.hevc],
-        for: connection
-      )
-    }
-    
-    // Enable video stabilization if the connection supports it.
-    if connection.isVideoStabilizationSupported {
-      connection.preferredVideoStabilizationMode = .auto
-    }
-    
-    self.movieFileOutput.startRecording(to: url, recordingDelegate: self)
-  }
-  
-  func stopRecording() {
-    self.movieFileOutput.stopRecording()
   }
 }
 

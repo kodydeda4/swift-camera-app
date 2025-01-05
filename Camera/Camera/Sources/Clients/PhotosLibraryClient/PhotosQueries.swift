@@ -9,20 +9,20 @@ extension PhotosLibraryClient.Request.PhotoLibraryChange {
   ) -> Self {
     Self {
       let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-      
+
       if let assetPlaceholder = assetChangeRequest?.placeholderForCreatedAsset {
         let albumChangeRequest = PHAssetCollectionChangeRequest(for: photosContext)
         albumChangeRequest?.addAssets([assetPlaceholder] as NSArray)
       }
     }
   }
-  
+
   static func delete(assets: [PHAsset]) -> Self {
     Self {
       PHAssetChangeRequest.deleteAssets(assets as NSArray)
     }
   }
-  
+
   static func createAssetCollection(withTitle title: String) -> Self {
     Self {
       PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)

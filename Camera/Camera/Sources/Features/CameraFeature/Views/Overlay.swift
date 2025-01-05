@@ -34,7 +34,7 @@ extension CameraView {
 }
 
 fileprivate extension CameraView {
-  
+
   private func zoomButton(_ zoom: CGFloat) -> some View {
     let isSelected = self.model.userSettings.zoom == zoom
 
