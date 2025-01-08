@@ -18,7 +18,7 @@ final class VideoPlayerModel {
 
   @CasePathable
   enum Destination {
-    case activity(ActivityModel)
+    case share(ActivityModel)
   }
 
   init(video: PhotosContext.Video) {
@@ -42,7 +42,7 @@ final class VideoPlayerModel {
   }
 
   func shareButtonTapped() {
-    self.destination = .activity(
+    self.destination = .share(
       ActivityModel(
         id: self.uuid(),
         activityItems: [
@@ -55,7 +55,7 @@ final class VideoPlayerModel {
   private func bind() {
     switch destination {
 
-    case let .activity(model):
+    case let .share(model):
       model.completionWithItemsHandler = { [weak self] _, _, _, _ in
         self?.destination = .none
       }
@@ -76,7 +76,7 @@ struct VideoPlayerView: View {
       VideoPlayer(player: self.model.player)
     }
     .task { await self.model.task() }
-    .sheet(item: self.$model.destination.activity) { model in
+    .sheet(item: self.$model.destination.share) { model in
       ActivityView(model: model)
     }
     .toolbar {
