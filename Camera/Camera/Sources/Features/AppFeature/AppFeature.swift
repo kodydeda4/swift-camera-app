@@ -50,6 +50,7 @@ import SwiftUINavigation
  Idk Features
  - [x] Save to an album for the app specifically?
  - [x] Camera - revert zoom on swap camera
+ - [ ] Camera - Improve Grid UI
  - [ ] Camera - start with settings from previous session
  - [ ] Camera - PointFree error handling with specific line number
  - [ ] Camera - Recording Quality
