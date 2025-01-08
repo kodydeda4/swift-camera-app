@@ -98,12 +98,12 @@ struct SettingsView: View {
           self.divider
           ZoomSection(model: self.model)
           self.divider
+          TorchModeSection(model: self.model)
+          self.divider
           CountdownTimerSection(model: self.model)
           self.divider
 //          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
 //          self.divider
-          TorchModeSection(model: self.model)
-          self.divider
           GridSection(model: self.model)
         }
       }
