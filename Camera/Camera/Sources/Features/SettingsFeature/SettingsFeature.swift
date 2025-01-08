@@ -9,10 +9,10 @@ import SwiftUINavigation
 final class SettingsModel: Identifiable {
   let id = UUID()
   var buildNumber: Build.Version { Build.version }
-
+  
   @ObservationIgnored @Shared(.userSettings) private(set) var userSettings
   @ObservationIgnored @Dependency(\.camera) var camera
-
+  
   func cameraButtonTapped(_ value: UserSettings.Camera) {
     _ = Result {
       // 1. set camera
@@ -26,33 +26,33 @@ final class SettingsModel: Identifiable {
       self.$userSettings.torchMode.withLock { $0 = .off }
     }
   }
-
+  
   var isZoomButtonsDisabled: Bool {
     self.userSettings.camera == .front
   }
-
+  
   func zoomButtonTapped(_ value: CGFloat) {
     _ = Result {
       try self.camera.adjust(.videoZoomFactor(value))
       self.$userSettings.zoom.withLock { $0 = value }
     }
   }
-
+  
   func countdownTimerButtonTapped(value: Int) {
     self.$userSettings.countdownTimer.withLock { $0 = value }
   }
-
+  
   func torchModeButtonTapped(value: UserSettings.TorchMode) {
     _ = Result {
       try self.camera.adjust(.torchMode(value.rawValue))
       self.$userSettings.torchMode.withLock { $0 = value }
     }
   }
-
+  
   func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
     self.$userSettings.recordingQuality.withLock { $0 = value }
   }
-
+  
   func gridButtonTapped(value: Bool) {
     self.$userSettings.isGridEnabled.withLock { $0 = value }
   }
@@ -62,7 +62,7 @@ final class SettingsModel: Identifiable {
 
 struct SettingsView: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       self.divider.opacity(0.5)
@@ -77,7 +77,7 @@ struct SettingsView: View {
     )
     .background { Color.black.opacity(0.75) }
   }
-
+  
   @MainActor private var content: some View {
     ScrollView {
       VStack(alignment: .leading) {
@@ -86,12 +86,12 @@ struct SettingsView: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
           .padding(.top, 8)
-
+        
         Text("Camera \(self.model.buildNumber.description)")
           .foregroundColor(.white)
           .opacity(0.75)
           .padding(.bottom)
-
+        
         self.divider
         VStack(alignment: .leading) {
           CameraSection(model: self.model)
@@ -102,8 +102,8 @@ struct SettingsView: View {
           self.divider
           CountdownTimerSection(model: self.model)
           self.divider
-//          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
-//          self.divider
+          //          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
+          //          self.divider
           GridSection(model: self.model)
         }
       }
@@ -111,7 +111,7 @@ struct SettingsView: View {
       .shadow(color: Color.black, radius: 16, y: 12)
     }
   }
-
+  
   private var footer: some View {
     VStack(spacing: 0) {
       LinearGradient(
@@ -123,12 +123,12 @@ struct SettingsView: View {
         endPoint: .bottom
       )
       .frame(height: 70)
-
+      
       Color.black
         .frame(height: 70)
     }
   }
-
+  
   private var divider: some View {
     Rectangle()
       .frame(height: 1)
@@ -142,7 +142,7 @@ private struct Section<Content: View>: View {
   let title: String
   let subtitle: String
   let content: () -> Content
-
+  
   var body: some View {
     HStack(alignment: .firstTextBaseline) {
       self.header
@@ -151,7 +151,7 @@ private struct Section<Content: View>: View {
         .padding([.leading, .top], 8)
     }
   }
-
+  
   private var header: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .firstTextBaseline) {
@@ -162,7 +162,7 @@ private struct Section<Content: View>: View {
           .foregroundColor(.white)
       }
       .padding(.bottom, 4)
-
+      
       Text(subtitle)
         .fontWeight(.bold)
         .foregroundColor(.white)
@@ -173,7 +173,7 @@ private struct Section<Content: View>: View {
 
 private struct CameraSection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "camera",
@@ -185,10 +185,10 @@ private struct CameraSection: View {
       }
     }
   }
-
+  
   private func button(_ camera: UserSettings.Camera) -> some View {
     let isSelected = self.model.userSettings.camera == camera
-
+    
     return Button {
       self.model.cameraButtonTapped(camera)
     } label: {
@@ -200,11 +200,11 @@ private struct CameraSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text(camera.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -216,7 +216,7 @@ private struct CameraSection: View {
 
 private struct ZoomSection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "binoculars",
@@ -229,10 +229,10 @@ private struct ZoomSection: View {
       .disabled(self.model.userSettings.camera == .front)
     }
   }
-
+  
   private func button(_ zoom: CGFloat) -> some View {
     let isSelected = self.model.userSettings.zoom == zoom
-
+    
     return Button {
       self.model.zoomButtonTapped(zoom)
     } label: {
@@ -244,11 +244,11 @@ private struct ZoomSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text("\(zoom.formattedDescription)x")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -260,7 +260,7 @@ private struct ZoomSection: View {
 
 private struct CountdownTimerSection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "timer",
@@ -272,10 +272,10 @@ private struct CountdownTimerSection: View {
       }
     }
   }
-
+  
   private func button(_ seconds: Int) -> some View {
     let isSelected = self.model.userSettings.countdownTimer == seconds
-
+    
     return Button {
       self.model.countdownTimerButtonTapped(value: seconds)
     } label: {
@@ -287,11 +287,11 @@ private struct CountdownTimerSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text("\(seconds.description)s")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -303,7 +303,7 @@ private struct CountdownTimerSection: View {
 
 private struct RecordingQualitySection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "camera",
@@ -317,10 +317,10 @@ private struct RecordingQualitySection: View {
       }
     }
   }
-
+  
   private func button(_ quality: UserSettings.RecordingQuality) -> some View {
     let isSelected = self.model.userSettings.recordingQuality == quality
-
+    
     return Button {
       self.model.recordingQualityButtonTapped(value: quality)
     } label: {
@@ -332,11 +332,11 @@ private struct RecordingQualitySection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text(quality.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -348,7 +348,7 @@ private struct RecordingQualitySection: View {
 
 private struct TorchModeSection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "bolt.fill",
@@ -361,10 +361,10 @@ private struct TorchModeSection: View {
       .disabled(self.model.userSettings.camera == .front)
     }
   }
-
+  
   private func button(_ torchMode: UserSettings.TorchMode) -> some View {
     let isSelected = self.model.userSettings.torchMode == torchMode
-
+    
     return Button {
       self.model.torchModeButtonTapped(value: torchMode)
     } label: {
@@ -376,11 +376,11 @@ private struct TorchModeSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text(torchMode.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -392,7 +392,7 @@ private struct TorchModeSection: View {
 
 private struct GridSection: View {
   @Bindable var model: SettingsModel
-
+  
   var body: some View {
     Section(
       systemImage: "grid",
@@ -406,10 +406,10 @@ private struct GridSection: View {
       }
     }
   }
-
+  
   private func button(_ isEnabled: Bool) -> some View {
     let isSelected = self.model.userSettings.isGridEnabled == isEnabled
-
+    
     return Button {
       self.model.gridButtonTapped(value: isEnabled)
     } label: {
@@ -421,11 +421,11 @@ private struct GridSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
+            ? Color.accentColor
+            : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
-
+        
         Text(isEnabled ? "On" : "Off")
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
@@ -454,6 +454,31 @@ fileprivate extension CGFloat {
     .photos: .authorized,
   ]
   @Shared(.userPermissions) var userPermissions = value
-
-  SettingsView(model: SettingsModel())
+  
+  NavigationStack {
+    ZStack {
+      VStack {}
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay {
+          Image(.cameraPreview)
+            .resizable()
+            .scaledToFill()
+            .ignoresSafeArea()
+        }
+        .overlay {
+          VStack {
+            Color.black
+              .frame(height: 65)
+            Spacer()
+            Color.black
+              .frame(height: 70)
+          }
+          .ignoresSafeArea()
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .ignoresSafeArea()
+      
+      SettingsView(model: SettingsModel())
+    }
+  }
 }

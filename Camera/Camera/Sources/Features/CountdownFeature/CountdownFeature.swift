@@ -13,8 +13,8 @@ final class CountdownModel: Identifiable {
   var onFinish: () -> Void
   = unimplemented("CountdownModel.onFinish")
   
-  @ObservationIgnored @Dependency(\.continuousClock) var clock
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
+  @ObservationIgnored @Dependency(\.continuousClock) var clock
   
   var countdown: Int {
     self.userSettings.countdownTimer - self.secondsElapsed

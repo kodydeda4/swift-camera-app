@@ -18,7 +18,7 @@ struct CaptureVideoPreviewLayerView: View {
 // MARK: - LiveValue
 
 /// UIKit view that actually displays the `AVCaptureVideoPreviewLayer` when the device is running.
-private struct LiveValue: UIViewControllerRepresentable {
+fileprivate struct LiveValue: UIViewControllerRepresentable {
   let captureVideoPreviewLayer: AVCaptureVideoPreviewLayer
 
   func makeUIViewController(context: Context) -> UIViewController {
@@ -38,7 +38,7 @@ private struct LiveValue: UIViewControllerRepresentable {
 
 /// Attempts to mirror what the `CaptureVideoPreviewLayerView` looks like on a real device,
 /// but with a static image instead. The borders and frame are hardcoded.
-private struct PreviewValue: View {
+fileprivate struct PreviewValue: View {
   var body: some View {
     VStack {}
       .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -61,3 +61,4 @@ private struct PreviewValue: View {
       }
   }
 }
+
