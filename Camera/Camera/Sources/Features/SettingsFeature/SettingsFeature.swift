@@ -21,6 +21,9 @@ final class SettingsModel: Identifiable {
       
       // 2. reset zoom
       self.$userSettings.zoom.withLock { $0 = 1.0 }
+      
+      // 3. reset torch
+      self.$userSettings.torchMode.withLock { $0 = .off }
     }
   }
 
