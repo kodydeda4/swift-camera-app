@@ -31,9 +31,6 @@ extension CameraView {
     .padding()
     .buttonStyle(.plain)
   }
-}
-
-fileprivate extension CameraView {
 
   private func zoomButton(_ zoom: CGFloat) -> some View {
     let isSelected = self.model.userSettings.zoom == zoom
@@ -41,24 +38,17 @@ fileprivate extension CameraView {
     return Button {
       self.model.zoomButtonTapped(zoom)
     } label: {
-      VStack {
-        Text("\(zoom.formattedDescription)x")
-          .font(.caption)
-          .bold()
-          .frame(width: 32, height: 32)
-          .foregroundColor(isSelected ? .black : .white)
-          .background(
-            isSelected
-              ? Color.accentColor
-              : Color.white.opacity(0.25)
-          )
-          .clipShape(Circle())
-
-        Text("\(zoom.formattedDescription)x")
-          .font(.caption)
-          .fontWeight(isSelected ? .bold : .regular)
-          .foregroundColor(.white)
-      }
+      Text("\(zoom.formattedDescription)x")
+        .font(.caption)
+        .bold()
+        .frame(width: 32, height: 32)
+        .foregroundColor(isSelected ? .black : .white)
+        .background(
+          isSelected
+          ? Color.accentColor
+          : Color.black.opacity(0.5)
+        )
+        .clipShape(Circle())
     }
   }
 
@@ -76,7 +66,7 @@ fileprivate extension CameraView {
                 .cornerRadius(8)
                 .padding(.horizontal)
             } else {
-              Color.blue
+              Color.black
                 .frame(width: 64, height: 64)
             }
           }
