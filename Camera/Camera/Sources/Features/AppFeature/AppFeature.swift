@@ -6,9 +6,9 @@ import SwiftUI
 import SwiftUINavigation
 
 /* --------------------------------------------------------------------------------------------
- 
+
  @DEDA
- 
+
  - [x] Camera
  - [x] Video Recording
  - [x] UserPermissions
@@ -31,7 +31,6 @@ import SwiftUINavigation
  - [x] display time in grid
  - [x] back camera zoom buttons on camera feature (without opening settings)
  - [ ] multi-select crud
- - [ ] Slow motion settings?
  - [ ] Fix app backgrounding
  - [ ] Fix app rotation
  - [ ] Log4Swift
@@ -40,23 +39,23 @@ import SwiftUINavigation
  - [ ] SPM
  - [ ] App demo for onboarding
  - [ ] App demo for camera/mainfeature
- 
+ - [ ] Slow motion settings?
+
  Photos
  - [x] Reactive (AsyncStream)
  - [x] Cached (@Shared(.inMemory))
  - [ ] Infinite Loading (.onAppear)
- 
 
  Idk Features
+ - [x] Save to an album for the app specifically?
  - [ ] Handle app backgrounding
  - [ ] Handle device rotation
  - [ ] Record video vs take picture
- - [ ] Save to an album for the app specifically?
  - [ ] Notifications for when something was saved to your camera roll
  - [ ] video metadata or grdb?
 
   UI Rework
- - [ ] Sound effect when you tap a button.
+ - [x] Sound effect when you tap a button.
  - [x] Haptic feedback for recording button
  - [x] Video Recording duration
  - [ ] Improve user permissions ui
@@ -70,7 +69,7 @@ import SwiftUINavigation
 @MainActor
 final class AppModel {
   var destination: Destination? { didSet { self.bind() } }
-  
+
   @ObservationIgnored @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
   @ObservationIgnored @Dependency(\.camera) var camera
@@ -82,12 +81,12 @@ final class AppModel {
     case main(MainModel)
     case onboarding(OnboardingModel)
   }
-  
+
   func task() async {
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         await self.syncUserPermissions()
-        
+
         await MainActor.run {
           self.destination = self.isOnboardingComplete
             ? .main(MainModel())
@@ -96,7 +95,7 @@ final class AppModel {
       }
     }
   }
-  
+
   /// Update user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
     UserPermissions.Feature.allCases.forEach { feature in
@@ -109,7 +108,7 @@ final class AppModel {
             case .authorized: return .authorized
             default: return .denied
             }
-            
+
           case .microphone:
             switch self.audio.recordPermission() {
             case .undetermined: return .undetermined
@@ -131,16 +130,16 @@ final class AppModel {
 
   private func bind() {
     switch destination {
-      
+
     case .main:
       break
-      
+
     case let .onboarding(model):
       model.onCompletion = { [weak self] in
         self?.$isOnboardingComplete.withLock { $0 = true }
         self?.destination = .main(MainModel())
       }
-      
+
     case .none:
       break
     }
@@ -151,17 +150,17 @@ final class AppModel {
 
 struct AppView: View {
   @Bindable var model: AppModel
-  
+
   var body: some View {
     Group {
       switch self.model.destination {
-        
+
       case let .main(model):
         MainView(model: model)
-        
+
       case let .onboarding(model):
         OnboardingView(model: model)
-        
+
       case .none:
         ProgressView()
       }
