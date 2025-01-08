@@ -93,8 +93,8 @@ struct SettingsView: View {
           self.divider
           CountdownTimerSection(model: self.model)
           self.divider
-          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
-          self.divider
+//          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
+//          self.divider
           TorchModeSection(model: self.model)
           self.divider
           GridSection(model: self.model)
@@ -219,6 +219,7 @@ private struct ZoomSection: View {
       ForEach([CGFloat]([0.5, 1, 2]), id: \.self) { zoom in
         button(zoom)
       }
+      .disabled(self.model.userSettings.camera == .front)
     }
   }
 
@@ -257,7 +258,7 @@ private struct CountdownTimerSection: View {
     Section(
       systemImage: "timer",
       title: "Timer",
-      subtitle: "Create a timer before the video starts recording."
+      subtitle: "Create a timer before recording."
     ) {
       ForEach([0, 3, 5], id: \.self) { seconds in
         button(seconds)
@@ -347,10 +348,8 @@ private struct TorchModeSection: View {
       title: "Torch",
       subtitle: "Toggle torch on/off/auto."
     ) {
-      HStack {
-        ForEach(UserSettings.TorchMode.allCases) { torchMode in
-          button(torchMode)
-        }
+      ForEach(UserSettings.TorchMode.allCases) { torchMode in
+        button(torchMode)
       }
       .disabled(self.model.userSettings.camera == .front)
     }
