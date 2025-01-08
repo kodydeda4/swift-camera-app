@@ -11,7 +11,7 @@ final class CountdownModel: Identifiable {
   let id = UUID()
   var secondsElapsed = 0
   var onFinish: () -> Void
-    = unimplemented("RecordingCountdownModel.onFinish")
+    = unimplemented("CountdownModel.onFinish")
 
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
