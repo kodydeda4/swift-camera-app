@@ -101,6 +101,7 @@ extension CameraView {
               Image(systemName: "ellipsis")
                 .resizable()
                 .scaledToFit()
+                .padding(4)
             }
           }
           .fontWeight(.semibold)
