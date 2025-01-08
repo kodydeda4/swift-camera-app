@@ -4,8 +4,8 @@ import LinkPresentation
 import SwiftUI
 import UIKit
 
-/// This is a SwiftUI MVVM abstraction over `UIKit.UIActivityViewController`, addressing the limitations of `SwiftUI.ShareButton`.
-/// Specifically, this code was created so that you can present a share sheet after computing a URL.
+/// This is a SwiftUI MVVM abstraction over `UIKit.UIActivityViewController`, to overcome the limitations of `SwiftUI.ShareButton`.
+/// Specifically, this code allows you to present a share sheet after computing a URL.
 
 @MainActor
 @Observable
