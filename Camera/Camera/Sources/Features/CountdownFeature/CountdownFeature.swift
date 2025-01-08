@@ -8,7 +8,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class CountdownModel: Identifiable {
-  let id = UUID()
+  let id: UUID
   var secondsElapsed = 0
   var onFinish: () -> Void
   = unimplemented("CountdownModel.onFinish")
@@ -16,6 +16,11 @@ final class CountdownModel: Identifiable {
   @ObservationIgnored @SharedReader(.userSettings) var userSettings
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   
+  init() {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+  }
+
   var countdown: Int {
     self.userSettings.countdownTimer - self.secondsElapsed
   }

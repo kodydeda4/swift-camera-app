@@ -7,7 +7,7 @@ import SwiftUI
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
-  let id = UUID()
+  let id: UUID
   
   var dismiss: () -> Void
     = unimplemented("UserPermissionsModel.dismiss")
@@ -20,6 +20,11 @@ final class UserPermissionsModel: Identifiable {
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.application) var application
+  
+  init() {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+  }
 
   var isContinueButtonDisabled: Bool {
     !hasFullPermissions

@@ -7,11 +7,16 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class SettingsModel: Identifiable {
-  let id = UUID()
+  let id: UUID
   var buildNumber: Build.Version { Build.version }
   
   @ObservationIgnored @Shared(.userSettings) private(set) var userSettings
   @ObservationIgnored @Dependency(\.camera) var camera
+  
+  init() {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+  }
   
   func cameraButtonTapped(_ value: UserSettings.Camera) {
     _ = Result {

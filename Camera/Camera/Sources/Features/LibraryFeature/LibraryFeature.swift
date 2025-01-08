@@ -9,7 +9,7 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class LibraryModel: Identifiable {
-  public let id = UUID()
+  let id: UUID
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
     = unimplemented("LibraryModel.dismiss")
@@ -17,6 +17,11 @@ final class LibraryModel: Identifiable {
   @ObservationIgnored @Shared(.photosContext) var photosContext
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   
+  init() {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+  }
+
   @CasePathable
   enum Destination {
     case videoPlayer(VideoPlayerModel)
