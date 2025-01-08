@@ -15,8 +15,12 @@ final class SettingsModel: Identifiable {
 
   func cameraButtonTapped(_ value: UserSettings.Camera) {
     _ = Result {
+      // 1. set camera
       try self.camera.adjust(.position(value.rawValue))
       self.$userSettings.camera.withLock { $0 = value }
+      
+      // 2. reset zoom
+      self.$userSettings.zoom.withLock { $0 = 1.0 }
     }
   }
 

@@ -92,6 +92,7 @@ final class CameraModel {
       try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
+      self.$userSettings.zoom.withLock { $0 = 1.0 }
     }
   }
   
