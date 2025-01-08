@@ -12,7 +12,7 @@ final class LibraryModel: Identifiable {
   public let id = UUID()
   var destination: Destination? { didSet { self.bind() } }
   var dismiss: () -> Void
-    = unimplemented("Library.dismiss")
+    = unimplemented("LibraryModel.dismiss")
   
   @ObservationIgnored @Shared(.photosContext) var photosContext
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
