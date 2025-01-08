@@ -84,8 +84,6 @@ extension CameraClient: DependencyKey {
   }
 }
 
-// @DEDA PointFree error handling with line number?...
-
 fileprivate final class Camera: NSObject {
   let events = AsyncChannel<CameraClient.DelegateEvent>()
   

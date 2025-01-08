@@ -94,29 +94,36 @@ fileprivate extension CameraView {
     .disabled(!self.model.hasFullPermissions)
   }
 
-  // @DEDA formerly switch camera button
-  // @DEDA idk why this mf is animating but it's annoying af.
   private var toggleSettingsButton: some View {
     let size: CGFloat = 30
+    let settings = self.model.destination.is(\.settings)
 
     return Group {
       if self.model.isSettingsButtonPresented {
         Button(action: self.model.settingsButtonTapped) {
-          Image(systemName: !self.model.destination.is(\.settings) ? "ellipsis" : "xmark")
-            .resizable()
-            .scaledToFit()
-            .fontWeight(.semibold)
-            .frame(width: size, height: size)
-            .padding(8)
-            .background(
-              !self.model.destination.is(\.settings)
-                ? Color.black.opacity(0.5)
-                : Color.white.opacity(0.1)
-            )
-            .foregroundColor(.white)
-            .clipShape(Circle())
+          ZStack {
+            if settings {
+              Image(systemName: "xmark")
+                .resizable()
+                .scaledToFit()
+                .padding(6)
+            } else {
+              Image(systemName: "ellipsis")
+                .resizable()
+                .scaledToFit()
+            }
+          }
+          .fontWeight(.semibold)
+          .frame(width: size, height: size)
+          .padding(8)
+          .background {
+            settings ? Color.white.opacity(0.1) : Color.black.opacity(0.5)
+          }
+          .foregroundColor(.white)
+          .clipShape(Circle())
         }
         .padding(.horizontal)
+        .animation(.none, value: settings)
       }
     }
   }

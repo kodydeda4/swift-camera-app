@@ -4,14 +4,6 @@ import DependenciesMacros
 import Photos
 import UIKit
 
-/// @DEDA
-/// This code provides an interface to Apple Photos API.
-/// You can create static requests for things like CRUD operations or fetch requests.
-/// This also allows you to have function labels for the requests.
-///
-/// - Example: `try await photosLibrary.performChanges(.createAssetCollection(withTitle: "App"))`
-/// - Example: `try await photos.fetchAssets(.videos(in: collection))
-
 @DependencyClient
 struct PhotosLibraryClient: Sendable {
   

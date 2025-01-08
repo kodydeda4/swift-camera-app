@@ -48,6 +48,8 @@ import SwiftUINavigation
 
  Idk Features
  - [x] Save to an album for the app specifically?
+ - [ ] Camera - start with settings from previous session
+ - [ ] Camera - PointFree error handling with specific line number
  - [ ] Handle app backgrounding
  - [ ] Handle device rotation
  - [ ] Record video vs take picture

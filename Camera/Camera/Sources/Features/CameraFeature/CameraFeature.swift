@@ -7,11 +7,6 @@ import Sharing
 import SwiftUI
 import SwiftUINavigation
 
-// @DEDA
-// Settings need to be resent to camera view on appear.
-// when you connect to the video preview layer, you can
-// send all of your state from userSettings.
-
 @MainActor
 @Observable
 final class CameraModel {
@@ -105,7 +100,6 @@ final class CameraModel {
       return
     }
 
-    // @DEDA when you return, start the session again.
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         for await _ in await self.clock.timer(interval: .seconds(1)) {
@@ -117,7 +111,6 @@ final class CameraModel {
         }
       }
       taskGroup.addTask {
-        //@DEDA try? await self.camera.configure(with: settings)
         try? await self.camera.connect(self.captureVideoPreviewLayer)
       }
       taskGroup.addTask {
@@ -275,7 +268,6 @@ struct CameraView: View {
   }
 }
 
-// @DEDA fix up the grid bro
 private struct CameraGridView: View {
   private let color = Color.gray
   private let spacing: CGFloat = 128
