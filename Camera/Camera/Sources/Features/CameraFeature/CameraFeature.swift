@@ -308,12 +308,6 @@ private struct CameraGridView: View {
 
 // MARK: - SwiftUI Previews
 
-#Preview("Settings") {
-  @Shared(.userPermissions) var userPermissions = .authorized
-  let model = CameraModel()
-  model.destination = .settings(SettingsModel())
-  return CameraView(model: model)
-}
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
@@ -325,4 +319,11 @@ private struct CameraGridView: View {
 #Preview("Permissions Required") {
   @Shared(.userPermissions) var userPermissions = .denied
   CameraView(model: CameraModel())
+}
+
+#Preview("Settings") {
+  @Shared(.userPermissions) var userPermissions = .authorized
+  let model = CameraModel()
+  model.destination = .settings(SettingsModel())
+  return CameraView(model: model)
 }

@@ -66,8 +66,13 @@ extension CameraView {
                 .cornerRadius(8)
                 .padding(.horizontal)
             } else {
-              Color.black
+              Color.secondary
                 .frame(width: 64, height: 64)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay {
+                  RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(Color(.systemGray2))
+                }
             }
           }
           .frame(width: 64, height: 64)
