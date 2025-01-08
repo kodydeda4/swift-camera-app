@@ -27,10 +27,6 @@ final class LibraryModel: Identifiable {
     self.dismiss()
   }
   
-  func editButtonTapped() {
-    //...@DEDA unimplemented
-  }
-  
   func buttonTapped(video: PhotosContext.Video) {
     self.destination = .videoPlayer(VideoPlayerModel(video: video))
   }
@@ -90,13 +86,6 @@ struct LibraryView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       }
       .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
-          Button(action: self.model.editButtonTapped) {
-            Text("Edit")
-              .fontWeight(.semibold)
-              .foregroundColor(.accentColor)
-          }
-        }
         ToolbarItem(placement: .principal) {
           Text("Library")
             .fontWeight(.semibold)
@@ -134,7 +123,7 @@ struct LibraryView: View {
 fileprivate extension TimeInterval {
   var formattedDescription: String {
     let minutes = Int(self) / 60
-    let seconds = Int(self) % 60
+    let seconds = Int(self) % 60 + 1
     return "\(minutes):\(String(format: "%02d", seconds))"
   }
 }
