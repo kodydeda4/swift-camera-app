@@ -11,10 +11,7 @@ import SwiftUINavigation
 final class MainModel {
   private(set) var cameraModel = CameraModel()
   
-  // Shared
   @ObservationIgnored @Shared(.photosContext) var photosContext
-  
-  // Dependencies
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator

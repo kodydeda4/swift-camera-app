@@ -45,7 +45,6 @@ final class VideoPlayerModel {
   func shareButtonTapped() {
     self.destination = .share(
       ActivityModel(
-        id: self.uuid(),
         activityItems: [
           ActivityItem(url: self.video.avURLAsset.url)
         ]

@@ -3,6 +3,7 @@ import IssueReporting
 import LinkPresentation
 import SwiftUI
 import UIKit
+import Dependencies
 
 /// This is a SwiftUI MVVM abstraction over `UIKit.UIActivityViewController`, to overcome the limitations of `SwiftUI.ShareButton`.
 /// Specifically, this code allows you to present a share sheet after computing a URL.
@@ -11,17 +12,17 @@ import UIKit
 @Observable
 final class ActivityModel: Identifiable {
   let id: UUID
-  let activityItems: [ActivityItem]
+  let activityItems: [UIActivityItemProvider]
   let applicationActivities: [UIActivity]
   var completionWithItemsHandler: UIActivityViewController
     .CompletionWithItemsHandler = unimplemented("ActivityModel.completionWithItemsHandler")
 
   init(
-    id: UUID,
-    activityItems: [ActivityItem],
+    activityItems: [UIActivityItemProvider],
     applicationActivities: [UIActivity] = []
   ) {
-    self.id = id
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
     self.activityItems = activityItems
     self.applicationActivities = applicationActivities
   }

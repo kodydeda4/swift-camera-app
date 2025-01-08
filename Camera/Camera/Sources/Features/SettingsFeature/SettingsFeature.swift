@@ -11,7 +11,7 @@ final class SettingsModel: Identifiable {
   var buildNumber: Build.Version { Build.version }
   
   @ObservationIgnored @Shared(.userSettings) private(set) var userSettings
-  @ObservationIgnored @Dependency(\.camera) var camera
+  @ObservationIgnored @Dependency(\.camera) private var camera
   
   init() {
     @Dependency(\.uuid) var uuid

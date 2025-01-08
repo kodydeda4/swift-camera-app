@@ -17,8 +17,8 @@ final class CameraModel {
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
 
   // Shared
-  @ObservationIgnored @Shared(.photosContext) var photosContext
   @ObservationIgnored @Shared(.userSettings) var userSettings
+  @ObservationIgnored @SharedReader(.photosContext) var photosContext
   @ObservationIgnored @SharedReader(.userPermissions) var userPermissions
   
   // Dependencies
