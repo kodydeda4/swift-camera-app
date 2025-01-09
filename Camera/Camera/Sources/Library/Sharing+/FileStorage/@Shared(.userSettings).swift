@@ -2,7 +2,7 @@ import AVFoundation
 import Sharing
 
 struct UserSettings: Equatable, Codable {
-  var camera = Camera.front
+  var camera = Camera.back
   var zoom: CGFloat = 1
   var countdownTimer = 0
   var recordingQuality = RecordingQuality.hd

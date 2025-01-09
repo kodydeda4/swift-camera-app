@@ -15,7 +15,7 @@ final class CameraModel {
   var isRecording = false
   var recordingSecondsElapsed = 0
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-
+  
   // Shared
   @ObservationIgnored @Shared(.userSettings) var userSettings
   @ObservationIgnored @SharedReader(.photosContext) var photosContext
@@ -28,7 +28,7 @@ final class CameraModel {
   @ObservationIgnored @Dependency(\.uuid) var uuid
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   @ObservationIgnored @Dependency(\.continuousClock) var clock
-
+  
   @CasePathable
   enum Destination {
     case userPermissions(UserPermissionsModel)
@@ -44,13 +44,23 @@ final class CameraModel {
   var isZoomButtonsPresented: Bool {
     self.userSettings.camera == .back && self.destination.is(\.none)
   }
-
+  
   /// Example: `"00:00:00"`
   var navigationTitle: String {
     DateComponentsFormatter
       .recordingDuration
       .string(from: TimeInterval(recordingSecondsElapsed))
       .unsafelyUnwrapped
+  }
+  
+  var cameraRecordingButtonState: CameraRecordingButton.State {
+    if isRecording {
+      return .recording
+    } else if destination.is(\.countdown) {
+      return .countdown
+    } else {
+      return .default
+    }
   }
   
   func recordingButtonTapped() {
@@ -62,7 +72,7 @@ final class CameraModel {
     
     !self.isRecording ? self.prepareForRecording() : self.stopRecording()
   }
-
+  
   func permissionsButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
   }
@@ -83,12 +93,12 @@ final class CameraModel {
       self.$userSettings.zoom.withLock { $0 = value }
     }
   }
-
+  
   func switchCameraButtonTapped() {
     _ = Result {
       let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
-        ? .front
-        : .back
+      ? .front
+      : .back
       try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
@@ -100,7 +110,7 @@ final class CameraModel {
     guard hasFullPermissions else {
       return
     }
-
+    
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         for await _ in await self.clock.timer(interval: .seconds(1)) {
@@ -145,7 +155,7 @@ private extension CameraModel {
     self.recordingSecondsElapsed = 0
     self.isRecording = true
   }
-
+  
   private func stopRecording() {
     self.hapticFeedback.generate(.soft)
     self.audio.play(.endVideoRecording)
@@ -154,7 +164,7 @@ private extension CameraModel {
     self.recordingSecondsElapsed = 0
     self.isRecording = false
   }
-   
+  
   private func handle(_ event: CameraClient.DelegateEvent) {
     switch event {
       
@@ -217,7 +227,7 @@ fileprivate extension DateComponentsFormatter {
 struct CameraView: View {
   @Bindable var model: CameraModel
   @State var count: Int?
-
+  
   var body: some View {
     NavigationStack {
       self.content
@@ -240,7 +250,11 @@ struct CameraView: View {
         .overlay(item: $model.destination.countdown) { $model in
           CountdownView(model: model)
         }
-        .overlay(content: self.overlay)
+        .overlay {
+          if self.model.hasFullPermissions {
+            CameraOverlay(model: self.model)
+          }
+        }
     }
   }
   
