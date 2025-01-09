@@ -30,7 +30,7 @@ import SwiftUINavigation
  - [x] Add sounds for when the camera starts/stops
  - [x] display time in grid
  - [x] back camera zoom buttons on camera feature (without opening settings)
- - [ ] SwiftUI Preview - CountdownView
+ - [x] SwiftUI Preview - CountdownView
  - [ ] multi-select crud
  - [ ] Fix app backgrounding
  - [ ] Fix app rotation
