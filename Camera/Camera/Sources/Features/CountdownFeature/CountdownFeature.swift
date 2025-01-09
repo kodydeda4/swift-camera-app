@@ -53,6 +53,8 @@ struct CountdownView: View {
     Text(self.model.countdown.description)
       .font(.largeTitle)
       .fontWeight(.bold)
+      .foregroundColor(.white)
+      .shadow(radius: 4)
       .task { await self.model.task() }
   }
 }
@@ -60,5 +62,10 @@ struct CountdownView: View {
 // MARK: - SwiftUI Previews
 
 #Preview("Settings") {
-  CountdownView(model: CountdownModel())
+  @Shared(.userSettings) var userSettings
+  $userSettings.countdownTimer.withLock { $0 = 30 }
+  
+  return Color.blue.ignoresSafeArea().overlay {
+    CountdownView(model: CountdownModel())
+  }
 }
