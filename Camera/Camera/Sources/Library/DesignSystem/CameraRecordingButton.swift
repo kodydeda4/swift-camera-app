@@ -1,6 +1,5 @@
 import SwiftUI
 
-// @DEDA extract this mf into a package m'boi.
 struct CameraRecordingButton: View {
   let state: State
   var action: () -> Void
