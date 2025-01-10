@@ -81,17 +81,16 @@ struct VideoPlayerView: View {
     }
     .toolbar {
       HStack {
-        Button("Share") {
-          self.model.shareButtonTapped()
+        Button(action: self.model.shareButtonTapped) {
+          Image(systemName: "square.and.arrow.up")
         }
-        Button("Delete") {
-          self.model.deleteButtonTapped()
+        Button(action: self.model.deleteButtonTapped) {
+          Image(systemName: "trash")
         }
       }
     }
   }
 }
-
 
 // MARK: - SwiftUI Previews
 //

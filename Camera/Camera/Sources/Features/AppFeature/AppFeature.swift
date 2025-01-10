@@ -30,17 +30,21 @@ import SwiftUINavigation
  - [x] Add sounds for when the camera starts/stops
  - [x] display time in grid
  - [x] back camera zoom buttons on camera feature (without opening settings)
- - [x] SwiftUI Preview - CountdownView
- - [ ] multi-select crud
- - [ ] Fix app backgrounding
- - [ ] Fix app rotation
- - [ ] Log4Swift
  - [ ] Unit Tests
- - [ ] swift 6
+ - [ ] Swift 6
+ - [ ] Library Management - Multiselect, CRUD operations.
+ - [ ] Log4Swift
  - [ ] SPM
- - [ ] App demo for onboarding
- - [ ] App demo for camera/mainfeature
- - [ ] Slow motion settings?
+ - [ ] AppDemo - Onboarding
+
+ SwiftUI Previews
+ - [x] AppFeature
+ - [x] Settings
+ - [x] CountdownFeature
+ - [x] Camera - PermissionsRequired
+ - [x] Camera - Overlays
+ - [ ] Library
+ - [ ] VideoPlayer
 
  Photos
  - [x] Reactive (AsyncStream)
@@ -49,24 +53,25 @@ import SwiftUINavigation
 
  Idk Features
  - [x] Save to an album for the app specifically?
- - [x] Camera - revert zoom on swap camera
+ - [x] Camera - Revert Zoom on CameraSwap
  - [ ] Camera - Improve Grid UI
- - [ ] Camera - start with settings from previous session
+ - [ ] Camera - Load settings from previous session
  - [ ] Camera - PointFree error handling with specific line number
  - [ ] Camera - Recording Quality
- - [ ] Handle app backgrounding
- - [ ] Handle device rotation
- - [ ] Record video vs take picture
+ - [ ] Camera - SlowMotion & VideoPlayback
+ - [ ] Camera - App Backgrounding
+ - [ ] Camera - Landscape Support
+ - [ ] Camera - Photo vs Video Mode
  - [ ] Notifications for when something was saved to your camera roll
- - [ ] video metadata or grdb?
+ - [ ] Video Metadata / Stickers using GRDB?
 
   UI Rework
  - [x] Sound effect when you tap a button.
  - [x] Haptic feedback for recording button
  - [x] Video Recording duration
- - [ ] Improve user permissions ui
+ - [ ] UserPermissions UI Rework
  - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
- - [ ] Finished recording toast / progress
+ - [ ] Finished Recording Toast
  - [ ] DesignSystem
 
  ---------------------------------------------------------------------------------- */
