@@ -55,7 +55,7 @@ flowchart LR
 
 ### Dependencies
 
-Dependenices are global, self-contained, non-heirarchical.
+Dependenices are global, self-contained, and non-heirarchical.
 
 ```mermaid
 %%{init: {'flowchart': {'curve': 'linear'}, 'themeVariables': {'nodeWidth': 150, 'nodeSpacing': 50, 'rankSpacing': 50}} }%%
