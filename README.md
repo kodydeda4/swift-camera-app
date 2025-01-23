@@ -8,8 +8,6 @@ A SwiftUI-based camera app with video recording, sharing, playback, and deletion
 <img width=185 src="https://github.com/user-attachments/assets/38a60968-b48f-4d03-bedc-fe91b935b8c3">
 <img width=185 src="https://github.com/user-attachments/assets/ae0ee5b6-886c-4571-a9ea-bdfc36cd72f7">
 
-
-
 ## 🚀 Features
 
 - 🎥 **Video Recording**: Record high-quality videos directly within the app.
@@ -24,13 +22,13 @@ A SwiftUI-based camera app with video recording, sharing, playback, and deletion
 - **MVVM**: Application architecture
 - **UIKit**: Lightweight integrations with existing UIKit views.
 
-## 🧰 Dependencies
+### 🧰 Dependencies
 This app was built using various libraries from [PointFree](https://www.pointfree.co/).
 - [swift-dependenices](https://github.com/pointfreeco/swift-dependencies): A dependency management library inspired by SwiftUI's "environment."
 - [swift-navigation](https://github.com/pointfreeco/swift-navigation): Bringing simple and powerful navigation tools to all Swift platforms, inspired by SwiftUI.
 - [swift-sharing](https://github.com/pointfreeco/swift-sharing): Instantly share state among your app's features and external persistence layers, including user defaults, the file system, and more.
 
-## Architecture
+## 🏠 Architecture
 
 The app follows an MVVM architecture.
 
