@@ -68,3 +68,18 @@ flowchart TD
     A --> F(HapticFeedback)
     A --> G(ImageGenerator)
 ```
+
+### Library
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}, 'themeVariables': {'nodeWidth': 150, 'nodeSpacing': 50, 'rankSpacing': 50}} }%%
+flowchart TD
+    A(Library)
+    A --> E(AnyError)
+    A --> H(Build)
+    A --> B(CaptureVideoPreviewLayerView)
+    A --> D(DesignSystem)
+    A --> F(Foundation+)
+```
+
+
