@@ -33,7 +33,7 @@ This app was built using various libraries from [PointFree](https://www.pointfre
 ### Features
 
 ```mermaid
-%%{init: {'theme': 'neutral' } }%%
+%%{init: {'theme': 'base', 'flowchart': {'curve': 'linear'}} }%%
 flowchart LR
     A(App) --> C(Onboarding)
     A(App) -->B(Main)
@@ -47,12 +47,13 @@ flowchart LR
     E --> I(Countdown)
     E --> J(Settings)
     E --> K(UserPermissions)
+    
 ```
 
 ### Dependencies
 ```mermaid
-%%{init: {'theme': 'neutral' } }%%
-flowchart LR
+%%{init: {'theme': 'base', 'flowchart': {'curve': 'linear'}} }%%
+flowchart TD
     A(Dependencies)
     A --> E(Camera)
     A --> H(PhotoLibrary)
