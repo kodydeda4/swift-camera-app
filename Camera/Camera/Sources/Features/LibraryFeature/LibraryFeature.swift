@@ -124,7 +124,6 @@ struct LibraryView: View {
   }
 }
 
-//@DEDA probably not the perfect solution for this.
 fileprivate extension TimeInterval {
   var formattedDescription: String {
     let minutes = Int(self) / 60

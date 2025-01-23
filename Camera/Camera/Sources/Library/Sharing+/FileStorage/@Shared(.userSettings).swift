@@ -5,7 +5,6 @@ struct UserSettings: Equatable, Codable {
   var camera = Camera.back
   var zoom: CGFloat = 1
   var countdownTimer = 0
-  var recordingQuality = RecordingQuality.hd
   var torchMode = TorchMode.off
   var isGridEnabled = false
 
@@ -13,11 +12,6 @@ struct UserSettings: Equatable, Codable {
     case on
     case off
     case auto
-  }
-  
-  enum RecordingQuality: Equatable, Codable, CaseIterable {
-    case hd
-    case fourK
   }
   
   enum Camera: Equatable, Codable, CaseIterable {
@@ -64,18 +58,6 @@ extension UserSettings.TorchMode: Identifiable, CustomStringConvertible {
       @unknown default: fatalError("????")
       }
     }()
-  }
-}
-
-extension UserSettings.RecordingQuality: Identifiable, CustomStringConvertible {
-  
-  var id: Self { self }
-  
-  var description: String {
-    switch self {
-    case .hd: return "HD"
-    case .fourK: return "4k"
-    }
   }
 }
 

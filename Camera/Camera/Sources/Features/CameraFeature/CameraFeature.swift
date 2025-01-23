@@ -170,13 +170,12 @@ private extension CameraModel {
       
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
-        if let assetCollection = self.photosContext.assetCollection {
-          try await self.photos.performChanges(
-            .save(contentsOf: outputFileURL, to: assetCollection)
-          )
-        } else {
-          print("@DEDA yo asset collection wuz nil.")
+        guard let assetCollection = self.photosContext.assetCollection else {
+          fatalError("Attempting save output of video recording file to asset collection, while asset collection is nil.")
         }
+        try await self.photos.performChanges(
+          .save(contentsOf: outputFileURL, to: assetCollection)
+        )
       }
     }
   }

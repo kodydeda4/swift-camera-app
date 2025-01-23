@@ -54,10 +54,6 @@ final class SettingsModel: Identifiable {
     }
   }
   
-  func recordingQualityButtonTapped(value: UserSettings.RecordingQuality) {
-    self.$userSettings.recordingQuality.withLock { $0 = value }
-  }
-  
   func gridButtonTapped(value: Bool) {
     self.$userSettings.isGridEnabled.withLock { $0 = value }
   }
@@ -107,8 +103,6 @@ struct SettingsView: View {
           self.divider
           CountdownTimerSection(model: self.model)
           self.divider
-          //          RecordingQualitySection(model: self.model)//@DEDA this is not implemented.
-          //          self.divider
           GridSection(model: self.model)
         }
       }
@@ -298,51 +292,6 @@ private struct CountdownTimerSection: View {
           .clipShape(Circle())
         
         Text("\(seconds.description)s")
-          .font(.caption)
-          .fontWeight(isSelected ? .bold : .regular)
-          .foregroundColor(.white)
-      }
-    }
-  }
-}
-
-private struct RecordingQualitySection: View {
-  @Bindable var model: SettingsModel
-  
-  var body: some View {
-    Section(
-      systemImage: "camera",
-      title: "Recording Quality",
-      subtitle: "Select a video recording quality."
-    ) {
-      HStack {
-        ForEach(UserSettings.RecordingQuality.allCases) { quality in
-          button(quality)
-        }
-      }
-    }
-  }
-  
-  private func button(_ quality: UserSettings.RecordingQuality) -> some View {
-    let isSelected = self.model.userSettings.recordingQuality == quality
-    
-    return Button {
-      self.model.recordingQualityButtonTapped(value: quality)
-    } label: {
-      VStack {
-        Text("\(quality)")
-          .font(.caption)
-          .bold()
-          .frame(width: 32, height: 32)
-          .foregroundColor(isSelected ? .black : .white)
-          .background(
-            isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
-          )
-          .clipShape(Circle())
-        
-        Text(quality.description)
           .font(.caption)
           .fontWeight(isSelected ? .bold : .regular)
           .foregroundColor(.white)
