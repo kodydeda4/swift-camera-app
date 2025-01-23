@@ -33,7 +33,8 @@ This app was built using various libraries from [PointFree](https://www.pointfre
 ### Features
 
 ```mermaid
-flowchart TD
+%%{init: {'theme': 'neutral' } }%%
+flowchart LR
     A(App) --> C(Onboarding)
     A(App) -->B(Main)
     C --> D(UserPermissions)
@@ -49,4 +50,14 @@ flowchart TD
 ```
 
 ### Dependencies
-
+```mermaid
+%%{init: {'theme': 'neutral' } }%%
+flowchart LR
+    A(Dependencies)
+    A --> E(Camera)
+    A --> H(PhotoLibrary)
+    A --> B(Application)
+    A --> D(Audio)
+    A --> F(HapticFeedback)
+    A --> G(ImageGenerator)
+```
