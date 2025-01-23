@@ -43,14 +43,13 @@ flowchart LR
     A(App) -->B(Main)
     C --> D(UserPermissions)
     B --> E(Camera)
-
-    E --> F(Library)
+    E --> K(UserPermissions)
     F --> G(VideoPlayer)
     G --> H(Activity)
-
     E --> I(Countdown)
     E --> J(Settings)
-    E --> K(UserPermissions)
+    E --> F(Library)
+    
     
 ```
 
