@@ -2,11 +2,13 @@
 
 A SwiftUI-based camera app with video recording, sharing, playback, and deletion functionalities.
 
-<img width=150 src="https://github.com/user-attachments/assets/53de5b6e-cadc-494e-89b7-6bde399ffcd1">
-<img width=150 src="https://github.com/user-attachments/assets/b2a6cef6-feb2-4b86-af2a-bc39689377e7">
-<img width=150 src="https://github.com/user-attachments/assets/4424ec3d-146d-4736-bbca-78b87168f61e">
-<img width=150 src="https://github.com/user-attachments/assets/38a60968-b48f-4d03-bedc-fe91b935b8c3">
-<img width=150 src="https://github.com/user-attachments/assets/ae0ee5b6-886c-4571-a9ea-bdfc36cd72f7">
+<img width=185 src="https://github.com/user-attachments/assets/53de5b6e-cadc-494e-89b7-6bde399ffcd1">
+<img width=185 src="https://github.com/user-attachments/assets/b2a6cef6-feb2-4b86-af2a-bc39689377e7">
+<img width=185 src="https://github.com/user-attachments/assets/4424ec3d-146d-4736-bbca-78b87168f61e">
+<img width=185 src="https://github.com/user-attachments/assets/38a60968-b48f-4d03-bedc-fe91b935b8c3">
+<img width=185 src="https://github.com/user-attachments/assets/ae0ee5b6-886c-4571-a9ea-bdfc36cd72f7">
+
+
 
 ## 🚀 Features
 
