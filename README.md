@@ -49,6 +49,7 @@ flowchart LR
     E --> I(Countdown)
     E --> J(Settings)
     E --> F(Library)
+
     
     
 ```
@@ -80,6 +81,7 @@ flowchart TD
     A --> B(CaptureVideoPreviewLayerView)
     A --> D(DesignSystem)
     A --> F(Foundation+)
+    A --> G(Sharing+)
 ```
 
 
