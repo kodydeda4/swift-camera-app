@@ -48,8 +48,8 @@ struct CameraOverlay: View {
       .foregroundColor(isSelected ? .black : .white)
       .background(
         isSelected
-        ? Color.accentColor
-        : Color.black.opacity(0.5)
+          ? Color.accentColor
+          : Color.black.opacity(0.5)
       )
       .clipShape(Circle())
   }

@@ -199,8 +199,8 @@ private struct CameraSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
@@ -243,8 +243,8 @@ private struct ZoomSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
@@ -286,8 +286,8 @@ private struct CountdownTimerSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
@@ -330,8 +330,8 @@ private struct TorchModeSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         
@@ -375,8 +375,8 @@ private struct GridSection: View {
           .foregroundColor(isSelected ? .black : .white)
           .background(
             isSelected
-            ? Color.accentColor
-            : Color.white.opacity(0.25)
+              ? Color.accentColor
+              : Color.white.opacity(0.25)
           )
           .clipShape(Circle())
         

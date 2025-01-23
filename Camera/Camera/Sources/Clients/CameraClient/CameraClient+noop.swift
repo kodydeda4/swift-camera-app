@@ -8,7 +8,7 @@ import SwiftUINavigation
 
 extension CameraClient {
   static var previewValue: Self {
-    
+
     return Self(
       requestAccess: { mediaType in
         await AVCaptureDevice.requestAccess(for: mediaType)

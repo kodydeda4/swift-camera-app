@@ -13,7 +13,7 @@ final class VideoPlayerModel {
   let player: AVPlayer
   var dismiss: () -> Void = unimplemented("VideoPlayerModel.dismiss")
   var destination: Destination? { didSet { self.bind() } }
-  
+
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.uuid) var uuid
 

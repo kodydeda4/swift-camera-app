@@ -97,8 +97,8 @@ final class CameraModel {
   func switchCameraButtonTapped() {
     _ = Result {
       let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
-      ? .front
-      : .back
+        ? .front
+        : .back
       try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
@@ -171,7 +171,9 @@ private extension CameraModel {
     case let .avCaptureFileOutputRecordingDelegate(.fileOutput(_, outputFileURL, _, _)):
       Task {
         guard let assetCollection = self.photosContext.assetCollection else {
-          fatalError("Attempting save output of video recording file to asset collection, while asset collection is nil.")
+          fatalError(
+            "Attempting save output of video recording file to asset collection, while asset collection is nil."
+          )
         }
         try await self.photos.performChanges(
           .save(contentsOf: outputFileURL, to: assetCollection)
