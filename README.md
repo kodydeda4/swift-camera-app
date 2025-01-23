@@ -27,3 +27,26 @@ This app was built using various libraries from [PointFree](https://www.pointfre
 - [swift-dependenices](https://github.com/pointfreeco/swift-dependencies): A dependency management library inspired by SwiftUI's "environment."
 - [swift-navigation](https://github.com/pointfreeco/swift-navigation): Bringing simple and powerful navigation tools to all Swift platforms, inspired by SwiftUI.
 - [swift-sharing](https://github.com/pointfreeco/swift-sharing): Instantly share state among your app's features and external persistence layers, including user defaults, the file system, and more.
+
+## Architecture
+
+### Features
+
+```mermaid
+flowchart TD
+    A(App) --> C(Onboarding)
+    A(App) -->B(Main)
+    C --> D(UserPermissions)
+    B --> E(Camera)
+
+    E --> F(Library)
+    F --> G(VideoPlayer)
+    G --> H(Activity)
+
+    E --> I(Countdown)
+    E --> J(Settings)
+    E --> K(UserPermissions)
+```
+
+### Dependencies
+
