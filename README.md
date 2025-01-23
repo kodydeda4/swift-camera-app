@@ -1,7 +1,6 @@
 # 📸 SwiftUI Camera App
 
 A SwiftUI-based camera app with video recording, sharing, playback, and deletion functionalities.
-Available on the [App Store](https://apps.apple.com/today) now!
 
 <img width=150 src="https://github.com/user-attachments/assets/53de5b6e-cadc-494e-89b7-6bde399ffcd1">
 <img width=150 src="https://github.com/user-attachments/assets/b2a6cef6-feb2-4b86-af2a-bc39689377e7">
