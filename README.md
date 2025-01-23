@@ -34,7 +34,7 @@ The app follows an MVVM architecture.
 
 ### Features
 
-Features are organized as a tree - each major view is powered by a model.
+Features are organized as a tree - where each major view is powered by a model.
 
 ```mermaid
 %%{init: {'flowchart': {'curve': 'linear'}, 'themeVariables': {'nodeWidth': 150, 'nodeSpacing': 50, 'rankSpacing': 50}} }%%
