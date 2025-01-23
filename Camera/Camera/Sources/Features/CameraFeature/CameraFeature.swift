@@ -222,7 +222,6 @@ fileprivate extension DateComponentsFormatter {
   }
 }
 
-
 // MARK: - SwiftUI
 
 struct CameraView: View {
@@ -322,7 +321,6 @@ private struct CameraGridView: View {
 }
 
 // MARK: - SwiftUI Previews
-
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
