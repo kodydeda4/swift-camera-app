@@ -7,7 +7,7 @@ import SwiftUI
 @Observable
 @MainActor
 final class UserPermissionsModel: Identifiable {
-  let id = UUID()
+  let id: UUID
   
   var dismiss: () -> Void
     = unimplemented("UserPermissionsModel.dismiss")
@@ -15,23 +15,23 @@ final class UserPermissionsModel: Identifiable {
   var onContinueButtonTapped: () -> Void
     = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
-  @ObservationIgnored
-  @Shared(.userPermissions) var userPermissions
+  @ObservationIgnored @Shared(.userPermissions) var userPermissions
+  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.camera) var camera
+  @ObservationIgnored @Dependency(\.photos) var photos
+  @ObservationIgnored @Dependency(\.application) var application
   
-  @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissionsClient
-  
-  @ObservationIgnored
-  @Dependency(\.application) var application
-  
+  init() {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+  }
+
   var isContinueButtonDisabled: Bool {
     !hasFullPermissions
   }
   
   var hasFullPermissions: Bool {
-    self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
+    self.userPermissions == .authorized
   }
 
   func cancelButtonTapped() {
@@ -42,23 +42,39 @@ final class UserPermissionsModel: Identifiable {
     self.onContinueButtonTapped()
   }
   
-  func request(_ feature: UserPermissionsClient.Feature) {
+  func request(_ feature: UserPermissions.Feature) {
     switch userPermissions[feature] {
       
     case .authorized:
       break
       
     case .denied:
-      Task {
-        try? await self.application.openSettings()
-      }
+      self.application.open(URL(string: UIApplication.openSettingsURLString)!)
       
-    case .none,
-         .undetermined:
+    default:
       Task {
-        let newValue = await self.userPermissionsClient.request(feature)
+        let status: UserPermissions.Status = await {
+          switch feature {
+            
+          case .camera:
+            await camera.requestAccess(.video)
+              ? .authorized
+              : .denied
+            
+          case .microphone:
+            await audio.requestRecordPermission()
+              ? .authorized
+              : .denied
+            
+          case .photos:
+            await photos.requestAuthorization(.addOnly) == .authorized
+              ? .authorized
+              : .denied
+          }
+        }()
+        
         self.$userPermissions.withLock {
-          $0[feature] = newValue ? .authorized : .denied
+          $0[feature] = status
         }
       }
     }

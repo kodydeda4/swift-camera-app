@@ -1,5 +1,6 @@
 import AVFoundation
 import Dependencies
+import IdentifiedCollections
 import Photos
 import Sharing
 import SwiftUI
@@ -8,145 +9,92 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class MainModel {
-  private(set) var captureSession = AVCaptureSession()
-  private(set) var captureDevice: AVCaptureDevice?
-  private(set) var captureDeviceInput: AVCaptureDeviceInput?
-  private(set) var captureMovieFileOutput = AVCaptureMovieFileOutput()
-  private(set) var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  private(set) var captureFileOutputRecordingDelegate = CaptureFileOutputRecordingDelegate()
-  private(set) var isRecording = false
-
-  var destination: Destination? { didSet { self.bind() } }
+  private(set) var cameraModel = CameraModel()
   
-  @ObservationIgnored
-  @Shared(.userPermissions) private var userPermissions
+  @ObservationIgnored @Shared(.photosContext) var photosContext
+  @ObservationIgnored @Dependency(\.photos) var photos
+  @ObservationIgnored @Dependency(\.uuid) var uuid
+  @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
   
-  @ObservationIgnored
-  @Dependency(\.userPermissions) private var userPermissionsClient
-  
-  @ObservationIgnored
-  @Dependency(\.photoLibrary) private var photoLibrary
-  
-  @ObservationIgnored
-  @Dependency(\.uuid) private var uuid
-  
-  @CasePathable
-  enum Destination {
-    case userPermissions(UserPermissionsModel)
-  }
-  
-  var hasFullPermissions: Bool {
-    self.userPermissions[.camera] == .authorized &&
-      self.userPermissions[.microphone] == .authorized &&
-      self.userPermissions[.photos] == .authorized
-  }
-  
-  func recordingButtonTapped() {
-    try? !isRecording ? startRecording() : stopRecording()
-    self.isRecording.toggle()
-  }
-  
-  func permissionsButtonTapped() {
-    self.destination = .userPermissions(UserPermissionsModel())
-  }
-
   func task() async {
-    await withTaskGroup(of: Void.self) { taskGroup in
+    await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
-        do {
-          try await self.startCaptureSession()
-        } catch {
-          print(error.localizedDescription)
+        let photosContext = try await self.fetchOrCreateAssetCollection(
+          withTitle: PhotosContext.title
+        )
+        
+        await MainActor.run {
+          self.$photosContext.assetCollection.withLock { $0 = photosContext }
+        }
+        for await fetchResult in await self.photos.streamAssets(.videos(in: photosContext)) {
+          await self.syncVideos(with: fetchResult)
         }
       }
-      taskGroup.addTask {
-        for await event in await self.captureFileOutputRecordingDelegate.events {
-          await self.handleRecordingDelegateEvent(event)
+    }
+  }
+  
+  private func syncVideos(with fetchResult: PHFetchResult<PHAsset>) {
+    let assets: [PHAsset] = (0..<fetchResult.count)
+      .compactMap { fetchResult.object(at: $0) }
+    
+    self.$photosContext.videos.withLock { $0 = [] }
+    
+    Task {
+      await withTaskGroup(of: Void.self) { taskGroup in
+        for asset in assets {
+          taskGroup.addTask {
+            guard
+              let avAsset = await self.photos.requestAVAsset(asset, .none)?.asset,
+              let avURLAsset = (avAsset as? AVURLAsset),
+              let thumbnail = try? await self.imageGenerator.image(avAsset)?.image
+            else {
+              return
+            }
+            await MainActor.run {
+              self.$photosContext.videos.withLock {
+                $0[id: asset] = PhotosContext.Video(
+                  phAsset: asset,
+                  avURLAsset: avURLAsset,
+                  thumbnail: UIImage(cgImage: thumbnail)
+                )
+              }
+            }
+          }
         }
       }
     }
   }
-}
-
-private extension MainModel {
   
-  func bind() {
-    switch destination {
-      
-    case let .userPermissions(model):
-      model.dismiss = { [weak self] in self?.destination = .none }
-      
-    case .none:
-      break
-    }
-  }
   
-  func startCaptureSession() throws {
-    guard let device = AVCaptureDevice.default(for: .video) else {
-      throw AnyError("AVCaptureDevice.default(for: .video) returned nil.")
-    }
+  private func fetchOrCreateAssetCollection(
+    withTitle title: String
+  ) async throws -> PHAssetCollection {
     
-    let input = try AVCaptureDeviceInput(device: device)
-    let output = self.captureMovieFileOutput
-    
-    guard self.captureSession.canAddInput(input) else {
-      throw AnyError("self.avCaptureSession.canAddInput(input) returned false.")
-    }
-    guard self.captureSession.canAddOutput(output) else {
-      throw AnyError("self.avCaptureSession.canAddOutput(output) returned false.")
-    }
-    
-    self.captureDevice = device
-    self.captureDeviceInput = input
-    self.captureSession.addInput(input)
-    self.captureSession.addOutput(output)
-    self.captureVideoPreviewLayer.session = self.captureSession
-    
-    Task.detached {
-      await self.captureSession.startRunning()
-    }
-  }
-  
-  func startRecording() throws {
-    guard let connection = self.captureMovieFileOutput.connection(with: .video) else {
-      throw AnyError("movieOutput.connection(with: .video) returned nil")
-    }
-    
-    // Configure connection for HEVC capture.
-    if self.captureMovieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.captureMovieFileOutput.setOutputSettings(
-        [AVVideoCodecKey: AVVideoCodecType.hevc],
-        for: connection
-      )
-    }
-    
-    // Enable video stabilization if the connection supports it.
-    if connection.isVideoStabilizationSupported {
-      connection.preferredVideoStabilizationMode = .auto
-    }
-    
-    self.captureMovieFileOutput.startRecording(
-      to: URL.temporaryDirectory
-        .appending(component: self.uuid().uuidString)
-        .appendingPathExtension(for: .quickTimeMovie),
-      recordingDelegate: self.captureFileOutputRecordingDelegate
+    // Fetch collections with title.
+    var albums = try await self.photos.fetchAssetCollections(
+      .albums(with: title)
     )
-  }
-  
-  func stopRecording() {
-    self.captureMovieFileOutput.stopRecording()
-  }
-  
-  func handleRecordingDelegateEvent(_ event: CaptureFileOutputRecordingDelegate.Event) {
-    switch event {
-      
-    case let .fileOutput(_, outputFileURL, _, _):
-      Task.detached {
-        try await self.photoLibrary().performChanges({
-          PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-        })
-      }
+    
+    // If you found it, update and return.
+    if let first = albums.firstObject {
+      return first
     }
+    
+    // Else, try to create to the album, refetch, and update.
+    try await self.photos.performChanges(
+      .createAssetCollection(withTitle: title)
+    )
+    
+    albums = try await self.photos.fetchAssetCollections(
+      .albums(with: title)
+    )
+    
+    if let first = albums.firstObject {
+      return first
+    }
+    
+    // If that didn't work, throw an error.
+    throw AnyError("Couldn't fetch or create asset collection.")
   }
 }
 
@@ -156,31 +104,15 @@ struct MainView: View {
   @Bindable var model: MainModel
   
   var body: some View {
-    NavigationStack {
-      Group {
-        if self.model.hasFullPermissions {
-          self.camera
-        } else {
-          self.permissionsRequired
-        }
-      }
-    }
-    .navigationBarBackButtonHidden()
-    .overlay(content: self.overlay)
-    .task { await self.model.task() }
-    .sheet(item: $model.destination.userPermissions) { model in
-      UserPermissionsSheet(model: model)
-    }
+    CameraView(model: self.model.cameraModel)
+      .task { await self.model.task() }
   }
 }
 
 // MARK: - SwiftUI Previews
 
 #Preview("Happy path") {
-  let value: Dictionary<
-    UserPermissionsClient.Feature,
-    UserPermissionsClient.Status
-  > = [
+  let value: UserPermissions.State = [
     .camera: .authorized,
     .microphone: .authorized,
     .photos: .authorized,

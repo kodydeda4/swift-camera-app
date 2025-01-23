@@ -1,90 +1,85 @@
+import CasePaths
 import Dependencies
+import Photos
 import Sharing
 import SwiftUI
 import SwiftUINavigation
-
-/* --------------------------------------------------------------------------------------------
- 
- @DEDA
- 
- - [x] Camera
- - [x] Video Recording
- - [x] UserPermissions
- - [x] Bind && Unimplemented
- - [x] Destination
- - [x] Swift Dependencies
- - [x] Swift Format
- - [ ] Build version
- - [ ] AppIcon
- - [ ] Animations && UI Improvements (smooth transitions, loading screens..)
- - [ ] Finished recording toast / progress
- 
- - [ ] SwiftUI Preview Compiler Directive
- - [ ] Logs
- - [ ] DesignSystem
- - [ ] Unit Tests
- - [ ] swift 6
- - [ ] SPM
-
- -------------------------------------------------------------------------------------------- */
 
 @Observable
 @MainActor
 final class AppModel {
   var destination: Destination? { didSet { self.bind() } }
-  
-  @ObservationIgnored
-  @Shared(.isOnboardingComplete) var isOnboardingComplete = false
-  
-  @ObservationIgnored
-  @Shared(.userPermissions) var userPermissions
-  
-  @ObservationIgnored
-  @Dependency(\.userPermissions) var userPermissionsClient
-  
+
+  @ObservationIgnored @Shared(.isOnboardingComplete) var isOnboardingComplete = false
+  @ObservationIgnored @Shared(.userPermissions) var userPermissions
+  @ObservationIgnored @Dependency(\.camera) var camera
+  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.photos) var photos
+
   @CasePathable
   enum Destination {
     case main(MainModel)
     case onboarding(OnboardingModel)
   }
-  
-  init() {
-    self.destination = self.isOnboardingComplete
-      ? .main(MainModel())
-      : .onboarding(OnboardingModel())
-  }
-  
-  var task: Task<Void, Never> {
-    Task.detached {
-      await withTaskGroup(of: Void.self) { taskGroup in
-        taskGroup.addTask {
-          await self.syncUserPermissions()
+
+  func task() async {
+    await withTaskGroup(of: Void.self) { taskGroup in
+      taskGroup.addTask {
+        await self.syncUserPermissions()
+
+        await MainActor.run {
+          self.destination = self.isOnboardingComplete
+            ? .main(MainModel())
+            : .onboarding(OnboardingModel())
         }
       }
     }
   }
-  
+
   /// Update user permissions when the app starts or returns from the background.
   private func syncUserPermissions() async {
-    UserPermissionsClient.Feature.allCases.forEach { feature in
+    UserPermissions.Feature.allCases.forEach { feature in
       self.$userPermissions.withLock {
-        $0[feature] = self.userPermissionsClient.status(feature)
+        $0[feature] = {
+          switch feature {
+          case .camera:
+            switch self.camera.authorizationStatus(.video) {
+            case .notDetermined: return .undetermined
+            case .authorized: return .authorized
+            default: return .denied
+            }
+
+          case .microphone:
+            switch self.audio.recordPermission() {
+            case .undetermined: return .undetermined
+            case .granted: return .authorized
+            default: return .denied
+            }
+
+          case .photos:
+            switch self.photos.authorizationStatus(.addOnly) {
+            case .notDetermined: return .undetermined
+            case .authorized: return .authorized
+            default: return .denied
+            }
+          }
+        }()
       }
     }
   }
-  
+
   private func bind() {
     switch destination {
-      
+
     case .main:
       break
-      
+
     case let .onboarding(model):
       model.onCompletion = { [weak self] in
         self?.$isOnboardingComplete.withLock { $0 = true }
         self?.destination = .main(MainModel())
       }
-      
+
     case .none:
       break
     }
@@ -95,22 +90,22 @@ final class AppModel {
 
 struct AppView: View {
   @Bindable var model: AppModel
-  
+
   var body: some View {
     Group {
       switch self.model.destination {
-        
+
       case let .main(model):
         MainView(model: model)
-        
+
       case let .onboarding(model):
         OnboardingView(model: model)
-        
+
       case .none:
         ProgressView()
       }
     }
-    .task { await self.model.task.cancellableValue }
+    .task { await self.model.task() }
   }
 }
 

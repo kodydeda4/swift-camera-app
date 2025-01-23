@@ -9,6 +9,7 @@ import SwiftUINavigation
 final class OnboardingModel {
   var destination: Destination? { didSet { self.bind() } }
   var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
+  var buildNumber: Build.Version { Build.version }
 
   @CasePathable
   enum Destination {
@@ -60,6 +61,8 @@ struct OnboardingView: View {
           Text("Record Videos.")
             .foregroundColor(.secondary)
             .padding(.bottom)
+
+          Text(self.model.buildNumber.description)
 
           Button("Continue") {
             self.model.continueButtonTapped()
