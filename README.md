@@ -30,9 +30,11 @@ This app was built using various libraries from [PointFree](https://www.pointfre
 
 ## Architecture
 
+The app follows an MVVM architecture.
+
 ### Features
 
-The app follows an MVVM architecture, where models are extracted from views and follow a heirarchical pattern, while dependencies are global and use dependency injection patterns.
+Features are organized as a tree - each major view is powered by a model.
 
 ```mermaid
 %%{init: {'flowchart': {'curve': 'linear'}, 'themeVariables': {'nodeWidth': 150, 'nodeSpacing': 50, 'rankSpacing': 50}} }%%
@@ -53,6 +55,9 @@ flowchart LR
 ```
 
 ### Dependencies
+
+Dependenices are global, self-contained, non-heirarchical.
+
 ```mermaid
 %%{init: {'flowchart': {'curve': 'linear'}, 'themeVariables': {'nodeWidth': 150, 'nodeSpacing': 50, 'rankSpacing': 50}} }%%
 flowchart TD
