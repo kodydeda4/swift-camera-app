@@ -27,7 +27,7 @@
 /* Begin PBXFileReference section */
 		335D02932CFFA270009FBDAD /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
 		335D02952CFFA27B009FBDAD /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
-		33B64EC62CFCC15000D97812 /* Camera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Camera.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		33B64EC62CFCC15000D97812 /* IDD Camera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IDD Camera.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		33B64ED62CFCC15200D97812 /* CameraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -102,7 +102,7 @@
 		33B64EC72CFCC15000D97812 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				33B64EC62CFCC15000D97812 /* Camera.app */,
+				33B64EC62CFCC15000D97812 /* IDD Camera.app */,
 				33B64ED62CFCC15200D97812 /* CameraTests.xctest */,
 			);
 			name = Products;
@@ -135,7 +135,7 @@
 				335D028B2CFF7F5C009FBDAD /* Sharing */,
 			);
 			productName = Camera;
-			productReference = 33B64EC62CFCC15000D97812 /* Camera.app */;
+			productReference = 33B64EC62CFCC15000D97812 /* IDD Camera.app */;
 			productType = "com.apple.product-type.application";
 		};
 		33B64ED52CFCC15200D97812 /* CameraTests */ = {
@@ -380,7 +380,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Camera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "LumiFlow - Camera Video Recording";
+				INFOPLIST_KEY_CFBundleDisplayName = "IDD Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
@@ -391,14 +391,14 @@
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.deda.camera;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "IDD Camera";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -421,7 +421,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Camera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "LumiFlow - Camera Video Recording";
+				INFOPLIST_KEY_CFBundleDisplayName = "IDD Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
@@ -432,14 +432,14 @@
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.deda.camera;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "IDD Camera";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
