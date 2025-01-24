@@ -380,7 +380,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Camera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Camera - Video Recording";
+				INFOPLIST_KEY_CFBundleDisplayName = "LumiFlow - Camera Video Recording";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
@@ -421,7 +421,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Camera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Camera - Video Recording";
+				INFOPLIST_KEY_CFBundleDisplayName = "LumiFlow - Camera Video Recording";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
