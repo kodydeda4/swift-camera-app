@@ -382,9 +382,9 @@
 				INFOPLIST_FILE = Camera/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "IDD Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Save your videos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to record your videos.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires microphone access to record audio for your videos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires photo access to save your videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -423,9 +423,9 @@
 				INFOPLIST_FILE = Camera/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "IDD Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Record videos";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Add sound to your AR videos";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Save your videos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to record your videos.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires microphone access to record audio for your videos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires photo access to save your videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
