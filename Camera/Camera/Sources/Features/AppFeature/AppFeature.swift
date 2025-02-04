@@ -14,7 +14,7 @@ final class AppModel {
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
   
   @ObservationIgnored @Dependency(\.camera) var camera
-  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.audioApplication) var audioApplication
   @ObservationIgnored @Dependency(\.audioSession) var audioSession
   @ObservationIgnored @Dependency(\.photos) var photos
 
@@ -54,7 +54,7 @@ final class AppModel {
             }
 
           case .microphone:
-            switch self.audio.recordPermission() {
+            switch self.audioApplication.recordPermission() {
             case .undetermined: return .undetermined
             case .granted: return .authorized
             default: return .denied

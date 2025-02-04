@@ -5,29 +5,25 @@ import DependenciesMacros
 import SwiftUI
 
 @DependencyClient
-struct AudioClient: Sendable {
+struct AudioApplicationClient: Sendable {
   var recordPermission: @Sendable () -> AVAudioApplication.recordPermission = { .undetermined }
   var requestRecordPermission: @Sendable () async -> Bool = { false }
-  var play: @Sendable (SystemSound) -> Void
 }
 
 extension DependencyValues {
-  var audio: AudioClient {
-    get { self[AudioClient.self] }
-    set { self[AudioClient.self] = newValue }
+  var audioApplication: AudioApplicationClient {
+    get { self[AudioApplicationClient.self] }
+    set { self[AudioApplicationClient.self] = newValue }
   }
 }
 
-extension AudioClient: DependencyKey {
+extension AudioApplicationClient: DependencyKey {
   static var liveValue = Self(
     recordPermission: {
       AVAudioApplication.shared.recordPermission
     },
     requestRecordPermission: {
       await AVAudioApplication.requestRecordPermission()
-    },
-    play: { systemSound in
-      AudioServicesPlaySystemSound(SystemSoundID(systemSound.rawValue))
     }
   )
 }
