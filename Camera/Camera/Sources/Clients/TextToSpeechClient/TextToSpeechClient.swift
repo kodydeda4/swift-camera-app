@@ -53,3 +53,18 @@ extension TextToSpeechClient: DependencyKey {
     }
   }
 }
+
+public extension AVSpeechUtterance {
+  /// Create an `AVSpeechUtterance` with default properties.
+  static var `default`: (String) -> AVSpeechUtterance = {
+    let rv = AVSpeechUtterance(string: $0)
+    rv.rate = 0.5
+    rv.voice = {
+      let samantha = AVSpeechSynthesisVoice.speechVoices().first(where: { $0.name == "Samantha" })
+      let englishUS = AVSpeechSynthesisVoice(language: "en-US")
+      return samantha ?? englishUS.unsafelyUnwrapped
+    }()
+    return rv
+  }
+}
+
