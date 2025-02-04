@@ -87,13 +87,12 @@ extension CameraClient: DependencyKey {
 fileprivate final class Camera: NSObject {
   let events = AsyncChannel<CameraClient.DelegateEvent>()
   
-  // Note: These are unwrapped when you call connect(to: videoPreviewLayer).
   private var session: AVCaptureSession!
-  private var videoDevice: AVCaptureDevice!
-  private var videoInput: AVCaptureDeviceInput!
-  private var audioDevice: AVCaptureDevice!
-  private var audioInput: AVCaptureDeviceInput!
   private var movieFileOutput: AVCaptureMovieFileOutput!
+  private var videoDevice: AVCaptureDevice!
+  private var videoDeviceInput: AVCaptureDeviceInput!
+  private var audioDevice: AVCaptureDevice!
+  private var audioDeviceInput: AVCaptureDeviceInput!
   
   /// Sets up the capture session with necessary inputs and outputs,
   /// connects to the video preview layer, and starts running the capture session in the background.
@@ -106,24 +105,24 @@ fileprivate final class Camera: NSObject {
     
     guard
       let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-      let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+      let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
       let audioDevice = AVCaptureDevice.default(for: .audio),
-      let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
-      self.session.canAddInput(videoInput),
-      self.session.canAddInput(audioInput),
+      let audioDeviceInput = try? AVCaptureDeviceInput(device: audioDevice),
+      self.session.canAddInput(videoDeviceInput),
+      self.session.canAddInput(audioDeviceInput),
       self.session.canAddOutput(movieFileOutput)
     else { throw CameraClient.Failure.custom("Failed to setup initial devices.") }
 
     self.session.beginConfiguration()
-    self.session.addInput(videoInput)
-    self.session.addInput(audioInput)
+    self.session.addInput(videoDeviceInput)
+    self.session.addInput(audioDeviceInput)
     self.session.addOutput(movieFileOutput)
     self.session.commitConfiguration()
     
     self.videoDevice = videoDevice
-    self.videoInput = videoInput
+    self.videoDeviceInput = videoDeviceInput
     self.audioDevice = audioDevice
-    self.audioInput = audioInput
+    self.audioDeviceInput = audioDeviceInput
 
     Task.detached { self.session.startRunning() }
     
@@ -153,15 +152,9 @@ fileprivate final class Camera: NSObject {
   
   func adjust(setting: CameraClient.CameraSetting) throws {
     switch setting {
-      
-    case let .torchMode(value):
-      try setTorchMode(value)
-      
-    case let .position(value):
-      try setPosition(value)
-
-    case let .videoZoomFactor(value):
-      try setVideoZoomFactor(value)
+    case let .torchMode(value): try setTorchMode(value)
+    case let .position(value): try setPosition(value)
+    case let .videoZoomFactor(value): try setVideoZoomFactor(value)
     }
   }
 
@@ -180,12 +173,14 @@ fileprivate final class Camera: NSObject {
     }
     
     self.session.beginConfiguration()
-    self.session.removeInput(videoInput)
+    self.session.removeInput(videoDeviceInput)
+    
     guard self.session.canAddInput(newVideoInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
+    
     self.session.addInput(newVideoInput)
-    self.videoInput = newVideoInput
+    self.videoDeviceInput = newVideoInput
     self.session.commitConfiguration()
     return
   }
@@ -207,12 +202,14 @@ fileprivate final class Camera: NSObject {
     
     // session configure
     self.session.beginConfiguration()
-    self.session.removeInput(videoInput)
+    self.session.removeInput(videoDeviceInput)
+    
     guard self.session.canAddInput(newVideoInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
+    
     self.session.addInput(newVideoInput)
-    self.videoInput = newVideoInput
+    self.videoDeviceInput = newVideoInput
     self.session.commitConfiguration()
     
     // device configure
@@ -227,10 +224,13 @@ fileprivate final class Camera: NSObject {
     guard videoDevice.hasTorch else {
       throw CameraClient.Failure.custom("device does not have a torch.")
     }
+    
     try self.videoDevice.lockForConfiguration()
+    
     if videoDevice.isTorchModeSupported(.on) {
       videoDevice.torchMode = torchMode
     }
+    
     self.videoDevice.unlockForConfiguration()
   }
 }
