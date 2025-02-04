@@ -87,9 +87,12 @@ extension CameraClient: DependencyKey {
 fileprivate final class Camera: NSObject {
   let events = AsyncChannel<CameraClient.DelegateEvent>()
   
+  // Note: These are unwrapped when you call connect(to: videoPreviewLayer).
   private var session: AVCaptureSession!
-  private var device: AVCaptureDevice!
-  private var deviceInput: AVCaptureDeviceInput!
+  private var videoDevice: AVCaptureDevice!
+  private var videoInput: AVCaptureDeviceInput!
+  private var audioDevice: AVCaptureDevice!
+  private var audioInput: AVCaptureDeviceInput!
   private var movieFileOutput: AVCaptureMovieFileOutput!
   
   /// Sets up the capture session with necessary inputs and outputs,
@@ -98,25 +101,32 @@ fileprivate final class Camera: NSObject {
   /// - Note: This method is required to enable the functionality of other methods within the class.
   /// - Note: Ensure that user permissions (e.g., camera and microphone) are verified before invoking this method.
   func connect(to videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
+    session = AVCaptureSession()
+    movieFileOutput = AVCaptureMovieFileOutput()
     
-    guard
-      let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-      let deviceInput = try? AVCaptureDeviceInput(device: device)
-    else {
+    guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+          let videoInput = try? AVCaptureDeviceInput(device: videoDevice) else {
       throw CameraClient.Failure.cannotMakeDeviceInput
     }
     
-    // Self.init()
-    self.session = AVCaptureSession()
-    self.device = device
-    self.deviceInput = deviceInput
-    self.movieFileOutput = AVCaptureMovieFileOutput()
+    self.videoDevice = videoDevice
+    self.videoInput = videoInput
     
-    // Configure Session.
-    self.session.beginConfiguration()
-    self.session.addInput(deviceInput)
-    self.session.addOutput(self.movieFileOutput)
-    self.session.commitConfiguration()
+    guard let audioDevice = AVCaptureDevice.default(for: .audio),
+          let audioInput = try? AVCaptureDeviceInput(device: audioDevice) else {
+      throw CameraClient.Failure.custom("Failed to get audio input.")
+    }
+    
+    self.audioDevice = audioDevice
+    self.audioInput = audioInput
+    
+    session.beginConfiguration()
+    
+    if session.canAddInput(videoInput) { session.addInput(videoInput) }
+    if session.canAddInput(audioInput) { session.addInput(audioInput) }
+    if session.canAddOutput(movieFileOutput) { session.addOutput(movieFileOutput) }
+    
+    session.commitConfiguration()
     
     Task.detached { self.session.startRunning() }
     
@@ -129,15 +139,10 @@ fileprivate final class Camera: NSObject {
       throw CameraClient.Failure.custom("self.movieFileOutput.connection(with: .video) was nil")
     }
     
-    // Configure connection for HEVC capture.
     if self.movieFileOutput.availableVideoCodecTypes.contains(.hevc) {
-      self.movieFileOutput.setOutputSettings(
-        [AVVideoCodecKey: AVVideoCodecType.hevc],
-        for: connection
-      )
+      self.movieFileOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: connection)
     }
     
-    // Enable video stabilization if the connection supports it.
     if connection.isVideoStabilizationSupported {
       connection.preferredVideoStabilizationMode = .auto
     }
@@ -171,65 +176,65 @@ fileprivate final class Camera: NSObject {
     )
     
     guard
-      let newDevice = discoverySession.devices.first,
-      let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice)
+      let newVideoDevice = discoverySession.devices.first,
+      let newVideoInput = try? AVCaptureDeviceInput(device: newVideoDevice)
     else {
       throw CameraClient.Failure.cannotMakeDeviceInput
     }
     
     self.session.beginConfiguration()
-    self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else {
+    self.session.removeInput(videoInput)
+    guard self.session.canAddInput(newVideoInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
-    self.session.addInput(newDeviceInput)
-    self.deviceInput = newDeviceInput
+    self.session.addInput(newVideoInput)
+    self.videoInput = newVideoInput
     self.session.commitConfiguration()
     return
   }
 
   /// Adjust the zoom - may require switching cameras.
   private func setVideoZoomFactor(_ videoZoomFactor: CGFloat) throws {
-    var newDevice: AVCaptureDevice? {
+    var newVideoDevice: AVCaptureDevice? {
       AVCaptureDevice.DiscoverySession(
         deviceTypes: [videoZoomFactor < 1 ? .builtInUltraWideCamera : .builtInWideAngleCamera],
         mediaType: .video,
-        position: device.position
+        position: videoDevice.position
       )
       .devices.first
     }
     
-    guard let newDevice, let newDeviceInput = try? AVCaptureDeviceInput(device: newDevice) else {
+    guard let newVideoDevice, let newVideoInput = try? AVCaptureDeviceInput(device: newVideoDevice) else {
       throw CameraClient.Failure.cannotMakeDeviceInput
     }
     
     // session configure
     self.session.beginConfiguration()
-    self.session.removeInput(deviceInput)
-    guard self.session.canAddInput(newDeviceInput) else {
+    self.session.removeInput(videoInput)
+    guard self.session.canAddInput(newVideoInput) else {
       throw CameraClient.Failure.cannotAddInput
     }
-    self.session.addInput(newDeviceInput)
-    self.deviceInput = newDeviceInput
+    self.session.addInput(newVideoInput)
+    self.videoInput = newVideoInput
     self.session.commitConfiguration()
     
     // device configure
-    try self.device.lockForConfiguration()
-    self.device.videoZoomFactor = newDevice.deviceType == .builtInUltraWideCamera
+    try self.videoDevice.lockForConfiguration()
+    self.videoDevice.videoZoomFactor = newVideoDevice.deviceType == .builtInUltraWideCamera
       ? 1
       : videoZoomFactor
-    self.device.unlockForConfiguration()
+    self.videoDevice.unlockForConfiguration()
   }
   
   private func setTorchMode(_ torchMode: AVCaptureDevice.TorchMode) throws {
-    guard device.hasTorch else {
+    guard videoDevice.hasTorch else {
       throw CameraClient.Failure.custom("device does not have a torch.")
     }
-    try self.device.lockForConfiguration()
-    if device.isTorchModeSupported(.on) {
-      device.torchMode = torchMode
+    try self.videoDevice.lockForConfiguration()
+    if videoDevice.isTorchModeSupported(.on) {
+      videoDevice.torchMode = torchMode
     }
-    self.device.unlockForConfiguration()
+    self.videoDevice.unlockForConfiguration()
   }
 }
 

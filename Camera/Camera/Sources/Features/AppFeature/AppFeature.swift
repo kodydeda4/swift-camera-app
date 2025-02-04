@@ -12,6 +12,7 @@ final class AppModel {
 
   @ObservationIgnored @Shared(.isOnboardingComplete) var isOnboardingComplete = false
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
+  
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.audio) var audio
   @ObservationIgnored @Dependency(\.photos) var photos
