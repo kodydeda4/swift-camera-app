@@ -15,6 +15,7 @@ final class AppModel {
   
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.audioSession) var audioSession
   @ObservationIgnored @Dependency(\.photos) var photos
 
   @CasePathable
@@ -24,6 +25,8 @@ final class AppModel {
   }
 
   func task() async {
+    try? self.audioSession.configure(for: .videoRecording)
+    
     await withTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
         await self.syncUserPermissions()
