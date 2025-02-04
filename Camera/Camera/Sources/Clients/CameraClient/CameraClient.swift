@@ -101,31 +101,27 @@ fileprivate final class Camera: NSObject {
   /// - Note: This method is required to enable the functionality of other methods within the class.
   /// - Note: Ensure that user permissions (e.g., camera and microphone) are verified before invoking this method.
   func connect(to videoPreviewLayer: AVCaptureVideoPreviewLayer) throws {
-    session = AVCaptureSession()
-    movieFileOutput = AVCaptureMovieFileOutput()
+    self.session = AVCaptureSession()
+    self.movieFileOutput = AVCaptureMovieFileOutput()
     
-    guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-          let videoInput = try? AVCaptureDeviceInput(device: videoDevice) else {
-      throw CameraClient.Failure.cannotMakeDeviceInput
-    }
+    guard
+      let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+      let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+      let audioDevice = AVCaptureDevice.default(for: .audio),
+      let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
+      self.session.canAddInput(videoInput),
+      self.session.canAddInput(audioInput),
+      self.session.canAddOutput(movieFileOutput)
+    else { throw CameraClient.Failure.custom("Failed to setup initial devices.") }
     
+    self.session.beginConfiguration()
+    self.session.addInput(videoInput)
+    self.session.addInput(audioInput)
+    self.session.addOutput(movieFileOutput)
     self.videoDevice = videoDevice
     self.videoInput = videoInput
-    
-    guard let audioDevice = AVCaptureDevice.default(for: .audio),
-          let audioInput = try? AVCaptureDeviceInput(device: audioDevice) else {
-      throw CameraClient.Failure.custom("Failed to get audio input.")
-    }
-    
     self.audioDevice = audioDevice
     self.audioInput = audioInput
-    
-    session.beginConfiguration()
-    
-    if session.canAddInput(videoInput) { session.addInput(videoInput) }
-    if session.canAddInput(audioInput) { session.addInput(audioInput) }
-    if session.canAddOutput(movieFileOutput) { session.addOutput(movieFileOutput) }
-    
     session.commitConfiguration()
     
     Task.detached { self.session.startRunning() }
