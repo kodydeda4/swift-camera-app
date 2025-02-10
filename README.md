@@ -69,6 +69,8 @@ extension View {
 
 <img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">  
 
+[PhotoKit](https://developer.apple.com/documentation/photokit) allows you to work with image & video assets that the photos app mangages.
+
 ```swift
 @MainActor
 @Observable
@@ -85,7 +87,23 @@ final class LibraryModel: Identifiable {
 
 ### Video Player
 
+<table>
+<tr>
+<th>
+Preview
+</th>
+<th>
+Code
+</th>
+</tr>
+
+<tr>
+
+<td>
 <img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">  
+</td>
+
+<td>
 
 ```swift
 @MainActor
@@ -100,9 +118,12 @@ final class VideoPlayerModel {
 }
 ```
 
+</td>
+</table>
+
 ### Share
 
-SwiftUI MVVM abstraction over `UIKit.UIActivityViewController` allows you to present the share sheet dynamically.
+SwiftUI MVVM abstraction over [UIKit.UIActivityViewController](https://developer.apple.com/documentation/uikit/uiactivityviewcontroller) allows you to present the share sheet dynamically.
 
 <table>
 <tr>
@@ -130,8 +151,9 @@ final class ActivityModel: Identifiable {
   let activityItems: [UIActivityItemProvider]
   let applicationActivities: [UIActivity]
   var completionWithItemsHandler: UIActivityViewController
-    .CompletionWithItemsHandler = unimplemented("ActivityModel.completionWithItemsHandler")
+    .CompletionWithItemsHandler
 }
 ```
 
 </td>
+</table>
