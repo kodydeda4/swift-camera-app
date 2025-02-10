@@ -36,7 +36,7 @@ The [swift-sharing](https://github.com/pointfreeco/swift-sharing) library makes 
 
 ## Settings
 
-A custom view-modifier was created using [swift-navigation](https://github.com/pointfreeco/swift-navigation), to drive the overlay thru a binding to the `SettingsModel`.
+A custom [swift-navigation](https://github.com/pointfreeco/swift-navigation) view-modifier was created to drive the overlay thru a binding.
 
 <img width="1200" alt="image" src="https://github.com/user-attachments/assets/b4915f2a-56d6-4504-8f2d-0ce59e2e45bf" />
 
