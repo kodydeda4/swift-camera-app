@@ -17,32 +17,30 @@ UIKit: Lightweight integrations with existing UIKit views.
 
 ## 🚀 Features
 
-### User Permissions
-
-<img width="1800" alt="image" src="https://github.com/user-attachments/assets/e29a06fa-600d-467c-980c-08e9431d6c55" />
+## User Permissions
 
 The [swift-sharing](https://github.com/pointfreeco/swift-sharing) library makes it possible to easily preview the app in different states - such as missing permissions, and easily observe state across features.
 
+<img width="1500" alt="image" src="https://github.com/user-attachments/assets/e29a06fa-600d-467c-980c-08e9431d6c55" />
 
-### Camera
-
-<img width="1800" alt="image" src="https://github.com/user-attachments/assets/816bdabe-12e4-417a-b384-e8cf3d465545" />
+## Camera
 
 [AVFoundation](https://developer.apple.com/av-foundation/).[AVCaptureVideoPreviewLayer](https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer) allows you to connect the camera to the UI layer. The app also uses compiler directives to let you preview the camera using an image for SwiftUI previews.
 
+<img width="1500" alt="image" src="https://github.com/user-attachments/assets/816bdabe-12e4-417a-b384-e8cf3d465545" />
 
-### Countdown
-
-<img width="1800" alt="image" src="https://github.com/user-attachments/assets/cf2b96b0-2c42-4d24-99ef-a42c38019343" />
+## Countdown
 
 [Swift structured concurrency 
 ](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) is used to create a timer, and [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting) allows you to provide `unimplemented` closures
 
-### Settings
+<img width="1500" alt="image" src="https://github.com/user-attachments/assets/cf2b96b0-2c42-4d24-99ef-a42c38019343" />
 
-<img width="1800" alt="image" src="https://github.com/user-attachments/assets/b4915f2a-56d6-4504-8f2d-0ce59e2e45bf" />
+## Settings
 
 A custom view-modifier was created using [swift-navigation](https://github.com/pointfreeco/swift-navigation), to drive the overlay thru a binding to the `SettingsModel`.
+
+<img width="1500" alt="image" src="https://github.com/user-attachments/assets/b4915f2a-56d6-4504-8f2d-0ce59e2e45bf" />
 
 ```swift
 extension View {
@@ -64,12 +62,12 @@ extension View {
 
 ```
 
+## Library
 
-### Library
+[PhotoKit](https://developer.apple.com/documentation/photokit) allows you to work with image & video assets that the photos app mangages.
 
 <img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">  
 
-[PhotoKit](https://developer.apple.com/documentation/photokit) allows you to work with image & video assets that the photos app mangages.
 
 ```swift
 @MainActor
