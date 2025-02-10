@@ -44,19 +44,95 @@ final class CameraModel {
 
 <img width=250 src="https://github.com/user-attachments/assets/b5bb16c2-abd4-41cd-89f6-62c1b5ad9780">  
 
+```swift
+@MainActor
+@Observable
+final class CountdownModel: Identifiable {
+  ...
+  var onFinish: () -> Void
+    = unimplemented("CountdownModel.onFinish")
+  @ObservationIgnored @SharedReader(.userSettings) var userSettings
+}
+```
+
 ### Settings
 
 <img width=250 src="https://github.com/user-attachments/assets/e5a154ff-e4e3-407f-b7eb-2c5ce1caf64a">  
+
+```swift
+struct UserSettings: Equatable, Codable {
+  var camera = Camera.back
+  var zoom: CGFloat = 1
+  var countdownTimer = 0
+  var torchMode = TorchMode.off
+  var isGridEnabled = false
+  ...
+}
+
+extension SharedReaderKey where Self == FileStorageKey<UserSettings>.Default {
+  static var userSettings: Self {
+    Self[.fileStorage(.shared("userSettings")), default: UserSettings()]
+  }
+}
+```
 
 ### Library
 
 <img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">  
 
+```swift
+@MainActor
+@Observable
+final class LibraryModel: Identifiable {
+  ...
+  @ObservationIgnored @Shared(.photosContext) var photosContext
+
+  @CasePathable
+  enum Destination {
+    case videoPlayer(VideoPlayerModel)
+  }
+}
+```
+
 ### Video Player
 
 <img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">  
+
+```swift
+@MainActor
+@Observable
+final class VideoPlayerModel {
+  let video: PhotosContext.Video
+  ...
+  @CasePathable
+  enum Destination {
+    case share(ActivityModel)
+  }
+}
+```
 
 ### Share
 
 <img width=250 src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032">
 
+```swift
+@MainActor
+@Observable
+final class ActivityModel: Identifiable {
+  let id: UUID
+  let activityItems: [UIActivityItemProvider]
+  let applicationActivities: [UIActivity]
+  var completionWithItemsHandler: UIActivityViewController
+    .CompletionWithItemsHandler = unimplemented("ActivityModel.completionWithItemsHandler")
+
+  init(
+    activityItems: [UIActivityItemProvider],
+    applicationActivities: [UIActivity] = []
+  ) {
+    @Dependency(\.uuid) var uuid
+    self.id = uuid()
+    self.activityItems = activityItems
+    self.applicationActivities = applicationActivities
+  }
+}
+```
