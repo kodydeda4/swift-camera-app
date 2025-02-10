@@ -19,62 +19,51 @@ UIKit: Lightweight integrations with existing UIKit views.
 
 ### User Permissions
 
-<img width=250 src="https://github.com/user-attachments/assets/01cf4f9b-b961-40d7-a2fb-1252caf6b31b">  
+<img width="1800" alt="image" src="https://github.com/user-attachments/assets/e29a06fa-600d-467c-980c-08e9431d6c55" />
 
-User permissions are requested with [swift-dependencies](https://github.com/pointfreeco/swift-dependencies), and stored as a dictionary using [swift-sharing](https://github.com/pointfreeco/swift-sharing).
+The [swift-sharing](https://github.com/pointfreeco/swift-sharing) library makes it possible to easily preview the app in different states - such as missing permissions, and easily observe state across features.
+
 
 ### Camera
 
-<img width=250 src="https://github.com/user-attachments/assets/da4c9d95-5f4f-40f3-b473-bf3f0e39a8e2">  
+<img width="1800" alt="image" src="https://github.com/user-attachments/assets/816bdabe-12e4-417a-b384-e8cf3d465545" />
 
-```swift
-@MainActor
-@Observable
-final class CameraModel {
-  var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
-  ...
-  @ObservationIgnored @Dependency(\.camera) var camera
-  @ObservationIgnored @Dependency(\.photos) var photos
-  @ObservationIgnored @Dependency(\.audioPlayer) var audioPlayer
-}
-```
+[AVFoundation](https://developer.apple.com/av-foundation/).[AVCaptureVideoPreviewLayer](https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer) allows you to connect the camera to the UI layer. The app also uses compiler directives to let you preview the camera using an image for SwiftUI previews.
 
 
 ### Countdown
 
-<img width=250 src="https://github.com/user-attachments/assets/b5bb16c2-abd4-41cd-89f6-62c1b5ad9780">  
+<img width="1800" alt="image" src="https://github.com/user-attachments/assets/cf2b96b0-2c42-4d24-99ef-a42c38019343" />
 
-```swift
-@MainActor
-@Observable
-final class CountdownModel: Identifiable {
-  ...
-  var onFinish: () -> Void
-    = unimplemented("CountdownModel.onFinish")
-  @ObservationIgnored @SharedReader(.userSettings) var userSettings
-}
-```
+[Swift structured concurrency 
+](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) is used to create a timer, and [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting) allows you to provide `unimplemented` closures
 
 ### Settings
 
-<img width=250 src="https://github.com/user-attachments/assets/e5a154ff-e4e3-407f-b7eb-2c5ce1caf64a">  
+<img width="1800" alt="image" src="https://github.com/user-attachments/assets/b4915f2a-56d6-4504-8f2d-0ce59e2e45bf" />
+
+A custom view-modifier was created using [swift-navigation](https://github.com/pointfreeco/swift-navigation), to drive the overlay thru a binding to the `SettingsModel`.
 
 ```swift
-struct UserSettings: Equatable, Codable {
-  var camera = Camera.back
-  var zoom: CGFloat = 1
-  var countdownTimer = 0
-  var torchMode = TorchMode.off
-  var isGridEnabled = false
-  ...
-}
-
-extension SharedReaderKey where Self == FileStorageKey<UserSettings>.Default {
-  static var userSettings: Self {
-    Self[.fileStorage(.shared("userSettings")), default: UserSettings()]
+extension View {
+  /// Layers the views that you specify in front of this view,
+  /// when the binding to a Boolean value you provide is true.
+  func overlay<Content>(
+    isPresented: Binding<Bool>,
+    @ViewBuilder content: @escaping () -> Content
+  ) -> some View
+    where Content: View
+  {
+    modifier(
+      OverlayModifier(
+        isPresented: isPresented,
+        content: content
+      )
+    )
   }
-}
+
 ```
+
 
 ### Library
 
@@ -113,7 +102,25 @@ final class VideoPlayerModel {
 
 ### Share
 
+SwiftUI MVVM abstraction over `UIKit.UIActivityViewController` allows you to present the share sheet dynamically.
+
+<table>
+<tr>
+<th>
+Preview
+</th>
+<th>
+Code
+</th>
+</tr>
+
+<tr>
+
+<td>
 <img width=250 src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032">
+</td>
+
+<td>
 
 ```swift
 @MainActor
@@ -124,15 +131,7 @@ final class ActivityModel: Identifiable {
   let applicationActivities: [UIActivity]
   var completionWithItemsHandler: UIActivityViewController
     .CompletionWithItemsHandler = unimplemented("ActivityModel.completionWithItemsHandler")
-
-  init(
-    activityItems: [UIActivityItemProvider],
-    applicationActivities: [UIActivity] = []
-  ) {
-    @Dependency(\.uuid) var uuid
-    self.id = uuid()
-    self.activityItems = activityItems
-    self.applicationActivities = applicationActivities
-  }
 }
 ```
+
+</td>
