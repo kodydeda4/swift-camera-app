@@ -65,11 +65,6 @@ Code
 ```swift
 final class MainModel {
   ...
-  @ObservationIgnored @Shared(.photosContext) var photosContext
-  @ObservationIgnored @Dependency(\.photos) var photos
-  @ObservationIgnored @Dependency(\.uuid) var uuid
-  @ObservationIgnored @Dependency(\.imageGenerator) var imageGenerator
-  
   func task() async {
     await withThrowingTaskGroup(of: Void.self) { taskGroup in
       taskGroup.addTask {
