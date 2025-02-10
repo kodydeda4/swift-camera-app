@@ -9,11 +9,11 @@ Available on the [AppStore](https://apps.apple.com/us/app/idd-camera/id674093522
 <img width=150 src="https://github.com/user-attachments/assets/53de5b6e-cadc-494e-89b7-6bde399ffcd1"><img width=150 src="https://github.com/user-attachments/assets/b2a6cef6-feb2-4b86-af2a-bc39689377e7"><img width=150 src="https://github.com/user-attachments/assets/4424ec3d-146d-4736-bbca-78b87168f61e"><img width=150 src="https://github.com/user-attachments/assets/38a60968-b48f-4d03-bedc-fe91b935b8c3"><img width=150 src="https://github.com/user-attachments/assets/ae0ee5b6-886c-4571-a9ea-bdfc36cd72f7">
 
 ### 🛠️ Tech Stack
-**SwiftUI:** For building the user interface.  
-**AVFoundation:** For camera and video recording functionalities.  
-**Swift-Concurrency:** For reactive programming and handling data flow.  
-**MVVM:** Application architecture.   
-**UIKit:** Lightweight integrations with existing UIKit views.  
+**SwiftUI:** For building the user interface.
+**AVFoundation:** For camera and video recording functionalities.
+**Swift-Concurrency:** For reactive programming and handling data flow.
+**MVVM:** Application architecture.
+**UIKit:** Lightweight integrations with existing UIKit views.
 
 ## User Permissions
 
@@ -29,7 +29,7 @@ The [swift-sharing](https://github.com/pointfreeco/swift-sharing) library makes 
 
 ## Countdown
 
-[Swift structured concurrency 
+[Swift structured concurrency
 ](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) is used to create a timer that increments every second.  [Swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting) is used to provide an unimplemented closure to execute once the timer is finished.
 
 <img width="1200" alt="image" src="https://github.com/user-attachments/assets/cf2b96b0-2c42-4d24-99ef-a42c38019343" />
@@ -57,7 +57,7 @@ Code
 <tr>
 
 <td>
-<img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">  
+<img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">
 </td>
 
 <td>
@@ -72,9 +72,13 @@ final class MainModel {
           withTitle: PhotosContext.title
         )
         await MainActor.run {
-          self.$photosContext.assetCollection.withLock { $0 = photosContext }
+          self.$photosContext.assetCollection.withLock {
+            $0 = photosContext
+          }
         }
-        for await fetchResult in await self.photos.streamAssets(.videos(in: photosContext)) {
+        for await fetchResult in await self.photos.streamAssets(
+          .videos(in: photosContext)
+        ) {
           await self.syncVideos(with: fetchResult)
         }
       }
@@ -102,7 +106,7 @@ Code
 <tr>
 
 <td>
-<img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">  
+<img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">
 </td>
 
 <td>
