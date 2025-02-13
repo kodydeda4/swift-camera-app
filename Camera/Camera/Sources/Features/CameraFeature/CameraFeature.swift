@@ -265,6 +265,7 @@ struct CameraView: View {
         CaptureVideoPreviewLayerView(
           captureVideoPreviewLayer: self.model.captureVideoPreviewLayer
         )
+        .background { Color.black.ignoresSafeArea() }
         .onTapGesture(count: 2) {
           self.model.switchCameraButtonTapped()
         }
