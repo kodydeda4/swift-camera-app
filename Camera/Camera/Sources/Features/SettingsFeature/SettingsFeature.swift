@@ -184,8 +184,8 @@ struct SettingsView: View {
   @MainActor private var torchModeSection: some View {
     Section(
       systemImage: "bolt.fill",
-      title: "Torch",
-      subtitle: "Toggle torch on/off/auto."
+      title: "Flash",
+      subtitle: "Toggle flash on/off/auto."
     ) {
       ForEach(UserSettings.TorchMode.allCases) { torchMode in
         Button(torchMode.description) {
