@@ -73,7 +73,16 @@ struct SettingsView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       self.divider.opacity(0.5)
-      self.content
+      
+      ScrollView {
+        VStack(alignment: .leading) {
+          self.header
+          self.content
+        }
+        .padding([.horizontal, .top])
+        .shadow(color: Color.black, radius: 16, y: 12)
+      }
+      
       self.divider.opacity(0.5)
       self.footer
     }
@@ -91,7 +100,24 @@ struct SettingsView: View {
       .foregroundColor(.white)
       .opacity(0.15)
   }
-    
+  
+  private var header: some View {
+    VStack(alignment: .leading) {
+      Text("Settings")
+        .font(.title2)
+        .fontWeight(.heavy)
+        .foregroundColor(.white)
+        .padding(.top, 8)
+      
+      Text("Camera \(self.model.buildVersion.description)")
+        .foregroundColor(.white)
+        .opacity(0.75)
+        .padding(.bottom)
+      
+      self.divider
+    }
+  }
+  
   private var footer: some View {
     VStack(spacing: 0) {
       LinearGradient(
@@ -108,35 +134,17 @@ struct SettingsView: View {
         .frame(height: 70)
     }
   }
-
+  
   @MainActor private var content: some View {
-    ScrollView {
-      VStack(alignment: .leading) {
-        Text("Settings")
-          .font(.title2)
-          .fontWeight(.heavy)
-          .foregroundColor(.white)
-          .padding(.top, 8)
-        
-        Text("Camera \(self.model.buildVersion.description)")
-          .foregroundColor(.white)
-          .opacity(0.75)
-          .padding(.bottom)
-        
-        self.divider
-        VStack(alignment: .leading) {
-          self.cameraSection
-          self.divider
-          self.zoomSection
-          self.divider
-          self.torchModeSection
-          self.divider
-          self.countdownTimerSection
-            .padding(.bottom)
-        }
-      }
-      .padding([.horizontal, .top])
-      .shadow(color: Color.black, radius: 16, y: 12)
+    Group {
+      self.cameraSection
+      self.divider
+      self.zoomSection
+      self.divider
+      self.torchModeSection
+      self.divider
+      self.countdownTimerSection
+        .padding(.bottom)
     }
   }
   
@@ -218,12 +226,12 @@ private struct Section<Content: View>: View {
   let content: () -> Content
   
   var body: some View {
-    HStack(alignment: .firstTextBaseline) {
+    HStack {
       self.header
       Spacer()
       HStack(content: self.content)
-        .padding([.leading, .top], 8)
     }
+    .padding(.vertical, 4)
   }
   
   private var header: some View {
@@ -235,6 +243,7 @@ private struct Section<Content: View>: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
       }
+      .font(.title3)
       .padding(.bottom, 4)
       
       Text(subtitle)
