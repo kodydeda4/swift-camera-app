@@ -287,6 +287,7 @@ struct CameraView: View {
           Image(systemName: self.model.userSettings.torchMode.systemImage)
             .foregroundColor(self.model.userSettings.torchMode.foregroundColor)
         }
+        .buttonStyle(.plain)
       }
       ToolbarItem(placement: .principal) {
         Text(self.model.navigationTitle)
