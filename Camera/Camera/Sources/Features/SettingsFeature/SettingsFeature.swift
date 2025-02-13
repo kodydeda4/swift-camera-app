@@ -243,13 +243,13 @@ private struct Section<Content: View>: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
       }
-      .font(.title3)
+      .font(.title2)
       .padding(.bottom, 4)
       
-      Text(subtitle)
-        .fontWeight(.bold)
-        .foregroundColor(.white)
-        .opacity(0.65)
+//      Text(subtitle)
+//        .fontWeight(.bold)
+//        .foregroundColor(.white)
+//        .opacity(0.65)
     }
   }
 }
