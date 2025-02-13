@@ -243,7 +243,7 @@ private struct Section<Content: View>: View {
           .fontWeight(.heavy)
           .foregroundColor(.white)
       }
-      .font(.title2)
+      .font(.title3)
       .padding(.bottom, 4)
       
 //      Text(subtitle)
@@ -259,7 +259,7 @@ private struct CircleButtonStyle: ButtonStyle {
   
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .font(.footnote)
+      .font(.caption)
       .bold()
       .frame(width: 50, height: 50)
       .foregroundColor(isSelected ? .black : .white)
