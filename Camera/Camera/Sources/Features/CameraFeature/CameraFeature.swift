@@ -42,7 +42,7 @@ final class CameraModel {
   var isSettingsButtonPresented: Bool { !self.isRecording }
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
   var isZoomButtonsPresented: Bool {
-    self.userSettings.camera == .back && self.destination.is(\.none)
+    self.userSettings.camera == .back && !self.destination.is(\.settings)
   }
   
   /// Example: `"00:00:00"`

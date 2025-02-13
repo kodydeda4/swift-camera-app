@@ -86,7 +86,9 @@ struct CameraOverlay: View {
   
   private var recordingButton: some View {
     CameraRecordingButton(self.model.cameraRecordingButtonState) {
-      self.model.recordingButtonTapped()
+      withAnimation(.easeInOut(duration: 0.3)) {
+        self.model.recordingButtonTapped()
+      }
     }
     .buttonStyle(.plain)
     .disabled(!self.model.hasFullPermissions)
