@@ -68,7 +68,7 @@ struct CameraOverlay: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
             } else {
-              Color.secondary
+              Color.black.opacity(0.5)
                 .frame(width: 64, height: 64)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
