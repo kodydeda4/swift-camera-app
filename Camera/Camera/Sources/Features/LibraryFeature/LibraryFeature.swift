@@ -78,6 +78,15 @@ struct LibraryView: View {
         VideoPlayerView(model: model)
       }
       .overlay {
+        if self.model.photosContext.videos.isEmpty {
+          ContentUnavailableView(
+            "No Videos Found",
+            systemImage: "film.stack",
+            description: Text("You haven’t recorded any videos yet.")
+          )
+        }
+      }
+      .overlay {
         VStack {
           Button(action: self.model.cancelButtonTapped) {
             Image(systemName: "xmark.circle.fill")
