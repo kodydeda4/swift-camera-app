@@ -113,18 +113,23 @@ fileprivate final class Camera: NSObject {
       self.session.canAddOutput(movieFileOutput)
     else { throw CameraClient.Failure.custom("Failed to setup initial devices.") }
 
+    print("Session.Configure.start")
     self.session.beginConfiguration()
     self.session.addInput(videoDeviceInput)
     self.session.addInput(audioDeviceInput)
     self.session.addOutput(movieFileOutput)
     self.session.commitConfiguration()
+    print("Session.Configure.finish")
     
     self.videoDevice = videoDevice
     self.videoDeviceInput = videoDeviceInput
     self.audioDevice = audioDevice
     self.audioDeviceInput = audioDeviceInput
 
-    Task.detached { self.session.startRunning() }
+    Task.detached {
+      print("Task.detached")
+      self.session.startRunning()
+    }
     
     videoPreviewLayer.session = self.session
   }

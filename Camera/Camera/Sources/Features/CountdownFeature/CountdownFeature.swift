@@ -55,6 +55,7 @@ struct CountdownView: View {
       .fontWeight(.bold)
       .foregroundColor(.white)
       .shadow(radius: 4)
+      .padding(.bottom, 64)
       .task { await self.model.task() }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background { Color.black.ignoresSafeArea().opacity(0.25) }

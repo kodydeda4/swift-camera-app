@@ -8,10 +8,8 @@ struct CaptureVideoPreviewLayerView: View {
     #if targetEnvironment(simulator)
       PreviewValue()
     #else
-      LiveValue(captureVideoPreviewLayer: captureVideoPreviewLayer)
-        .offset(y: 14) // match the native camera app.
-        .ignoresSafeArea()
-        .background { Color.black.ignoresSafeArea() }
+    LiveValue(captureVideoPreviewLayer: captureVideoPreviewLayer)
+      .clipped()
     #endif
   }
 }
@@ -27,6 +25,8 @@ fileprivate struct LiveValue: UIViewControllerRepresentable {
     viewController.view.backgroundColor = .black
     viewController.view.layer.addSublayer(captureVideoPreviewLayer)
     captureVideoPreviewLayer.frame = viewController.view.bounds
+    captureVideoPreviewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+    
     return viewController
   }
 

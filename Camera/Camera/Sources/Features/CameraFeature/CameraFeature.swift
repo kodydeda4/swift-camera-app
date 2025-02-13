@@ -291,7 +291,7 @@ struct CameraView: View {
       }
       ToolbarItem(placement: .principal) {
         Text(self.model.navigationTitle)
-          .foregroundColor(.white)
+//          .foregroundColor(.white)
           .fontWeight(.semibold)
           .frame(width: 100)
           .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
@@ -318,7 +318,7 @@ extension UserSettings.TorchMode {
     case .on:
       return .accentColor
     default:
-      return .white
+      return .primary
     }
   }
 }

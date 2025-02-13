@@ -110,6 +110,7 @@ struct AppView: View {
       }
     }
     .task { await self.model.task() }
+//    .preferredColorScheme(.dark)
   }
 }
 
