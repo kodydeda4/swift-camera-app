@@ -9,7 +9,7 @@ import SwiftUINavigation
 final class OnboardingModel {
   var destination: Destination? { didSet { self.bind() } }
   var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
-  var buildNumber: Build.Version { Build.version }
+  var buildVersion = Build.version
 
   @CasePathable
   enum Destination {
@@ -62,7 +62,7 @@ struct OnboardingView: View {
             .foregroundColor(.secondary)
             .padding(.bottom)
 
-          Text(self.model.buildNumber.description)
+          Text(self.model.buildVersion.description)
           
           Button("Continue") {
             self.model.continueButtonTapped()

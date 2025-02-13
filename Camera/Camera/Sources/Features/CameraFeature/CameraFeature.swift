@@ -10,7 +10,6 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-  var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var isRecording = false
   var recordingSecondsElapsed = 0

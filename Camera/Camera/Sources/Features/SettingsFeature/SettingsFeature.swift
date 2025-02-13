@@ -8,7 +8,7 @@ import SwiftUINavigation
 @Observable
 final class SettingsModel: Identifiable {
   let id: UUID
-  var buildNumber: Build.Version { Build.version }
+  var buildVersion = Build.version
   
   @ObservationIgnored @Shared(.userSettings) private(set) var userSettings
   @ObservationIgnored @Dependency(\.camera) private var camera
@@ -88,7 +88,7 @@ struct SettingsView: View {
           .foregroundColor(.white)
           .padding(.top, 8)
         
-        Text("Camera \(self.model.buildNumber.description)")
+        Text("Camera \(self.model.buildVersion.description)")
           .foregroundColor(.white)
           .opacity(0.75)
           .padding(.bottom)
