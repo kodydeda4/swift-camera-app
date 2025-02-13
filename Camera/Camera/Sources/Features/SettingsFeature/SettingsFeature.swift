@@ -261,7 +261,7 @@ private struct CircleButtonStyle: ButtonStyle {
     configuration.label
       .font(.footnote)
       .bold()
-      .frame(width: 44, height: 44)
+      .frame(width: 50, height: 50)
       .foregroundColor(isSelected ? .black : .white)
       .background(
         isSelected
