@@ -4,7 +4,7 @@ import Sharing
 struct UserSettings: Equatable, Codable {
   var camera = Camera.back
   var zoom: CGFloat = 1
-  var countdownTimer = 0
+  var countdownTimer = 3
   var torchMode = TorchMode.off
   var isGridEnabled = false
 

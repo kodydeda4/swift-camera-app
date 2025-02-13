@@ -12,7 +12,6 @@ import SwiftUINavigation
 final class CameraModel {
   var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
-  var isTTSInFlight = false
   var isRecording = false
   var recordingSecondsElapsed = 0
   var captureVideoPreviewLayer = AVCaptureVideoPreviewLayer()
@@ -77,20 +76,6 @@ final class CameraModel {
   
   func permissionsButtonTapped() {
     self.destination = .userPermissions(UserPermissionsModel())
-  }
-  
-  func ttsButtonTapped() {
-    Task {
-      await MainActor.run {
-        self.isTTSInFlight = true
-      }
-      
-      await self.textToSpeech.speakAsync(.default("Hello World"))
-
-      await MainActor.run {
-        self.isTTSInFlight = false
-      }
-    }
   }
   
   func cameraRollButtonTapped() {

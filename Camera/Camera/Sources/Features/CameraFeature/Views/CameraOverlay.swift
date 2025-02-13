@@ -9,7 +9,6 @@ struct CameraOverlay: View {
     VStack {
       Spacer()
       self.zoomButtons
-      self.ttsButton
       
       HStack {
         self.cameraRollButton
@@ -39,20 +38,6 @@ struct CameraOverlay: View {
     }
   }
   
-  private var ttsButton: some View {
-    GroupBox {
-      HStack {
-        Text("Hello World")
-        if self.model.isTTSInFlight {
-          ProgressView()
-        }
-        Spacer()
-        Button("Speak") {
-          self.model.ttsButtonTapped()
-        }
-      }
-    }
-  }
   private func zoomButtonLabel(_ zoom: CGFloat) -> some View {
     let isSelected = self.model.userSettings.zoom == zoom
     
