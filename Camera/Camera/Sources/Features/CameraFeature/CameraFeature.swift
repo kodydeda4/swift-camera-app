@@ -97,12 +97,22 @@ final class CameraModel {
   func switchCameraButtonTapped() {
     _ = Result {
       let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
-        ? .front
-        : .back
+      ? .front
+      : .back
       try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
       self.$userSettings.zoom.withLock { $0 = 1.0 }
+    }
+  }
+  
+  func torchModeToggleButtonTapped() {
+    var value: UserSettings.TorchMode {
+      self.userSettings.torchMode == .off ? .on : .off
+    }
+    _ = Result {
+      try self.camera.adjust(.torchMode(value.rawValue))
+      self.$userSettings.torchMode.withLock { $0 = value }
     }
   }
   
@@ -271,14 +281,44 @@ struct CameraView: View {
   }
   
   @MainActor private func toolbar() -> some ToolbarContent {
-    ToolbarItem(placement: .principal) {
-      Text(self.model.navigationTitle)
-        .foregroundColor(.white)
-        .fontWeight(.semibold)
-        .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
+    Group {
+      ToolbarItem(placement: .navigationBarLeading) {
+        Button(action: self.model.torchModeToggleButtonTapped) {
+          Image(systemName: self.model.userSettings.torchMode.systemImage)
+            .foregroundColor(self.model.userSettings.torchMode.foregroundColor)
+        }
+      }
+      ToolbarItem(placement: .principal) {
+        Text(self.model.navigationTitle)
+          .foregroundColor(.white)
+          .fontWeight(.semibold)
+          .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
+      }
     }
   }
 }
+
+extension UserSettings.TorchMode {
+  var systemImage: String {
+    switch self {
+    case .on:
+      return "bolt.circle"
+    case .off:
+      return "bolt.slash.circle"
+    case .auto:
+      return "bolt.circle"
+    }
+  }
+  var foregroundColor: Color {
+    switch self {
+    case .on:
+      return .accentColor
+    default:
+      return .white
+    }
+  }
+}
+
 
 // MARK: - SwiftUI Previews
 
