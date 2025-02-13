@@ -44,23 +44,7 @@ A custom [swift-navigation](https://github.com/pointfreeco/swift-navigation) vie
 
 [PhotoKit](https://developer.apple.com/documentation/photokit) allows you to work with image & video assets that the photos app mangages. `Main` model listens for changes and caches them to shared state, for the `Library` feature to observe.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">
-</td>
-
-<td>
+<img src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8" width="1200" height="500" style="object-fit: contain; display: block; margin: auto;">   
 
 ```swift
 final class MainModel {
@@ -86,30 +70,11 @@ final class MainModel {
   }
 ```
 
-</td>
-</table>
-
 ## Video Player
 
 `VideoPlayer` model allows you to handle all the logic for the video player.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">
-</td>
-
-<td>
+<img src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb" width="1200" height="500" style="object-fit: contain; display: block; margin: auto;">   
 
 ```swift
 @MainActor
@@ -124,30 +89,11 @@ final class VideoPlayerModel {
 }
 ```
 
-</td>
-</table>
-
 ## Share
 
 [UIActivityViewController](https://developer.apple.com/documentation/uikit/uiactivityviewcontroller) allows you to present the share sheet dynamically, such as when a user taps a button. A [SwiftUI view modifier ](https://github.com/kodydeda4/swift-share-link) was created to let you model the destination without dropping down to UIKit.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032">
-</td>
-
-<td>
+<img src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032" width="1200" height="500" style="object-fit: contain; display: block; margin: auto;">
 
 ```swift
 @MainActor
@@ -160,6 +106,3 @@ final class ActivityModel: Identifiable {
     .CompletionWithItemsHandler
 }
 ```
-
-</td>
-</table>
