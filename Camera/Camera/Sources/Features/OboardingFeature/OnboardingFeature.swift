@@ -63,11 +63,11 @@ struct OnboardingView: View {
             .padding(.bottom)
 
           Text(self.model.buildNumber.description)
-
+          
           Button("Continue") {
             self.model.continueButtonTapped()
           }
-          .buttonStyle(.borderedProminent)
+          .buttonStyle(RoundedRectangleButtonStyle())
         }
         .padding(64)
       }

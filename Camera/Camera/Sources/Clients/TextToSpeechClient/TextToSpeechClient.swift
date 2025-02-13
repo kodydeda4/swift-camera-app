@@ -1,5 +1,3 @@
-// Copyright © 2020 Pocket Radar. All rights reserved.
-
 import Dependencies
 import DependenciesMacros
 import AVFoundation

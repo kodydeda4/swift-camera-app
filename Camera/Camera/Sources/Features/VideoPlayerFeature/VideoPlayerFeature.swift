@@ -74,6 +74,7 @@ struct VideoPlayerView: View {
   var body: some View {
     ZStack {
       VideoPlayer(player: self.model.player)
+        .preferredColorScheme(.dark)
     }
     .task { await self.model.task() }
     .sheet(item: self.$model.destination.share) { model in

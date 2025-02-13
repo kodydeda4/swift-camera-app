@@ -99,7 +99,11 @@ struct CameraOverlay: View {
     
     return Group {
       if self.model.isSettingsButtonPresented {
-        Button(action: self.model.settingsButtonTapped) {
+        Button {
+          withAnimation(.easeInOut(duration: 0.3)) {
+            self.model.settingsButtonTapped()
+          }
+        } label: {
           ZStack {
             if settings {
               Image(systemName: "xmark")

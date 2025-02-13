@@ -130,11 +130,10 @@ struct UserPermissionsView: View {
       
       Spacer()
       
-      Button(action: self.model.continueButtonTapped) {
-        Text("Continue")
-          .frame(maxWidth: .infinity)
+      Button("Continue") {
+        self.model.continueButtonTapped()
       }
-      .buttonStyle(.borderedProminent)
+      .buttonStyle(RoundedRectangleButtonStyle())
       .disabled(self.model.isContinueButtonDisabled)
       .padding()
     }

@@ -17,11 +17,10 @@ extension CameraView {
         .fontWeight(.semibold)
         .foregroundColor(Color(.systemGray))
 
-      Button(action: self.model.permissionsButtonTapped) {
-        Text("Permissions")
-          .frame(maxWidth: .infinity)
+      Button("Permissions") {
+        self.model.permissionsButtonTapped()
       }
-      .buttonStyle(.borderedProminent)
+      .buttonStyle(RoundedRectangleButtonStyle())
       .frame(width: 160)
       .padding(.bottom, 64)
     }

@@ -2,7 +2,33 @@
   "colors" : [
     {
       "color" : {
-        "platform" : "ios",
+        "platform" : "universal",
+        "reference" : "systemYellowColor"
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "color" : {
+        "platform" : "universal",
+        "reference" : "systemYellowColor"
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "platform" : "universal",
         "reference" : "systemYellowColor"
       },
       "idiom" : "universal"
