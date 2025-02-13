@@ -53,10 +53,6 @@ final class SettingsModel: Identifiable {
       self.$userSettings.torchMode.withLock { $0 = value }
     }
   }
-  
-  func gridButtonTapped(value: Bool) {
-    self.$userSettings.isGridEnabled.withLock { $0 = value }
-  }
 }
 
 // MARK: - SwiftUI
@@ -102,8 +98,6 @@ struct SettingsView: View {
           self.torchModeSection
           self.divider
           self.countdownTimerSection
-          self.divider
-          self.gridSection
         }
       }
       .padding([.horizontal, .top])
@@ -202,25 +196,6 @@ struct SettingsView: View {
         ))
       }
       .disabled(self.model.userSettings.camera == .front)
-    }
-  }
-  
-  @MainActor private var gridSection: some View {
-    Section(
-      systemImage: "grid",
-      title: "Grid",
-      subtitle: "Toggle grid on/off."
-    ) {
-      HStack {
-        ForEach([true, false], id: \.self) { isEnabled in
-          Button(isEnabled ? "On" : "Off") {
-            self.model.gridButtonTapped(value: isEnabled)
-          }
-          .buttonStyle(CircleButtonStyle(
-            isSelected: self.model.userSettings.isGridEnabled == isEnabled
-          ))
-        }
-      }
     }
   }
 }

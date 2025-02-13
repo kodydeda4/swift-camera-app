@@ -11,6 +11,7 @@ struct CaptureVideoPreviewLayerView: View {
       LiveValue(captureVideoPreviewLayer: captureVideoPreviewLayer)
         .offset(y: 14) // match the native camera app.
         .ignoresSafeArea()
+        .background { Color.black.ignoresSafeArea() }
     #endif
   }
 }

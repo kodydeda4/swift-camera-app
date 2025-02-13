@@ -241,9 +241,6 @@ struct CameraView: View {
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
         }
-        .overlay(isPresented: .constant(self.model.userSettings.isGridEnabled)) {
-          CameraGridView()
-        }
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
         }
@@ -264,7 +261,6 @@ struct CameraView: View {
         CaptureVideoPreviewLayerView(
           captureVideoPreviewLayer: self.model.captureVideoPreviewLayer
         )
-        .background { Color.black.ignoresSafeArea() }
         .onTapGesture(count: 2) {
           self.model.switchCameraButtonTapped()
         }
@@ -284,49 +280,11 @@ struct CameraView: View {
   }
 }
 
-private struct CameraGridView: View {
-  private let color = Color.gray
-  private let spacing: CGFloat = 128
-  private let items = Array(1...4)
-  private let columns = [
-    GridItem(.flexible()),
-    GridItem(.flexible()),
-  ]
-  
-  var body: some View {
-    ZStack {
-      VStack(spacing: spacing * 2) {
-        Rectangle()
-          .frame(height: 1)
-          .foregroundColor(color)
-        
-        Rectangle()
-          .frame(height: 1)
-          .foregroundColor(Color(.systemGray6))
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      
-      HStack(spacing: spacing) {
-        Rectangle()
-          .frame(width: 1)
-          .foregroundColor(color)
-        
-        Rectangle()
-          .frame(width: 1)
-          .foregroundColor(color)
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    .opacity(0.5)
-  }
-}
-
 // MARK: - SwiftUI Previews
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
   @Shared(.userSettings) var userSettings
-  $userSettings.isGridEnabled.withLock { $0 = true }
   return CameraView(model: CameraModel())
 }
 
