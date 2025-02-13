@@ -55,6 +55,16 @@ final class SettingsModel: Identifiable {
   }
 }
 
+fileprivate extension CGFloat {
+  var formattedDescription: String {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
+    formatter.minimumFractionDigits = 0
+    formatter.roundingMode = .halfUp
+    return formatter.string(for: self)!
+  }
+}
+
 // MARK: - SwiftUI
 
 struct SettingsView: View {
@@ -75,6 +85,30 @@ struct SettingsView: View {
     .background { Color.black.opacity(0.75) }
   }
   
+  private var divider: some View {
+    Rectangle()
+      .frame(height: 1)
+      .foregroundColor(.white)
+      .opacity(0.15)
+  }
+    
+  private var footer: some View {
+    VStack(spacing: 0) {
+      LinearGradient(
+        colors: [
+          Color.black.opacity(0.5),
+          Color.black
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+      )
+      .frame(height: 70)
+      
+      Color.black
+        .frame(height: 70)
+    }
+  }
+
   @MainActor private var content: some View {
     ScrollView {
       VStack(alignment: .leading) {
@@ -98,35 +132,12 @@ struct SettingsView: View {
           self.torchModeSection
           self.divider
           self.countdownTimerSection
+            .padding(.bottom)
         }
       }
       .padding([.horizontal, .top])
       .shadow(color: Color.black, radius: 16, y: 12)
     }
-  }
-  
-  private var footer: some View {
-    VStack(spacing: 0) {
-      LinearGradient(
-        colors: [
-          Color.black.opacity(0.5),
-          Color.black
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-      )
-      .frame(height: 70)
-      
-      Color.black
-        .frame(height: 70)
-    }
-  }
-  
-  private var divider: some View {
-    Rectangle()
-      .frame(height: 1)
-      .foregroundColor(.white)
-      .opacity(0.15)
   }
   
   @MainActor private var cameraSection: some View {
@@ -197,16 +208,6 @@ struct SettingsView: View {
       }
       .disabled(self.model.userSettings.camera == .front)
     }
-  }
-}
-
-fileprivate extension CGFloat {
-  var formattedDescription: String {
-    let formatter = NumberFormatter()
-    formatter.maximumFractionDigits = 1
-    formatter.minimumFractionDigits = 0
-    formatter.roundingMode = .halfUp
-    return formatter.string(for: self)!
   }
 }
 
