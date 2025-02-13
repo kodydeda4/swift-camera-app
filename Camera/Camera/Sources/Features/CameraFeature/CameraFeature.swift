@@ -10,7 +10,6 @@ import SwiftUINavigation
 @MainActor
 @Observable
 final class CameraModel {
-  var buildNumber: Build.Version { Build.version }
   var destination: Destination? { didSet { self.bind() } }
   var isRecording = false
   var recordingSecondsElapsed = 0
@@ -24,8 +23,9 @@ final class CameraModel {
   // Dependencies
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.photos) var photos
-  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.audioPlayer) var audioPlayer
   @ObservationIgnored @Dependency(\.uuid) var uuid
+  @ObservationIgnored @Dependency(\.textToSpeech) var textToSpeech
   @ObservationIgnored @Dependency(\.hapticFeedback) var hapticFeedback
   @ObservationIgnored @Dependency(\.continuousClock) var clock
   
@@ -42,7 +42,7 @@ final class CameraModel {
   var isSettingsButtonPresented: Bool { !self.isRecording }
   var isSwitchCameraButtonDisabled: Bool { self.isRecording }
   var isZoomButtonsPresented: Bool {
-    self.userSettings.camera == .back && self.destination.is(\.none)
+    self.userSettings.camera == .back && !self.destination.is(\.settings)
   }
   
   /// Example: `"00:00:00"`
@@ -97,12 +97,22 @@ final class CameraModel {
   func switchCameraButtonTapped() {
     _ = Result {
       let cameraPosition: UserSettings.Camera = self.userSettings.camera == .back
-        ? .front
-        : .back
+      ? .front
+      : .back
       try self.camera.adjust(.position(cameraPosition.rawValue))
       self.$userSettings.camera.withLock { $0 = cameraPosition }
       self.destination = .none
       self.$userSettings.zoom.withLock { $0 = 1.0 }
+    }
+  }
+  
+  func torchModeToggleButtonTapped() {
+    var value: UserSettings.TorchMode {
+      self.userSettings.torchMode == .off ? .on : .off
+    }
+    _ = Result {
+      try self.camera.adjust(.torchMode(value.rawValue))
+      self.$userSettings.torchMode.withLock { $0 = value }
     }
   }
   
@@ -149,7 +159,7 @@ private extension CameraModel {
   
   private func startRecording() {
     self.hapticFeedback.generate(.soft)
-    self.audio.play(.beginVideoRecording)
+    self.audioPlayer.play(.beginVideoRecording)
     self.destination = .none
     try? self.camera.startRecording(.movieFileOutput(id: self.uuid()))
     self.recordingSecondsElapsed = 0
@@ -158,7 +168,7 @@ private extension CameraModel {
   
   private func stopRecording() {
     self.hapticFeedback.generate(.soft)
-    self.audio.play(.endVideoRecording)
+    self.audioPlayer.play(.endVideoRecording)
     self.destination = .none
     try? camera.stopRecording()
     self.recordingSecondsElapsed = 0
@@ -241,9 +251,6 @@ struct CameraView: View {
         .fullScreenCover(item: $model.destination.library) { model in
           LibraryView(model: model)
         }
-        .overlay(isPresented: .constant(self.model.userSettings.isGridEnabled)) {
-          CameraGridView()
-        }
         .overlay(item: $model.destination.settings) { $model in
           SettingsView(model: model)
         }
@@ -274,58 +281,54 @@ struct CameraView: View {
   }
   
   @MainActor private func toolbar() -> some ToolbarContent {
-    ToolbarItem(placement: .principal) {
-      Text(self.model.navigationTitle)
-        .foregroundColor(.white)
-        .fontWeight(.semibold)
-        .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
+    Group {
+      ToolbarItem(placement: .navigationBarLeading) {
+        Button(action: self.model.torchModeToggleButtonTapped) {
+          Image(systemName: self.model.userSettings.torchMode.systemImage)
+            .foregroundColor(self.model.userSettings.torchMode.foregroundColor)
+        }
+        .buttonStyle(.plain)
+      }
+      ToolbarItem(placement: .principal) {
+        Text(self.model.navigationTitle)
+//          .foregroundColor(.white)
+          .fontWeight(.semibold)
+          .frame(width: 100)
+          .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
+          .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+        
+      }
     }
   }
 }
 
-private struct CameraGridView: View {
-  private let color = Color.gray
-  private let spacing: CGFloat = 128
-  private let items = Array(1...4)
-  private let columns = [
-    GridItem(.flexible()),
-    GridItem(.flexible()),
-  ]
-  
-  var body: some View {
-    ZStack {
-      VStack(spacing: spacing * 2) {
-        Rectangle()
-          .frame(height: 1)
-          .foregroundColor(color)
-        
-        Rectangle()
-          .frame(height: 1)
-          .foregroundColor(Color(.systemGray6))
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      
-      HStack(spacing: spacing) {
-        Rectangle()
-          .frame(width: 1)
-          .foregroundColor(color)
-        
-        Rectangle()
-          .frame(width: 1)
-          .foregroundColor(color)
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
+extension UserSettings.TorchMode {
+  var systemImage: String {
+    switch self {
+    case .on:
+      return "bolt.circle"
+    case .off:
+      return "bolt.slash.circle"
+    case .auto:
+      return "bolt.circle"
     }
-    .opacity(0.5)
+  }
+  var foregroundColor: Color {
+    switch self {
+    case .on:
+      return .accentColor
+    default:
+      return .primary
+    }
   }
 }
+
 
 // MARK: - SwiftUI Previews
 
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
   @Shared(.userSettings) var userSettings
-  $userSettings.isGridEnabled.withLock { $0 = true }
   return CameraView(model: CameraModel())
 }
 

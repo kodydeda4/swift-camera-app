@@ -22,7 +22,6 @@ final class MainModel {
         let photosContext = try await self.fetchOrCreateAssetCollection(
           withTitle: PhotosContext.title
         )
-        
         await MainActor.run {
           self.$photosContext.assetCollection.withLock { $0 = photosContext }
         }

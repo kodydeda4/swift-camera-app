@@ -1,6 +1,6 @@
 import Foundation
 
-extension AudioClient {
+extension AudioPlayerClient {
   enum SystemSound: Int {
     case newMail = 1000
     case mailSent = 1001

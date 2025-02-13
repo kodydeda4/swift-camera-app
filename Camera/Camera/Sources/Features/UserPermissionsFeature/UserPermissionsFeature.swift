@@ -16,7 +16,7 @@ final class UserPermissionsModel: Identifiable {
     = unimplemented("UserPermissionsModel.onContinueButtonTapped")
   
   @ObservationIgnored @Shared(.userPermissions) var userPermissions
-  @ObservationIgnored @Dependency(\.audio) var audio
+  @ObservationIgnored @Dependency(\.audioApplication) var audioApplication
   @ObservationIgnored @Dependency(\.camera) var camera
   @ObservationIgnored @Dependency(\.photos) var photos
   @ObservationIgnored @Dependency(\.application) var application
@@ -62,7 +62,7 @@ final class UserPermissionsModel: Identifiable {
               : .denied
             
           case .microphone:
-            await audio.requestRecordPermission()
+            await audioApplication.requestRecordPermission()
               ? .authorized
               : .denied
             
@@ -130,11 +130,10 @@ struct UserPermissionsView: View {
       
       Spacer()
       
-      Button(action: self.model.continueButtonTapped) {
-        Text("Continue")
-          .frame(maxWidth: .infinity)
+      Button("Continue") {
+        self.model.continueButtonTapped()
       }
-      .buttonStyle(.borderedProminent)
+      .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
       .disabled(self.model.isContinueButtonDisabled)
       .padding()
     }

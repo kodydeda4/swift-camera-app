@@ -9,7 +9,7 @@ import SwiftUINavigation
 final class OnboardingModel {
   var destination: Destination? { didSet { self.bind() } }
   var onCompletion: () -> Void = unimplemented("OnboardingModel.onCompletion")
-  var buildNumber: Build.Version { Build.version }
+  var buildVersion = Build.version
 
   @CasePathable
   enum Destination {
@@ -42,34 +42,41 @@ struct OnboardingView: View {
   var body: some View {
     NavigationStack {
       VStack {
+        LinearGradient(
+          colors: [.accentColor, .clear],
+          startPoint: .top,
+          endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        
         VStack {
-          Spacer()
-
-          Image(systemName: "camera.fill")
+          Image("AppLogo")
             .resizable()
             .scaledToFit()
             .frame(width: 64, height: 64)
-            .foregroundColor(.orange)
+            .foregroundColor(.accentColor)
             .padding()
-            .background(Color.orange.opacity(0.6))
+            .background(Color.accentColor)
             .clipShape(Circle())
 
-          Text("Camera")
+          Text("IDD Camera")
             .font(.title)
             .bold()
 
-          Text("Record Videos.")
+          Text("Welcome to your new Camera!")
+            .font(.title2)
             .foregroundColor(.secondary)
             .padding(.bottom)
 
-          Text(self.model.buildNumber.description)
+          Text(self.model.buildVersion.description)
+            .foregroundColor(.secondary)
 
           Button("Continue") {
             self.model.continueButtonTapped()
           }
-          .buttonStyle(.borderedProminent)
+          .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
         }
-        .padding(64)
+        .padding(32)
       }
       .navigationDestination(item: $model.destination.userPermissions) { model in
         UserPermissionsView(model: model)

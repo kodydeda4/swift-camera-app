@@ -22,10 +22,10 @@
  - [x] Add sounds for when the camera starts/stops
  - [x] display time in grid
  - [x] back camera zoom buttons on camera feature (without opening settings)
+ - [ ] Log4Swift
  - [ ] Unit Tests
  - [ ] Swift 6
  - [ ] Library Management - Multiselect, CRUD operations.
- - [ ] Log4Swift
  - [ ] SPM
  - [ ] AppDemo - Onboarding
 
