@@ -48,14 +48,16 @@ struct CameraOverlay: View {
       .foregroundColor(isSelected ? .black : .white)
       .background(
         isSelected
-          ? Color.accentColor
-          : Color.black.opacity(0.5)
+        ? Color.accentColor
+        : Color.black.opacity(0.5)
       )
       .clipShape(Circle())
   }
   
   private var cameraRollButton: some View {
-    Group {
+    let settings = self.model.destination.is(\.settings)
+    
+    return Group {
       if self.model.isCameraRollButtonPresented {
         Button {
           self.model.cameraRollButtonTapped()
@@ -68,13 +70,17 @@ struct CameraOverlay: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
             } else {
-              Color.black.opacity(0.5)
-                .frame(width: 64, height: 64)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay {
-                  RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(Color(.systemGray2))
-                }
+              Group {
+                settings
+                ? Color.white.opacity(0.1)
+                : Color.black.opacity(0.5)
+              }
+              .frame(width: 64, height: 64)
+              .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+              .overlay {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                  .strokeBorder(Color.white.opacity(0.15))
+              }
             }
           }
           .frame(width: 64, height: 64)
@@ -151,7 +157,7 @@ fileprivate extension CGFloat {
 #Preview("Camera") {
   @Shared(.userPermissions) var userPermissions = .authorized
   @Shared(.userSettings) var userSettings
-
+  
   return CameraView(model: CameraModel())
 }
 
