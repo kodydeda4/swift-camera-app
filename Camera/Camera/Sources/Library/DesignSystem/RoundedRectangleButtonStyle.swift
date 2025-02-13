@@ -45,6 +45,6 @@ struct RoundedRectangleButtonStyle: ButtonStyle {
   Button("Click Me") {
     
   }
-  .buttonStyle(RoundedRectangleButtonStyle())
+  .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
   .padding()
 }

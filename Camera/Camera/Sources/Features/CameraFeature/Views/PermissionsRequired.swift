@@ -20,7 +20,7 @@ extension CameraView {
       Button("Permissions") {
         self.model.permissionsButtonTapped()
       }
-      .buttonStyle(RoundedRectangleButtonStyle())
+      .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
       .frame(width: 160)
       .padding(.bottom, 64)
     }

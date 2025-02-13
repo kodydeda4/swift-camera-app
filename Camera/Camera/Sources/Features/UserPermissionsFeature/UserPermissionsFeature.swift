@@ -133,7 +133,7 @@ struct UserPermissionsView: View {
       Button("Continue") {
         self.model.continueButtonTapped()
       }
-      .buttonStyle(RoundedRectangleButtonStyle())
+      .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
       .disabled(self.model.isContinueButtonDisabled)
       .padding()
     }

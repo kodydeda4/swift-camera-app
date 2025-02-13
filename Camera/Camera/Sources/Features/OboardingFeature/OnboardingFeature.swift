@@ -67,7 +67,7 @@ struct OnboardingView: View {
           Button("Continue") {
             self.model.continueButtonTapped()
           }
-          .buttonStyle(RoundedRectangleButtonStyle())
+          .buttonStyle(RoundedRectangleButtonStyle(foregroundColor: .black))
         }
         .padding(64)
       }
