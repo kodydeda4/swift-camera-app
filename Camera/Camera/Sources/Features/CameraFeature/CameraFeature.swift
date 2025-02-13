@@ -293,7 +293,10 @@ struct CameraView: View {
         Text(self.model.navigationTitle)
           .foregroundColor(.white)
           .fontWeight(.semibold)
+          .frame(width: 100)
           .background(Color.red.opacity(self.model.isRecording ? 1 : 0))
+          .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+        
       }
     }
   }
