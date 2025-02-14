@@ -6,7 +6,11 @@ Available on the [AppStore](https://apps.apple.com/us/app/idd-camera/id674093522
 
 [![IDD Camera App Store Badge](https://github.com/user-attachments/assets/25ef15ca-5a73-447b-affa-a0b26a1d7082)](https://apps.apple.com/us/app/idd-camera/id6740935223)
 
-<img width=150 src="https://github.com/user-attachments/assets/53de5b6e-cadc-494e-89b7-6bde399ffcd1"><img width=150 src="https://github.com/user-attachments/assets/b2a6cef6-feb2-4b86-af2a-bc39689377e7"><img width=150 src="https://github.com/user-attachments/assets/4424ec3d-146d-4736-bbca-78b87168f61e"><img width=150 src="https://github.com/user-attachments/assets/38a60968-b48f-4d03-bedc-fe91b935b8c3"><img width=150 src="https://github.com/user-attachments/assets/ae0ee5b6-886c-4571-a9ea-bdfc36cd72f7">
+<img width=150 src="https://github.com/user-attachments/assets/207232cf-12da-4d32-ad75-e1ba0f5a62e3">
+<img width=150 src="https://github.com/user-attachments/assets/15cf6cc0-2df4-484e-a527-17ae201db80d">
+<img width=150 src="https://github.com/user-attachments/assets/d3829880-bef3-4a55-a12e-b114ff95acbe">
+<img width=150 src="https://github.com/user-attachments/assets/54690939-3156-4d8c-8bb7-ce0fba8c5c7f">
+<img width=150 src="https://github.com/user-attachments/assets/d722a06d-521c-43ce-af6f-1ac311c69acc">
 
 ### 🛠️ Tech Stack
 **SwiftUI:** For building the user interface.
@@ -44,23 +48,7 @@ A custom [swift-navigation](https://github.com/pointfreeco/swift-navigation) vie
 
 [PhotoKit](https://developer.apple.com/documentation/photokit) allows you to work with image & video assets that the photos app mangages. `Main` model listens for changes and caches them to shared state, for the `Library` feature to observe.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8">
-</td>
-
-<td>
+<!-- <img src="https://github.com/user-attachments/assets/c30ad8ba-0c65-473f-9bfe-44c460edf9b8" width="200" style="object-fit: contain; display: block; margin: auto;">    -->
 
 ```swift
 final class MainModel {
@@ -86,30 +74,11 @@ final class MainModel {
   }
 ```
 
-</td>
-</table>
-
 ## Video Player
 
 `VideoPlayer` model allows you to handle all the logic for the video player.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb">
-</td>
-
-<td>
+<!-- <img src="https://github.com/user-attachments/assets/34d6dfe5-b118-4847-bb49-daf0661b14bb" width="200" style="object-fit: contain; display: block; margin: auto;">    -->
 
 ```swift
 @MainActor
@@ -124,30 +93,11 @@ final class VideoPlayerModel {
 }
 ```
 
-</td>
-</table>
-
 ## Share
 
 [UIActivityViewController](https://developer.apple.com/documentation/uikit/uiactivityviewcontroller) allows you to present the share sheet dynamically, such as when a user taps a button. A [SwiftUI view modifier ](https://github.com/kodydeda4/swift-share-link) was created to let you model the destination without dropping down to UIKit.
 
-<table>
-<tr>
-<th>
-Preview
-</th>
-<th>
-Code
-</th>
-</tr>
-
-<tr>
-
-<td>
-<img width=250 src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032">
-</td>
-
-<td>
+<!-- <img src="https://github.com/user-attachments/assets/7602daa1-dd5f-43f2-aebe-c32c741e3032" width="200" style="object-fit: contain; display: block; margin: auto;"> -->
 
 ```swift
 @MainActor
@@ -161,5 +111,3 @@ final class ActivityModel: Identifiable {
 }
 ```
 
-</td>
-</table>
